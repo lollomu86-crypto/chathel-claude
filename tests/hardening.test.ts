@@ -26,7 +26,8 @@ const ENV_KEYS = ['CHATHEL_DEMO', 'NODE_ENV', 'SUPABASE_URL', 'SUPABASE_ANON_KEY
 const saved: Record<string, string | undefined> = {};
 for (const k of ENV_KEYS) saved[k] = process.env[k];
 function setEnv(o: Partial<Record<(typeof ENV_KEYS)[number], string | undefined>>) {
-  for (const k of ENV_KEYS) { const v = k in o ? o[k] : saved[k]; if (v === undefined) delete process.env[k]; else process.env[k] = v; }
+  const env = process.env as Record<string, string | undefined>;
+  for (const k of ENV_KEYS) { const v = k in o ? o[k] : saved[k]; if (v === undefined) delete env[k]; else env[k] = v; }
 }
 beforeEach(() => { _resetForTests(); setEnv({}); G.__chathelStore = undefined; G.__chathelIdentity = undefined; memorySink.items.length = 0; setAlertSinks(null); delete process.env.ANTHROPIC_API_KEY; });
 
