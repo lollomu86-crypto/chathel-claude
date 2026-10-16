@@ -9,13 +9,12 @@ import { SwRegister } from '@/components/SwRegister';
 
 /* Font self-hosted da next/font a build time: nessuna richiesta a Google dal browser dell'ospite (GDPR).
    Entrambi hanno il cirillico (il russo e' una lingua dell'app). Fallback reali: font di sistema con metriche corrette. */
-const SUBSETS: ('latin' | 'latin-ext' | 'cyrillic')[] = ['latin', 'latin-ext', 'cyrillic'];
 const inter = Inter({
-  subsets: SUBSETS, variable: '--font-inter', display: 'swap', adjustFontFallback: true,
+  subsets: ['latin', 'latin-ext', 'cyrillic'], variable: '--font-inter', display: 'swap', adjustFontFallback: true,
   fallback: ['system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
 });
 const montserrat = Montserrat({
-  subsets: SUBSETS, variable: '--font-montserrat', display: 'swap', adjustFontFallback: true,
+  subsets: ['latin', 'latin-ext', 'cyrillic'], variable: '--font-montserrat', display: 'swap', adjustFontFallback: true,
   fallback: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
 });
 
