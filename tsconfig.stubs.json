@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "incremental": false, "plugins": [], "types": ["node"], "typeRoots": ["/opt/npm-tools/node_modules/@types"], "paths": { "@/*": ["./src/*"], "zod": ["/opt/npm-tools/node_modules/zod"] } },
+  "include": ["scripts/tsc-stubs/*.d.ts", "src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "scripts/**/*.ts"],
+  "exclude": ["node_modules", "scripts/tsc-stubs/*.mjs"]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "chathel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ChatHel - scheletro MVP P0 (PWA ospite, vista barista, pannello hotel)",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "icons": "node scripts/gen-icons.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "lint": "tsc --noEmit",
+    "harness": "tsx scripts/harness-server.ts",
+    "i18n": "node scripts/check-i18n.mjs",
+    "e2e": "node scripts/e2e-f01.mjs && node scripts/e2e-guest.mjs && node scripts/e2e-staff.mjs && node scripts/e2e-matrix.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": ">=0.60.0 <1",
+    "@fontsource-variable/inter": "^5.1.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "next": "^15.5.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
