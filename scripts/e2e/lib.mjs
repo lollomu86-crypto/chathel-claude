@@ -3,13 +3,13 @@ import { createRequire } from 'node:module';
 import { mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-const require = createRequire('/opt/npm-tools/node_modules/');
+const require = createRequire(process.env.PW_MODULES || '/opt/npm-tools/node_modules/');
 export const { chromium } = require('playwright');
 export const SHOTS = process.env.E2E_SHOTS || join(dirname(fileURLToPath(import.meta.url)), '..', '..', '.e2e-shots');
 mkdirSync(SHOTS, { recursive: true });
 
 export async function launch() {
-  return chromium.launch({ executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--no-sandbox'] });
+  return chromium.launch({ ...(process.env.CHROMIUM === 'bundled' ? {} : { executablePath: process.env.CHROMIUM || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' }), args: ['--no-sandbox'] });
 }
 /** Contesto con viewport, tema e lingua del browser; service worker bloccato; raccoglie errori di console e di pagina. */
 export async function newCtx(browser, { w = 390, h = 844, dark = false, lang = 'it-IT', base } = {}) {
