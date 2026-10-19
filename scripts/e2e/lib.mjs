@@ -43,7 +43,11 @@ export const re = (s) => new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
 let pass = 0; const fails = [];
 export const check = (cond, msg) => { if (cond) { pass++; console.log('  ok  ', msg); } else { fails.push(msg); console.log('  FAIL', msg); } };
 export const summary = () => { console.log(`\n${pass} controlli ok, ${fails.length} falliti`); if (fails.length) console.log(fails.map((f) => ' - ' + f).join('\n')); return fails.length; };
-export const ready = (page) => page.waitForFunction(() => window.__chReady === true);
+// harness: bandiera __chReady; Next reale (E2E_BASE): attende l'idratazione di React (fibre sui nodi del DOM)
+export const ready = async (page) => {
+  await page.waitForFunction(() => window.__chReady === true || [...document.querySelectorAll('button, a, input, main')].some((n) => Object.keys(n).some((k) => k.startsWith('__reactFiber') || k.startsWith('__reactProps'))), null, { timeout: 30000 });
+  await page.waitForTimeout(150);
+};
 
 /** Ingresso ospite dal QR come farebbe una persona: identita' demo, nickname, consensi, informativa. */
 export async function enterAsGuest(page, { slug = 'demo', k = 'demo-qr-token', who = 'Giulia', nick, adult = true, consents = { list: true, chat: true, dm: true } } = {}) {
