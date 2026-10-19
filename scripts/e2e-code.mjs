@@ -19,6 +19,7 @@ try {
   await a.getByRole('alert').filter({ hasText: t('errors.invalid_code') }).waitFor();
   check(true, 'codice sbagliato: messaggio chiaro, si resta qui');
   check(!/\/h\//.test(a.url()), 'codice sbagliato: nessun ingresso');
+  A.errors.length = 0; // il 404 del codice sbagliato e' voluto
   await input.fill('482915');
   await go.click();
   await a.waitForURL(/\/h\/demo\?k=482915/);
