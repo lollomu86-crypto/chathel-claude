@@ -43,7 +43,12 @@ export function raise(error: { code?: string; message?: string } | null): never 
     // 42501 = privilegio negato (RLS o GRANT): per il client e' un divieto
     if (error.code === '42501') throw new ChError('CH004', 'forbidden');
     // CHECK (booked_count <= capacity) violato aggiornando la capienza di uno slot
-    if (error.code === '23514') throw new ChError('CH002', 'capacity_below_booked');
+    if (error.code === '23514') {
+      // solo il vincolo sugli slot e' "capienza sotto le prenotazioni"; un altro vincolo (es. categoria non valida) e' un valore non valido
+      const rel = /relation "([a-z_]+)"/.exec(error.message ?? '')?.[1];
+      if (rel && rel !== 'slots') throw new ChError('CH003', 'invalid_value');
+      throw new ChError('CH002', 'capacity_below_booked');
+    }
     if (error.code === '23505') throw new ChError('CH005', 'conflict');
     throw new Error(`db_error:${error.code ?? 'unknown'}`);
   }

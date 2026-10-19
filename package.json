@@ -17,7 +17,8 @@
     "lint": "tsc --noEmit",
     "harness": "tsx scripts/harness-server.ts",
     "i18n": "node scripts/check-i18n.mjs",
-    "e2e": "node scripts/e2e-f01.mjs && node scripts/e2e-code.mjs && node scripts/e2e-guest.mjs && node scripts/e2e-staff.mjs && node scripts/e2e-matrix.mjs"
+    "e2e": "node scripts/e2e-f01.mjs && node scripts/e2e-code.mjs && node scripts/e2e-guest.mjs && node scripts/e2e-staff.mjs && node scripts/e2e-matrix.mjs",
+    "test:live": "bash scripts/sb-live/setup.sh && set -a && . /tmp/sb-live.env && set +a && tsx --test --test-concurrency=1 tests/live/*.live.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": ">=0.60.0 <1",

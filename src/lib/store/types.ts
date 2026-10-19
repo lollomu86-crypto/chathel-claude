@@ -83,7 +83,7 @@ export interface SocialStaffApi {
 }
 
 export interface GuestApi {
-  /** Funzioni sociali. Con lo store Supabase non ancora collegate: lancia 'social_not_available'. */
+  /** Funzioni sociali (elenco, chat pubblica e privata, coupon). */
   social(): SocialGuestApi;
   /** Se valorizzato, il cookie di sessione va riscritto con questo valore (token rinnovato). */
   refreshedSession?: string;
