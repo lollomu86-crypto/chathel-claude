@@ -9,6 +9,7 @@ import { routes, rootLayout, notFound } from 'virtual:routes';
 import { als } from './shims/headers';
 import { RedirectError } from './shims/navigation';
 import * as onboarding from '@/app/api/onboarding/route';
+import * as hotelCode from '@/app/api/hotel-code/route';
 import * as aiChat from '@/app/api/ai/chat/route';
 import * as guest from '@/app/api/guest/[action]/route';
 import * as staff from '@/app/api/staff/[action]/route';
@@ -22,6 +23,7 @@ const ROOT = process.cwd();
 
 function api(path: string): { handlers: Record<string, H>; action: string } | null {
   if (path === '/api/onboarding') return { handlers: onboarding as unknown as Record<string, H>, action: '' };
+  if (path === '/api/hotel-code') return { handlers: hotelCode as unknown as Record<string, H>, action: '' };
   if (path === '/api/ai/chat') return { handlers: aiChat as unknown as Record<string, H>, action: '' };
   if (path === '/api/health') return { handlers: health as unknown as Record<string, H>, action: '' };
   const m = /^\/api\/(guest|identity|staff)\/([a-z-]+)$/.exec(path);

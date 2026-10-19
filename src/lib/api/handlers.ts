@@ -168,6 +168,23 @@ export async function onboarding(ctx: Ctx, raw: unknown): Promise<Res> {
   });
 }
 
+// ----------------------------------------------------------------------------- ingresso con codice numerico
+/** Pubblico: dal codice a 6 cifre dell'hotel ricava l'indirizzo d'ingresso. Il codice vale come il token del QR, quindi limiti stretti. */
+export async function hotelByCode(ctx: Ctx, raw: unknown): Promise<Res> {
+  return guarded('hotel-by-code', async () => {
+    if (ctx.method !== 'POST') return fail(405, 'method_not_allowed');
+    const b = z.object({ code: z.string().trim().regex(/^\d{6}$/) }).parse(raw);
+    if (!(await hit(`hc:ip:${ipKey(ctx.ip)}`, 12, 10 * 60_000)) || !(await hit('hc:all', 600, 10 * 60_000))) return fail(429, 'rate_limited');
+    const slug = await ctx.store.hotelSlugByCode(b.code);
+    if (!slug) {
+      // tentativi sbagliati: tetto globale contro la ricerca del codice
+      if (!(await hit('hc:bad', 120, 10 * 60_000))) return fail(429, 'rate_limited');
+      return fail(404, 'invalid_code');
+    }
+    return ok({ slug });
+  });
+}
+
 // ----------------------------------------------------------------------------- ospite
 const idSchema = z.string().min(1).max(80);
 
@@ -439,6 +456,9 @@ export async function staffAction(ctx: Ctx, action: string, raw: unknown): Promi
       case 'rotate-qr':
         if (!post) return fail(405, 'method_not_allowed');
         return ok(await s.rotateQr());
+      case 'rotate-code':
+        if (!post) return fail(405, 'method_not_allowed');
+        return ok(await s.rotateAccessCode());
       default:
         return (await socialStaffAction(ctx, s, action, raw)) ?? fail(404, 'not_found');
     }

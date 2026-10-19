@@ -97,6 +97,13 @@ export class SupabaseStore implements Store {
     }
   }
 
+  async hotelSlugByCode(code: string): Promise<string | null> {
+    if (!/^\d{6}$/.test(code)) return null;
+    const { data, error } = await this.serviceClient().rpc('hotel_by_code', { p_code: code });
+    if (error) raise(error);
+    return typeof data === 'string' && data ? data : null;
+  }
+
   async publicHotel(slug: string): Promise<PublicHotel | null> {
     const { data, error } = await this.anonClient().rpc('public_hotel', { p_slug: slug });
     if (error) raise(error);
@@ -516,6 +523,18 @@ class SbStaffApi implements StaffApi {
     return { token: data as string };
   }
   async currentQrToken(): Promise<string | null> { return null; } // nel database c'e' solo l'hash
+  async currentAccessCode(): Promise<string | null> {
+    this.need(['hotel_admin']);
+    const { data, error } = await this.db.rpc('get_hotel_access_code', { p_hotel: this.hid });
+    if (error) raise(error);
+    return typeof data === 'string' ? data : null;
+  }
+  async rotateAccessCode() {
+    this.need(['hotel_admin']);
+    const { data, error } = await this.db.rpc('rotate_hotel_access_code', { p_hotel: this.hid });
+    if (error) raise(error);
+    return { code: data as string };
+  }
 }
 
 export { GUEST_MESSAGES_PER_DAY };

@@ -14,6 +14,7 @@ export default async function SettingsAdmin() {
   const t = makeT(locale);
   const h = staff.info.hotel;
   const token = await staff.currentQrToken();
+  const code = await staff.currentAccessCode();
   return (
     <>
       <h1>{t('admin.settings.title')}</h1>
@@ -27,7 +28,7 @@ export default async function SettingsAdmin() {
           <dt>{t('admin.settings.funding')}</dt><dd>{h.bonusFunding === 'hotel' ? t('admin.settings.fundingHotel') : t('admin.settings.fundingGrant')}</dd>
         </dl></div>
       </section>
-      <AdminSettings slug={h.slug} initialToken={token} />
+      <AdminSettings slug={h.slug} initialToken={token} initialCode={code} />
       <section className="card card-muted"><h2 className="h3">{t('admin.settings.staffTitle')}</h2><p>{t('admin.settings.staffHelp')}</p></section>
     </>
   );

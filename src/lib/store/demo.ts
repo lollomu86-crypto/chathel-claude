@@ -3,7 +3,7 @@
 // non garantisce concorrenza reale (Node e' a thread singolo; nel database la garanzia sta nei vincoli).
 // Solo server.
 
-import { createHash, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes, randomInt, randomUUID, timingSafeEqual } from 'node:crypto';
 import { ChError } from '../errors';
 import { identityKey } from '../auth/guest-identity';
 import { BONUS_MAX_PER_HOUR_DEFAULT, HOTEL_COUPON_ACTIVE_CAP_DEFAULT, HOTEL_COUPON_DAILY_CAP_DEFAULT } from '../limits';
@@ -35,6 +35,7 @@ export interface DemoOptions {
   now?: () => Date;
   bonusCap?: number;
   qrToken?: string;
+  accessCode?: string;
   /** se false, parte senza eventi/servizi/base di conoscenza di esempio (test) */
   seed?: boolean;
   /** tetto di bonus emessi nell'ora (default 60) */
@@ -53,7 +54,7 @@ interface Hotel {
   id: string; slug: string; name: string; timezone: string; defaultLocale: Locale; checkoutTime: string;
   maxStayDays: number; bonusEnabled: boolean; bonusLabel: string; bonusValueCents: number; bonusCap: number;
   bonusFunding: 'hotel' | 'chathel_grant'; seasonYear: number; qrTtlSeconds: number;
-  maxPerGuestDay: number; cancelCutoffMinutes: number; qrToken: string; qrPrevToken: string | null; qrPrevUntil: Date | null;
+  maxPerGuestDay: number; cancelCutoffMinutes: number; qrToken: string; accessCode: string; qrPrevToken: string | null; qrPrevUntil: Date | null;
   bonusMaxPerHour: number; receptionPhone: string | null;
 }
 interface G { id: string; name: string; locale: Locale; isAdult: boolean; createdAt: Date; expiresAt: Date; stayId: string; startBonus: StartStayBonus; identityKey: string }
@@ -98,7 +99,7 @@ export class DemoStore implements Store {
       checkoutTime: '11:00', maxStayDays: 21, bonusEnabled: true, bonusLabel: "Caffè di benvenuto",
       bonusValueCents: 120, bonusCap: opts.bonusCap ?? 30, bonusFunding: 'hotel', seasonYear: now.getUTCFullYear(),
       qrTtlSeconds: 90, maxPerGuestDay: 2, cancelCutoffMinutes: 60,
-      qrToken: opts.qrToken ?? 'demo-qr-token', qrPrevToken: null, qrPrevUntil: null,
+      qrToken: opts.qrToken ?? 'demo-qr-token', accessCode: /^\d{6}$/.test(opts.accessCode ?? '') ? (opts.accessCode as string) : '482915', qrPrevToken: null, qrPrevUntil: null,
       bonusMaxPerHour: opts.bonusMaxPerHour ?? BONUS_MAX_PER_HOUR_DEFAULT, receptionPhone: opts.receptionPhone === undefined ? 'interno 9' : opts.receptionPhone,
     };
     this.social = new SocialHub({
@@ -193,6 +194,7 @@ export class DemoStore implements Store {
   qrValid(token: string): boolean {
     const h = this.hotel;
     if (sameHash(token, h.qrToken)) return true;
+    if (/^\d{6}$/.test(token) && sameHash(token, h.accessCode)) return true;
     return !!(h.qrPrevToken && h.qrPrevUntil && h.qrPrevUntil > this.now() && sameHash(token, h.qrPrevToken));
   }
 
@@ -200,6 +202,10 @@ export class DemoStore implements Store {
   qrLink(): string { return `/h/${this.hotel.slug}?k=${encodeURIComponent(this.hotel.qrToken)}`; }
 
   // ---------------------------------------------------------------- Store
+  async hotelSlugByCode(code: string): Promise<string | null> {
+    return /^\d{6}$/.test(code) && sameHash(code, this.hotel.accessCode) ? this.hotel.slug : null;
+  }
+
   async publicHotel(slug: string): Promise<PublicHotel | null> {
     const h = this.hotel;
     if (slug !== h.slug) return null;
@@ -661,6 +667,15 @@ class DemoStaffApi implements StaffApi {
     return { token: h.qrToken };
   }
   async currentQrToken() { this.need(ADMIN); return this.s.hotel.qrToken; }
+  async currentAccessCode() { this.need(ADMIN); return this.s.hotel.accessCode; }
+  async rotateAccessCode() {
+    this.need(ADMIN);
+    const h = this.s.hotel;
+    let c = h.accessCode;
+    while (c === h.accessCode) c = String(randomInt(100000, 1000000));
+    h.accessCode = c;
+    return { code: c };
+  }
 }
 
 function clean(t: I18nText): I18nText {

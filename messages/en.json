@@ -45,15 +45,19 @@
   },
   "landing": {
     "tagline": "Your hotel, in your pocket.",
-    "subtitle": "Scan the hotel's QR code with your phone camera: no app to download.",
+    "subtitle": "Scan the hotel's QR with your phone camera or type the hotel code: no app to download.",
     "demoTitle": "Try it locally (demo mode)",
     "demoGuest": "Enter as a guest of the demo hotel",
     "demoAdmin": "Hotel panel (/admin)",
     "demoBar": "Bartender view (/bar)",
-    "demoNote": "Demo credentials: admin@demo.chathel.test / demo-admin, bar@demo.chathel.test / demo-bar. For local tests only.",
+    "demoNote": "Demo credentials (tests only): hotel code 482915; manager admin@demo.chathel.test / demo-admin; front desk reception@demo.chathel.test / demo-reception; bartender bar@demo.chathel.test / demo-bar.",
     "resume": "Back to your app",
     "privacy": "Privacy notice",
-    "expiredHelp": "Scan the hotel QR code again to get back in."
+    "expiredHelp": "Scan the hotel QR code again to get back in.",
+    "codeTitle": "Have the hotel code?",
+    "codeHelp": "You can find it at reception or on the card in your room: 6 digits.",
+    "codeLabel": "Hotel code",
+    "codeGo": "Enter with the code"
   },
   "onboarding": {
     "title": "Welcome to {hotel}",
@@ -498,7 +502,11 @@
       "download": "Download PNG",
       "staffTitle": "Bartender view",
       "staffHelp": "Bartenders sign in at /bar with their personal account.",
-      "qrAlt": "Hotel entry QR code"
+      "qrAlt": "Hotel entry QR code",
+      "codeTitle": "Hotel numeric code",
+      "codeHelp": "Guests without a QR can enter by typing these 6 digits. Share it at reception or print it on the room card.",
+      "codeRotate": "Generate a new code",
+      "codeRotateWarn": "The old code stops working immediately. Guests already inside stay inside."
     },
     "social": {
       "title": "Social: reports and numbers",
@@ -640,7 +648,8 @@
     "invalid_report": "Report not found.",
     "report_closed": "Report already closed.",
     "social_not_available": "Social features are not yet available with this database.",
-    "method_not_allowed": "Operation not allowed."
+    "method_not_allowed": "Operation not allowed.",
+    "invalid_code": "Invalid code. Check the 6 digits or ask the front desk."
   },
   "ai": {
     "notKnown": "I don't have this information. I'm connecting you with reception: the staff will reply as soon as possible.",

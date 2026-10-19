@@ -45,15 +45,19 @@
   },
   "landing": {
     "tagline": "Dein Hotel in der Hosentasche.",
-    "subtitle": "Scanne den QR-Code des Hotels mit der Handykamera: keine App zum Herunterladen.",
+    "subtitle": "Scannen Sie den QR-Code des Hotels mit der Handykamera oder geben Sie den Hotelcode ein: keine App nötig.",
     "demoTitle": "Lokal ausprobieren (Demo-Modus)",
     "demoGuest": "Als Gast des Demo-Hotels eintreten",
     "demoAdmin": "Hotel-Bereich (/admin)",
     "demoBar": "Barkeeper-Ansicht (/bar)",
-    "demoNote": "Demo-Zugangsdaten: admin@demo.chathel.test / demo-admin, bar@demo.chathel.test / demo-bar. Nur für lokale Tests.",
+    "demoNote": "Demo-Zugangsdaten (nur zum Testen): Hotelcode 482915; Direktion admin@demo.chathel.test / demo-admin; Rezeption reception@demo.chathel.test / demo-reception; Barkeeper bar@demo.chathel.test / demo-bar.",
     "resume": "Zurück zu deiner App",
     "privacy": "Datenschutzhinweis",
-    "expiredHelp": "Scannen Sie den QR-Code des Hotels erneut, um wieder hineinzukommen."
+    "expiredHelp": "Scannen Sie den QR-Code des Hotels erneut, um wieder hineinzukommen.",
+    "codeTitle": "Sie haben den Hotelcode?",
+    "codeHelp": "Sie finden ihn an der Rezeption oder auf der Karte im Zimmer: 6 Ziffern.",
+    "codeLabel": "Hotelcode",
+    "codeGo": "Mit dem Code eintreten"
   },
   "onboarding": {
     "title": "Willkommen im {hotel}",
@@ -498,7 +502,11 @@
       "download": "PNG herunterladen",
       "staffTitle": "Barkeeper-Ansicht",
       "staffHelp": "Barkeeper melden sich unter /bar mit ihrem persönlichen Konto an.",
-      "qrAlt": "Eingangs-QR-Code des Hotels"
+      "qrAlt": "Eingangs-QR-Code des Hotels",
+      "codeTitle": "Numerischer Hotelcode",
+      "codeHelp": "Gäste ohne QR-Code können mit diesen 6 Ziffern eintreten. Geben Sie ihn an der Rezeption weiter oder drucken Sie ihn auf die Zimmerkarte.",
+      "codeRotate": "Neuen Code erzeugen",
+      "codeRotateWarn": "Der alte Code funktioniert sofort nicht mehr. Wer schon drin ist, bleibt drin."
     },
     "social": {
       "title": "Social: Meldungen und Zahlen",
@@ -640,7 +648,8 @@
     "invalid_report": "Meldung nicht gefunden.",
     "report_closed": "Meldung bereits geschlossen.",
     "social_not_available": "Die Social-Funktionen sind mit dieser Datenbank noch nicht verfügbar.",
-    "method_not_allowed": "Vorgang nicht erlaubt."
+    "method_not_allowed": "Vorgang nicht erlaubt.",
+    "invalid_code": "Ungültiger Code. Prüfen Sie die 6 Ziffern oder fragen Sie die Rezeption."
   },
   "ai": {
     "notKnown": "Diese Information habe ich nicht. Ich verbinde dich mit der Rezeption: Das Personal antwortet so bald wie möglich.",

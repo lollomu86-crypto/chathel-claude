@@ -3,6 +3,7 @@ import { getStore } from '@/lib/store';
 import { getGuest, getLocale, messagesFor } from '@/lib/server';
 import { makeT } from '@/lib/i18n';
 import { I18nProvider } from '@/components/I18n';
+import { CodeEntry } from '@/components/CodeEntry';
 import { LangSwitch } from '@/components/LangSwitch';
 import { LogoMark } from '@/components/LogoMark';
 import { Icon } from '@/components/ui/Icon';
@@ -36,6 +37,7 @@ export default async function Landing({ searchParams }: { searchParams: Promise<
           <h2 id="lg" className="t-sub">{t('common.language')}</h2>
           <LangSwitch />
         </section>
+        <CodeEntry />
         {demoLink && (
           <section className="card card-muted stack" aria-labelledby="demo">
             <h2 id="demo" className="t-sub">{t('landing.demoTitle')}</h2>

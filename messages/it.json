@@ -45,15 +45,19 @@
   },
   "landing": {
     "tagline": "Il tuo hotel, in tasca.",
-    "subtitle": "Inquadra il QR dell'hotel con la fotocamera del telefono: niente app da scaricare.",
+    "subtitle": "Inquadra il QR dell'hotel con la fotocamera del telefono oppure digita il codice dell'hotel: niente app da scaricare.",
     "demoTitle": "Prova in locale (modalità demo)",
     "demoGuest": "Entra come ospite dell'hotel demo",
     "demoAdmin": "Pannello hotel (/admin)",
     "demoBar": "Vista barista (/bar)",
-    "demoNote": "Credenziali demo: admin@demo.chathel.test / demo-admin, bar@demo.chathel.test / demo-bar. Solo per prove locali.",
+    "demoNote": "Credenziali demo (solo per prove): codice hotel 482915; direttore admin@demo.chathel.test / demo-admin; reception reception@demo.chathel.test / demo-reception; barista bar@demo.chathel.test / demo-bar.",
     "resume": "Torna alla tua app",
     "privacy": "Informativa privacy",
-    "expiredHelp": "Inquadra di nuovo il QR dell'hotel per rientrare."
+    "expiredHelp": "Inquadra di nuovo il QR dell'hotel per rientrare.",
+    "codeTitle": "Hai il codice dell'hotel?",
+    "codeHelp": "Lo trovi in reception o sul cartoncino in camera: sono 6 cifre.",
+    "codeLabel": "Codice dell'hotel",
+    "codeGo": "Entra con il codice"
   },
   "onboarding": {
     "title": "Benvenuto in {hotel}",
@@ -498,7 +502,11 @@
       "download": "Scarica PNG",
       "staffTitle": "Vista barista",
       "staffHelp": "I baristi accedono da /bar con il loro account personale.",
-      "qrAlt": "QR di ingresso dell'hotel"
+      "qrAlt": "QR di ingresso dell'hotel",
+      "codeTitle": "Codice numerico dell'hotel",
+      "codeHelp": "Gli ospiti senza QR possono entrare digitando queste 6 cifre. Comunicalo in reception o scrivilo sul cartoncino della camera.",
+      "codeRotate": "Genera un nuovo codice",
+      "codeRotateWarn": "Il vecchio codice smette di funzionare subito. Chi è già dentro resta dentro."
     },
     "social": {
       "title": "Social: segnalazioni e numeri",
@@ -640,7 +648,8 @@
     "invalid_report": "Segnalazione non trovata.",
     "report_closed": "Segnalazione già chiusa.",
     "social_not_available": "Le funzioni social non sono ancora disponibili con questo database.",
-    "method_not_allowed": "Operazione non consentita."
+    "method_not_allowed": "Operazione non consentita.",
+    "invalid_code": "Codice non valido. Controlla le 6 cifre o chiedi alla reception."
   },
   "ai": {
     "notKnown": "Non ho questa informazione. Ti metto in contatto con la reception: ti risponde lo staff appena possibile.",

@@ -18,7 +18,7 @@ export async function getStore(): Promise<Store> {
       const n = Number(v);
       return v !== undefined && Number.isFinite(n) && n >= 0 ? n : undefined;
     };
-    store = new DemoStore({ bonusCap: num('DEMO_BONUS_CAP'), bonusMaxPerHour: num('DEMO_BONUS_PER_HOUR'), qrToken: readEnv('DEMO_QR_TOKEN') });
+    store = new DemoStore({ bonusCap: num('DEMO_BONUS_CAP'), bonusMaxPerHour: num('DEMO_BONUS_PER_HOUR'), qrToken: readEnv('DEMO_QR_TOKEN'), accessCode: readEnv('DEMO_ACCESS_CODE') });
   } else {
     const { SupabaseStore, supabaseRateBackend } = await import('./supabase');
     const { createClient } = await import('@supabase/supabase-js');

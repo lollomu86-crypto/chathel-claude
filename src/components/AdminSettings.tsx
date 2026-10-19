@@ -7,10 +7,11 @@ import { useConfirm, useI18n } from './I18n';
  * QR dell'hotel. Con Supabase nel database c'e' solo l'hash del token: il token in chiaro si vede UNA volta
  * alla generazione ("Rigenera"). In demo il token corrente e' noto e il QR si mostra subito.
  */
-export function AdminSettings({ slug, initialToken }: { slug: string; initialToken: string | null }) {
+export function AdminSettings({ slug, initialToken, initialCode = null }: { slug: string; initialToken: string | null; initialCode?: string | null }) {
   const { t } = useI18n();
   const ask = useConfirm();
   const [token, setToken] = useState<string | null>(initialToken);
+  const [code, setCode] = useState<string | null>(initialCode);
   const [busy, setBusy] = useState(false);
   const [warn, setWarn] = useState(false);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -29,6 +30,13 @@ export function AdminSettings({ slug, initialToken }: { slug: string; initialTok
     const r = await call('/api/staff/rotate-qr', {});
     setBusy(false);
     if (r.ok) { setToken(r.token as string); setWarn(true); }
+  };
+  const rotateCode = async () => {
+    if (!(await ask({ title: t('admin.settings.codeRotate'), body: t('admin.settings.codeRotateWarn'), confirmLabel: t('admin.settings.codeRotate'), danger: true }))) return;
+    setBusy(true);
+    const r = await call('/api/staff/rotate-code', {});
+    setBusy(false);
+    if (r.ok) setCode(r.code as string);
   };
   const download = () => {
     const c = canvas.current;
@@ -52,6 +60,11 @@ export function AdminSettings({ slug, initialToken }: { slug: string; initialTok
         </>
       ) : <p className="notice notice-info">{t('admin.settings.rotateWarn')}</p>}
       <button type="button" className="btn btn-secondary" disabled={busy} onClick={rotate}>{t('admin.settings.rotate')}</button>
+      <hr />
+      <h2 id="ac" className="h3">{t('admin.settings.codeTitle')}</h2>
+      <p className="muted">{t('admin.settings.codeHelp')}</p>
+      {code && <p className="tokenbox" aria-labelledby="ac" style={{ fontSize: '2rem', letterSpacing: '0.3em', textAlign: 'center' }}>{code}</p>}
+      <button type="button" className="btn btn-secondary" disabled={busy} onClick={rotateCode}>{t('admin.settings.codeRotate')}</button>
     </section>
   );
 }

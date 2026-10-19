@@ -144,11 +144,16 @@ export interface StaffApi {
   rotateQr(): Promise<{ token: string }>;
   /** Token corrente del QR, se disponibile (solo demo: con Supabase esiste solo l'hash) */
   currentQrToken(): Promise<string | null>;
+  /** Codice numerico (6 cifre) con cui l'ospite entra senza QR */
+  currentAccessCode(): Promise<string | null>;
+  rotateAccessCode(): Promise<{ code: string }>;
 }
 
 export interface Store {
   readonly mode: 'demo' | 'supabase';
   publicHotel(slug: string): Promise<PublicHotel | null>;
+  /** Hotel (slug) a cui appartiene un codice numerico di ingresso, o null */
+  hotelSlugByCode(code: string): Promise<string | null>;
   startStay(input: StartStayInput): Promise<StartStayResult>;
   guest(session: string | undefined): Promise<GuestApi | null>;
   staffLogin(email: string, password: string): Promise<{ session: string; role: StaffRole } | null>;
