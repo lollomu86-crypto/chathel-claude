@@ -679,3 +679,57 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 @media (min-width: 900px) { .kpis-compact { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); } }
 .chips a.chip { text-decoration: none; }
 a.app-head-title { display: flex; flex-direction: column; justify-content: center; min-height: var(--tap); }
+
+/* =====================================================================
+   REVISIONE "APP DA VACANZA" (19 ottobre 2026)
+   Solo forma, tipografia e ritmo: NESSUN colore nuovo, tutto usa i token sopra.
+   Onda sotto la testata, titoli con Fraunces, card piu' morbide, scorciatoie in cerchi, tab bar fluttuante.
+   ===================================================================== */
+:root { --font-serif: var(--font-fraunces, "Fraunces"), var(--font-montserrat, "Montserrat"), Georgia, serif; --wave-h: 20px;
+  --wave-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 20' preserveAspectRatio='none'%3E%3Cpath d='M0 0H1200V8C1100 20 1000 20 900 10S700 -2 600 8 400 20 300 10 100 -2 0 10Z'/%3E%3C/svg%3E"); }
+
+/* Titoli grandi in corsivo-serif caldo; per il cirillico (Fraunces non lo ha) il font passa a Montserrat da solo */
+h1, .t-title { font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em; }
+.shell > h1:first-child { font-size: var(--fs-3xl); line-height: 1.1; margin-top: var(--space-2); }
+
+/* Onda sotto la testata (ospite e pagina d'ingresso) */
+.app-head, .entry-head { position: relative; margin-bottom: calc(var(--wave-h) - 1px); }
+.app-head::after, .entry-head::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: var(--wave-h); background: var(--header-bg);
+  -webkit-mask: var(--wave-mask) center / 100% 100% no-repeat; mask: var(--wave-mask) center / 100% 100% no-repeat; pointer-events: none; }
+.app-head-in { min-height: 76px; }
+.app-head-title { font-size: var(--fs-xl); }
+.entry-head { padding-bottom: var(--space-8); }
+.entry-head h1 { font-size: var(--fs-3xl); }
+
+/* Card: angoli piu' ampi, bordo sottile e ombra leggera */
+.card, .ticket, .shortcut { border-radius: var(--radius-xl); }
+.card, .shortcut { box-shadow: 0 6px 18px -12px rgba(11, 20, 38, 0.35); }
+.card-link { transition: transform var(--ease), box-shadow var(--ease); }
+.card-link:hover { transform: translateY(-1px); }
+.btn { border-radius: var(--radius-pill); }
+.btn-small { border-radius: var(--radius-pill); }
+input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="tel"], input[type="date"], input[type="time"], input[type="number"], input[type="datetime-local"], select, textarea { border-radius: var(--radius-lg); }
+
+/* Scorciatoie: icona in un cerchio tenue */
+.shortcut { gap: var(--space-3); padding: var(--space-5) var(--space-2); }
+.shortcut svg { box-sizing: content-box; width: 26px; height: 26px; padding: 13px; border-radius: 50%; background: var(--primary-soft); color: var(--on-primary-soft); }
+
+/* Data degli eventi: segnalibro con filo in alto */
+.date-chip { width: 56px; height: 64px; border-radius: var(--radius-lg); border-top: 5px solid var(--cta); }
+.date-chip strong { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-2xl); }
+
+/* Sezioni: titoli serif */
+h2, .t-heading, .t-sub, h3 { font-family: var(--font-serif); font-weight: 600; }
+.ticket-title, .empty-title { font-family: var(--font-serif); }
+
+/* Tab bar fluttuante a pillola (telefono); da 900 px resta colonna laterale */
+@media (max-width: 899px) {
+  .tabbar { bottom: calc(var(--space-2) + env(safe-area-inset-bottom)); width: min(calc(100% - var(--space-4)), calc(var(--shell-max) - var(--space-4))); border: var(--bw) solid var(--border); border-radius: var(--radius-pill); padding-bottom: 0; box-shadow: var(--shadow-float); overflow: hidden; }
+  .tabbar a[aria-current="page"]::before { border-radius: var(--radius-pill); }
+  .shell { padding-bottom: calc(var(--tabbar-h) + var(--space-8) + env(safe-area-inset-bottom)); }
+  .confirm-bar, .composer { bottom: calc(var(--tabbar-h) + var(--space-4) + env(safe-area-inset-bottom)); }
+  .toast { bottom: calc(var(--tabbar-h) + var(--space-6) + env(safe-area-inset-bottom)); }
+}
+[data-theme="dark"] .card, [data-theme="dark"] .shortcut { box-shadow: none; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .card, :root:not([data-theme="light"]) .shortcut { box-shadow: none; } }
+@media (prefers-reduced-motion: reduce) { .card-link { transition: none; } .card-link:hover { transform: none; } }

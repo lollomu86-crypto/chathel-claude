@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Montserrat } from 'next/font/google';
+import { Fraunces, Inter, Montserrat } from 'next/font/google';
 import { cookies } from 'next/headers';
 import './globals.css';
 import { getLocale, isDemoMode, messagesFor } from '@/lib/server';
@@ -16,6 +16,12 @@ const inter = Inter({
 const montserrat = Montserrat({
   subsets: ['latin', 'latin-ext', 'cyrillic'], variable: '--font-montserrat', display: 'swap', adjustFontFallback: true,
   fallback: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
+});
+
+// Fraunces (solo titoli grandi): niente cirillico, il russo ricade su Montserrat glifo per glifo
+const fraunces = Fraunces({
+  subsets: ['latin', 'latin-ext'], variable: '--font-fraunces', display: 'swap', adjustFontFallback: true,
+  fallback: ['Montserrat', 'Georgia', 'serif'],
 });
 
 // titolo e descrizione nella lingua dell'ospite; ogni pagina aggiunge il proprio titolo (template "%s · ChatHel")
@@ -45,7 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // tema scelto dal Profilo (cookie ch_theme): forzato gia' dal server, senza lampo al caricamento; assente = segue il dispositivo
   const theme = (await cookies()).get('ch_theme')?.value;
   return (
-    <html lang={locale} className={`${inter.variable} ${montserrat.variable}`} data-theme={theme === 'light' || theme === 'dark' ? theme : undefined}>
+    <html lang={locale} className={`${inter.variable} ${montserrat.variable} ${fraunces.variable}`} data-theme={theme === 'light' || theme === 'dark' ? theme : undefined}>
       <body>
         <I18nProvider locale={locale} messages={messagesFor(locale)}>
           <a className="skip-link" href="#main">{t('common.skipToContent')}</a>

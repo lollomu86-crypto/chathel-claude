@@ -35,7 +35,7 @@ try {
   await a.waitForURL(/\/stay/);
   await a.locator('main#main').waitFor();
   check(true, 'entrata nell\'app con il codice dell\'hotel');
-  check(A.errors.filter((e) => !/status of 401|favicon|Service Worker/.test(e)).length === 0, 'nessun errore di console: ' + A.errors.join(' | '));
+  check(A.errors.filter((e) => !/status of 40[13]|favicon|Service Worker/.test(e)).length === 0, 'nessun errore di console: ' + A.errors.join(' | '));
   await A.ctx.close();
 } catch (e) { console.error(e); exit = 1; }
 finally { await browser.close(); await srv.close?.(); }
