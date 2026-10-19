@@ -685,7 +685,7 @@ a.app-head-title { display: flex; flex-direction: column; justify-content: cente
    Solo forma, tipografia e ritmo: NESSUN colore nuovo, tutto usa i token sopra.
    Onda sotto la testata, titoli con Fraunces, card piu' morbide, scorciatoie in cerchi, tab bar fluttuante.
    ===================================================================== */
-:root { --font-serif: var(--font-fraunces, "Fraunces"), var(--font-montserrat, "Montserrat"), Georgia, serif; --wave-h: 20px;
+:root { --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif; /* serif di sistema: nessun download, ha il cirillico */ --wave-h: 20px;
   --wave-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 20' preserveAspectRatio='none'%3E%3Cpath d='M0 0H1200V8C1100 20 1000 20 900 10S700 -2 600 8 400 20 300 10 100 -2 0 10Z'/%3E%3C/svg%3E"); }
 
 /* Titoli grandi in corsivo-serif caldo; per il cirillico (Fraunces non lo ha) il font passa a Montserrat da solo */
