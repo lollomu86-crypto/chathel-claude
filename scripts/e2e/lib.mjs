@@ -15,9 +15,9 @@ export async function launch() {
 export async function newCtx(browser, { w = 390, h = 844, dark = false, lang = 'it-IT', base } = {}) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, colorScheme: dark ? 'dark' : 'light', locale: lang, serviceWorkers: 'block', deviceScaleFactor: 1, baseURL: base, hasTouch: w < 600 });
   const errors = [];
+  ctx.on('response', (r) => { if (r.status() === 404) errors.push(`[404] ${r.request().method()} ${r.url()}`); });
   ctx.on('page', (p) => {
     p.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') errors.push(`[${m.type()}] ${m.text().slice(0, 300)}`); });
-    p.on('response', (r) => { if (r.status() === 404) errors.push(`[404] ${r.request().method()} ${r.url()}`); });
     p.on('pageerror', (e) => errors.push(`[pageerror] ${String(e.message).slice(0, 300)}`));
   });
   return { ctx, errors };
