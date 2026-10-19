@@ -11,6 +11,10 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // i browser chiedono /favicon.ico da soli: lo indirizziamo all'icona dell'app invece di rispondere 404
+  async redirects() {
+    return [{ source: '/favicon.ico', destination: '/icons/icon-192.png', permanent: false }];
+  },
   async headers() {
     return [
       { source: '/:path*', headers: securityHeaders },
