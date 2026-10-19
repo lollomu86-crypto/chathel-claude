@@ -40,12 +40,19 @@ create schema if not exists extensions;
 create extension if not exists pgcrypto with schema extensions;
 
 create schema if not exists auth;
-create table if not exists auth.users (
-  id            uuid primary key default gen_random_uuid(),
-  email         text,
-  is_anonymous  boolean not null default false,
-  created_at    timestamptz not null default now()
-);
+-- Su Supabase lo schema auth e la tabella auth.users esistono gia' e sono di sistema (l'editor SQL non puo' crearvi nulla):
+-- la tabella si crea SOLO se manca (database di prova senza Supabase).
+do $authusers$
+begin
+  if to_regclass('auth.users') is null then
+    create table auth.users (
+      id            uuid primary key default gen_random_uuid(),
+      email         text,
+      is_anonymous  boolean not null default false,
+      created_at    timestamptz not null default now()
+    );
+  end if;
+end $authusers$;
 
 do $shim$
 begin
@@ -59,7 +66,11 @@ begin
   end if;
 end $shim$;
 
-grant usage on schema auth to anon, authenticated, service_role;
+-- su Supabase questi permessi ci sono gia' e non sono nostri da modificare
+do $authgrant$ begin
+  grant usage on schema auth to anon, authenticated, service_role;
+exception when insufficient_privilege then null;
+end $authgrant$;
 
 -- -----------------------------------------------------------------------------
 -- 1. Schema applicativo e tipi
