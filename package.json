@@ -17,7 +17,7 @@
     "lint": "tsc --noEmit",
     "harness": "tsx scripts/harness-server.ts",
     "i18n": "node scripts/check-i18n.mjs",
-    "e2e": "node scripts/e2e-f01.mjs && node scripts/e2e-guest.mjs && node scripts/e2e-staff.mjs && node scripts/e2e-matrix.mjs"
+    "e2e": "node scripts/e2e-f01.mjs && node scripts/e2e-code.mjs && node scripts/e2e-guest.mjs && node scripts/e2e-staff.mjs && node scripts/e2e-matrix.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": ">=0.60.0 <1",
