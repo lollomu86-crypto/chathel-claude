@@ -18,7 +18,7 @@ export interface BrowserAuthClient {
       options?: { redirectTo?: string; scopes?: string; queryParams?: Record<string, string> };
     }): Promise<{ error: { message: string } | null }>;
     getSession(): Promise<{ data: { session: { access_token: string; refresh_token: string } | null } }>;
-    signOut(opts?: { scope: 'local' | 'global' | 'others' }): Promise<unknown>;
+    signOut?(opts?: { scope: 'local' | 'global' | 'others' }): Promise<unknown>;
   };
 }
 
@@ -48,8 +48,28 @@ export async function finishGoogleLogin(
   const s = data.session;
   if (!s) return { ok: false, error: 'no_session' };
   const r = await post('/api/identity/session', { accessToken: s.access_token, refreshToken: s.refresh_token });
-  // il server ha il cookie HttpOnly: il browser non deve conservare i token
-  // scope 'local': il logout globale revocherebbe anche il refresh token appena dato al server
-  await client.auth.signOut({ scope: 'local' }).catch(() => undefined);
+  // il server ha il cookie HttpOnly: il browser non deve conservare i token.
+  // NON si chiama signOut(): anche con scope 'local' Supabase CANCELLA la sessione sul server, cioe' quella appena
+  // consegnata al server (poi getUser risponderebbe 403 "Session not found" e l'ospite tornerebbe al login).
+  // Si tolgono quindi solo le chiavi locali di supabase-js, senza nessuna chiamata di rete.
+  clearLocalAuthStorage();
   return r;
+}
+
+/** Toglie da localStorage/sessionStorage la sessione e il verificatore PKCE di supabase-js (chiavi `sb-<ref>-auth-token*`). */
+export function clearLocalAuthStorage(): void {
+  for (const st of [() => globalThis.localStorage, () => globalThis.sessionStorage]) {
+    try {
+      const store = st();
+      if (!store) continue;
+      const keys: string[] = [];
+      for (let i = 0; i < store.length; i++) {
+        const k = store.key(i);
+        if (k && /^sb-.*-auth-token/.test(k)) keys.push(k);
+      }
+      for (const k of keys) store.removeItem(k);
+    } catch {
+      /* archivio non disponibile (modalita' privata): nulla da togliere */
+    }
+  }
 }
