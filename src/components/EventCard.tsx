@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { call } from './client-api';
 import { useErrorText, useI18n } from './I18n';
 import { Icon } from './ui/Icon';
+import { safeImage } from '@/lib/safe-image';
 
 export interface EventCardProps {
   id: string;
@@ -16,6 +17,7 @@ export interface EventCardProps {
   goingCount: number | null;
   capacity: number | null;
   today: boolean;
+  imageUrl?: string | null;
 }
 
 export function EventCard(p: EventCardProps) {
@@ -36,7 +38,8 @@ export function EventCard(p: EventCardProps) {
     router.refresh();
   };
   return (
-    <article className="card event stack-sm" aria-labelledby={`ev-${p.id}`}>
+    <article className={`card event stack-sm${safeImage(p.imageUrl) ? ' has-photo' : ''}`} aria-labelledby={`ev-${p.id}`}>
+      {safeImage(p.imageUrl) && <img className="card-photo" src={safeImage(p.imageUrl)!} alt="" width={800} height={450} loading="lazy" decoding="async" />}
       <div className="row row-nowrap">
         <span className="date-chip" aria-hidden="true"><small>{p.chip.weekday}</small><strong>{p.chip.day}</strong></span>
         <div className="grow">

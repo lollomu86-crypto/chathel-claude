@@ -112,6 +112,7 @@ export interface EventView {
   startsAt: string;
   endsAt?: string | null;
   capacity?: number | null;
+  imageUrl?: string | null;
   /** Solo il NUMERO di adesioni, mai chi. null = non disponibile all'ospite (vedi NOTE-SVILUPPO) */
   goingCount: number | null;
   going: boolean;
@@ -129,6 +130,7 @@ export interface FacilityView {
   kind: FacilityKind;
   name: I18nText;
   description?: I18nText | null;
+  imageUrl?: string | null;
   slots: SlotView[];
 }
 export interface BookingView {

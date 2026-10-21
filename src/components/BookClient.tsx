@@ -3,10 +3,11 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 import { call } from './client-api';
 import { useConfirm, useErrorText, useI18n } from './I18n';
+import { safeImage } from '@/lib/safe-image';
 import { Icon } from './ui/Icon';
 
 export interface BookSlot { id: string; day: string; time: string; remaining: number; capacity: number }
-export interface BookFacility { id: string; name: string; description: string; slots: BookSlot[] }
+export interface BookFacility { id: string; name: string; description: string; imageUrl?: string | null; slots: BookSlot[] }
 export interface BookDay { key: string; label: string }
 export interface BookBooking { id: string; facility: string; when: string; party: number; canCancel: boolean }
 
@@ -64,6 +65,7 @@ export function BookClient({ facilities, days, bookings, cutoff }: { facilities:
               ))}
             </div>
           </fieldset>
+          {safeImage(f?.imageUrl) && <img className="card-photo card-photo-wide" src={safeImage(f?.imageUrl)!} alt="" width={800} height={450} decoding="async" />}
           {f?.description && <p className="muted small">{f.description}</p>}
 
           <fieldset className="fieldset">

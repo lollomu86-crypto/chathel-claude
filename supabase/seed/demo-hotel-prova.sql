@@ -30,42 +30,42 @@ begin
   delete from public.notifications where hotel_id = h and guest_id is null and kind = 'announcement';
 
   -- eventi (pubblicati) nei prossimi giorni, orari di Roma
-  insert into public.events(hotel_id, title, description, location, starts_at, ends_at, capacity, published) values
+  insert into public.events(hotel_id, title, description, location, starts_at, ends_at, capacity, published, image_url) values
   (h, '{"it":"Aperitivo di benvenuto","en":"Welcome aperitivo","de":"Willkommens-Aperitif"}',
       '{"it":"Un calice di benvenuto in terrazza per conoscere lo staff e scoprire il programma della settimana.","en":"A welcome drink on the terrace to meet the team and discover the week''s programme.","de":"Ein Willkommensgetränk auf der Terrasse, um das Team kennenzulernen und das Wochenprogramm zu entdecken."}',
-      'Terrazza', ((today + 1) + time '19:00') at time zone 'Europe/Rome', ((today + 1) + time '20:00') at time zone 'Europe/Rome', null, true),
+      'Terrazza', ((today + 1) + time '19:00') at time zone 'Europe/Rome', ((today + 1) + time '20:00') at time zone 'Europe/Rome', null, true, '/demo/aperitivo-benvenuto.svg'),
   (h, '{"it":"Yoga all''alba","en":"Sunrise yoga","de":"Yoga bei Sonnenaufgang"}',
       '{"it":"Mezz''ora di yoga leggero sulla spiaggia, adatto a tutti. Porta un asciugamano.","en":"Half an hour of gentle yoga on the beach, suitable for everyone. Bring a towel.","de":"Eine halbe Stunde sanftes Yoga am Strand, für alle geeignet. Bitte ein Handtuch mitbringen."}',
-      'Spiaggia', ((today + 2) + time '07:30') at time zone 'Europe/Rome', ((today + 2) + time '08:15') at time zone 'Europe/Rome', 20, true),
+      'Spiaggia', ((today + 2) + time '07:30') at time zone 'Europe/Rome', ((today + 2) + time '08:15') at time zone 'Europe/Rome', 20, true, '/demo/yoga-alba.svg'),
   (h, '{"it":"Torneo di beach volley","en":"Beach volleyball tournament","de":"Beachvolleyball-Turnier"}',
       '{"it":"Squadre miste da quattro. Iscrizione libera fino a esaurimento posti, premio per i vincitori.","en":"Mixed teams of four. Open sign-up while places last, prize for the winners.","de":"Gemischte Vierer-Teams. Anmeldung solange Plätze frei sind, Preis für die Sieger."}',
-      'Campo da beach volley', ((today + 2) + time '17:00') at time zone 'Europe/Rome', ((today + 2) + time '19:00') at time zone 'Europe/Rome', 24, true),
+      'Campo da beach volley', ((today + 2) + time '17:00') at time zone 'Europe/Rome', ((today + 2) + time '19:00') at time zone 'Europe/Rome', 24, true, '/demo/beach-volley.svg'),
   (h, '{"it":"Musica dal vivo in piazzetta","en":"Live music in the piazzetta","de":"Live-Musik auf der Piazzetta"}',
       '{"it":"Duo acustico dopo cena, con cocktail al bar della piazzetta.","en":"Acoustic duo after dinner, with cocktails at the piazzetta bar.","de":"Akustik-Duo nach dem Abendessen, mit Cocktails an der Piazzetta-Bar."}',
-      'Piazzetta', ((today + 3) + time '21:30') at time zone 'Europe/Rome', ((today + 3) + time '23:00') at time zone 'Europe/Rome', null, true),
+      'Piazzetta', ((today + 3) + time '21:30') at time zone 'Europe/Rome', ((today + 3) + time '23:00') at time zone 'Europe/Rome', null, true, '/demo/musica-piazzetta.svg'),
   (h, '{"it":"Caccia al tesoro per famiglie","en":"Family treasure hunt","de":"Schatzsuche für Familien"}',
       '{"it":"Un percorso a indizi in tutto il resort per grandi e piccoli, con merenda finale.","en":"A clue trail around the resort for young and old, with a snack at the end.","de":"Eine Schnitzeljagd durch das ganze Resort für Groß und Klein, mit Imbiss zum Abschluss."}',
-      'Ritrovo alla reception', ((today + 4) + time '10:30') at time zone 'Europe/Rome', ((today + 4) + time '12:00') at time zone 'Europe/Rome', 40, true),
+      'Ritrovo alla reception', ((today + 4) + time '10:30') at time zone 'Europe/Rome', ((today + 4) + time '12:00') at time zone 'Europe/Rome', 40, true, '/demo/caccia-al-tesoro.svg'),
   (h, '{"it":"Serata a tema: cena sarda","en":"Theme night: Sardinian dinner","de":"Themenabend: Sardisches Abendessen"}',
       '{"it":"Menu ispirato alla cucina sarda al ristorante, con un assaggio di prodotti del territorio.","en":"A menu inspired by Sardinian cuisine at the restaurant, with a taste of local products.","de":"Ein von der sardischen Küche inspiriertes Menü im Restaurant, mit lokalen Produkten zum Probieren."}',
-      'Ristorante', ((today + 5) + time '20:00') at time zone 'Europe/Rome', ((today + 5) + time '22:30') at time zone 'Europe/Rome', 80, true);
+      'Ristorante', ((today + 5) + time '20:00') at time zone 'Europe/Rome', ((today + 5) + time '22:30') at time zone 'Europe/Rome', 80, true, '/demo/cena-sarda.svg');
 
   -- servizi prenotabili
-  insert into public.facilities(hotel_id, kind, name, description, default_capacity)
+  insert into public.facilities(hotel_id, kind, name, description, default_capacity, image_url)
     values (h, 'spa', '{"it":"Percorso benessere","en":"Wellness circuit","de":"Wellness-Rundgang"}',
-            '{"it":"Sauna, bagno turco e vasca idromassaggio, 60 minuti.","en":"Sauna, steam room and whirlpool, 60 minutes.","de":"Sauna, Dampfbad und Whirlpool, 60 Minuten."}', 4) returning id into f_spa;
-  insert into public.facilities(hotel_id, kind, name, description, default_capacity)
+            '{"it":"Sauna, bagno turco e vasca idromassaggio, 60 minuti.","en":"Sauna, steam room and whirlpool, 60 minutes.","de":"Sauna, Dampfbad und Whirlpool, 60 Minuten."}', 4, '/demo/spa-percorso.svg') returning id into f_spa;
+  insert into public.facilities(hotel_id, kind, name, description, default_capacity, image_url)
     values (h, 'spa', '{"it":"Massaggio rilassante","en":"Relaxing massage","de":"Entspannungsmassage"}',
-            '{"it":"Massaggio di 50 minuti con un operatore.","en":"A 50-minute massage with a therapist.","de":"50-minütige Massage mit einer Therapeutin."}', 1) returning id into f_mas;
-  insert into public.facilities(hotel_id, kind, name, description, default_capacity)
+            '{"it":"Massaggio di 50 minuti con un operatore.","en":"A 50-minute massage with a therapist.","de":"50-minütige Massage mit einer Therapeutin."}', 1, '/demo/massaggio-rilassante.svg') returning id into f_mas;
+  insert into public.facilities(hotel_id, kind, name, description, default_capacity, image_url)
     values (h, 'pool', '{"it":"Lettini in piscina","en":"Pool sunbeds","de":"Liegen am Pool"}',
-            '{"it":"Due lettini con ombrellone vicino alla piscina, mezza giornata.","en":"Two sunbeds with a parasol by the pool, half a day.","de":"Zwei Liegen mit Sonnenschirm am Pool, einen halben Tag."}', 6) returning id into f_pool;
-  insert into public.facilities(hotel_id, kind, name, description, default_capacity)
+            '{"it":"Due lettini con ombrellone vicino alla piscina, mezza giornata.","en":"Two sunbeds with a parasol by the pool, half a day.","de":"Zwei Liegen mit Sonnenschirm am Pool, einen halben Tag."}', 6, '/demo/piscina-lettini.svg') returning id into f_pool;
+  insert into public.facilities(hotel_id, kind, name, description, default_capacity, image_url)
     values (h, 'gamesroom', '{"it":"Sala giochi","en":"Games room","de":"Spielzimmer"}',
-            '{"it":"Ping pong e calcio balilla, un''ora a tavolo.","en":"Table tennis and table football, one hour per table.","de":"Tischtennis und Tischfußball, eine Stunde pro Tisch."}', 4) returning id into f_game;
-  insert into public.facilities(hotel_id, kind, name, description, default_capacity)
+            '{"it":"Ping pong e calcio balilla, un''ora a tavolo.","en":"Table tennis and table football, one hour per table.","de":"Tischtennis und Tischfußball, eine Stunde pro Tisch."}', 4, '/demo/sala-giochi.svg') returning id into f_game;
+  insert into public.facilities(hotel_id, kind, name, description, default_capacity, image_url)
     values (h, 'other', '{"it":"Cena al ristorante","en":"Dinner at the restaurant","de":"Abendessen im Restaurant"}',
-            '{"it":"Prenota il tuo tavolo per la cena.","en":"Book your table for dinner.","de":"Reservieren Sie Ihren Tisch für das Abendessen."}', 20) returning id into f_rest;
+            '{"it":"Prenota il tuo tavolo per la cena.","en":"Book your table for dinner.","de":"Reservieren Sie Ihren Tisch für das Abendessen."}', 20, '/demo/ristorante-tavolo.svg') returning id into f_rest;
 
   -- posti prenotabili: da oggi ai prossimi 7 giorni (solo orari ancora futuri)
   insert into public.slots(hotel_id, facility_id, starts_at, ends_at, capacity)

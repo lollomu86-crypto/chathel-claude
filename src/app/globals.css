@@ -733,3 +733,9 @@ h2, .t-heading, .t-sub, h3 { font-family: var(--font-serif); font-weight: 600; }
 [data-theme="dark"] .card, [data-theme="dark"] .shortcut { box-shadow: none; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .card, :root:not([data-theme="light"]) .shortcut { box-shadow: none; } }
 @media (prefers-reduced-motion: reduce) { .card-link { transition: none; } .card-link:hover { transform: none; } }
+
+/* ---- Immagini di eventi e servizi (nessun colore nuovo) ---- */
+.card.has-photo { overflow: hidden; }
+.card-photo { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--surface-2); }
+.card.has-photo > .card-photo { margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0; width: calc(100% + var(--space-4) * 2); max-width: none; }
+.card-photo-wide { border-radius: var(--radius-xl); }

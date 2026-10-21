@@ -37,6 +37,7 @@ export default async function EventsPage() {
           goingCount={e.goingCount}
           capacity={e.capacity ?? null}
           today={localDayKey(new Date(e.startsAt), tz) === today}
+          imageUrl={e.imageUrl ?? null}
         />
       ))}
     </>

@@ -233,7 +233,7 @@ class SbGuestApi implements GuestApi {
 
   async events(): Promise<EventView[]> {
     const since = new Date(Date.now() - 12 * 3_600_000).toISOString();
-    const evs = ok(await this.db.from('events').select('id, title, description, location, starts_at, ends_at, capacity')
+    const evs = ok(await this.db.from('events').select('id, title, description, location, starts_at, ends_at, capacity, image_url')
       .eq('published', true).gte('starts_at', since).order('starts_at')) as any[];
     const mine = ok(await this.db.from('event_attendance').select('event_id, status').eq('guest_id', this.g.id)) as any[];
     const going = new Set(mine.filter((a) => a.status === 'going' || a.status === 'attended').map((a) => a.event_id));
@@ -241,7 +241,7 @@ class SbGuestApi implements GuestApi {
     return evs
       .filter((e) => new Date(e.ends_at ?? new Date(e.starts_at).getTime() + 3 * 3_600_000).getTime() > now)
       .map((e) => ({ id: e.id, title: e.title, description: e.description, location: e.location, startsAt: iso(e.starts_at)!,
-        endsAt: iso(e.ends_at), capacity: e.capacity,
+        endsAt: iso(e.ends_at), capacity: e.capacity, imageUrl: e.image_url ?? null,
         // schema.sql: l'ospite non puo' leggere le adesioni altrui, quindi il conteggio non e' disponibile (US-04 CA4 vs RLS)
         goingCount: null, going: going.has(e.id) }));
   }
@@ -251,10 +251,10 @@ class SbGuestApi implements GuestApi {
   }
 
   async facilities(): Promise<FacilityView[]> {
-    const facs = ok(await this.db.from('facilities').select('id, kind, name, description').eq('active', true)) as any[];
+    const facs = ok(await this.db.from('facilities').select('id, kind, name, description, image_url').eq('active', true)) as any[];
     const slots = ok(await this.db.from('slots').select('id, facility_id, starts_at, ends_at, capacity, booked_count')
       .eq('status', 'open').gt('starts_at', new Date().toISOString()).order('starts_at').limit(1000)) as any[];
-    return facs.map((f) => ({ id: f.id, kind: f.kind, name: f.name, description: f.description,
+    return facs.map((f) => ({ id: f.id, kind: f.kind, name: f.name, description: f.description, imageUrl: f.image_url ?? null,
       slots: slots.filter((s) => s.facility_id === f.id).map((s) => ({ id: s.id, startsAt: iso(s.starts_at)!, endsAt: iso(s.ends_at)!, capacity: s.capacity, booked: s.booked_count })) }));
   }
   async myBookings(): Promise<BookingView[]> {

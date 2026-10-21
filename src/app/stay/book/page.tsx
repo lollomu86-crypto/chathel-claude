@@ -26,6 +26,7 @@ export default async function BookPage() {
         id: f.id,
         name: pick(f.name, locale, 'it'),
         description: pick(f.description, locale, 'it'),
+        imageUrl: f.imageUrl ?? null,
         slots: f.slots.map((s) => ({ id: s.id, day: localDayKey(new Date(s.startsAt), tz), time: formatTime(s.startsAt, locale, tz), remaining: s.capacity - s.booked, capacity: s.capacity })),
       }))}
       bookings={bookings.map((b) => ({
