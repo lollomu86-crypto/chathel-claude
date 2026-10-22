@@ -505,7 +505,8 @@ test('statico: handler, store Supabase e server non importano lo store demo (pas
 
 test('statico: nessun segreto o password demo nel codice di produzione fuori da store/demo.ts', () => {
   const walk = (d: string): string[] => readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(pjoin(d, e.name)) : [pjoin(d, e.name)]));
-  for (const f of walk('src').filter((x) => /\.(ts|tsx)$/.test(x) && !/store\/demo(-data)?\.ts$/.test(x))) {
+  // percorsi con "/" anche su Windows (pjoin usa "\"), altrimenti i file demo non vengono esclusi
+  for (const f of walk('src').map((x) => x.replace(/\\/g, '/')).filter((x) => /\.(ts|tsx)$/.test(x) && !/store\/demo(-data)?\.ts$/.test(x))) {
     const t = readFileSync(f, 'utf8');
     assert.ok(!/demo-admin|demo-reception|demo-bar/.test(t), `${f}: password demo`);
   }
