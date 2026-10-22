@@ -473,11 +473,13 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
 /* Ritmo: 4 px tra messaggi consecutivi della stessa persona (.msg-cont / .bubble-cont), 12 px quando cambia chi scrive. */
 .chat { display: flex; flex-direction: column; gap: var(--space-1); }
 .chat > * + :not(.msg-cont):not(.bubble-cont) { margin-top: var(--space-2); }
-.bubble { position: relative; max-width: 80%; padding: var(--space-2) var(--space-3); border-radius: var(--radius-lg); font-size: var(--fs-md); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
-.bubble .who { display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); margin-bottom: 2px; white-space: normal; }
-/* orario a destra sull'ultima riga del testo se c'e' spazio, altrimenti sotto (float) */
-.bubble .time { float: right; margin: 6px 0 -4px var(--space-3); font-size: var(--fs-xs); font-weight: var(--fw-medium); line-height: 1.4; opacity: 0.85; white-space: nowrap; }
-.bubble::after { content: ""; display: block; clear: both; }
+/* Bolla = riga flessibile: nome a tutta larghezza, testo, orario. L'orario sta accanto al testo se c'e' spazio, altrimenti va
+   a capo allineato a destra (margin-left: auto). Niente float: l'orario non puo' uscire dalla bolla e coprire cio' che segue. */
+.bubble { position: relative; max-width: 80%; display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: var(--space-3);
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-lg); font-size: var(--fs-md); line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble .who { flex: 1 0 100%; display: flex; align-items: center; gap: 6px; font-size: var(--fs-sm); font-weight: var(--fw-semibold); margin-bottom: 2px; white-space: normal; }
+.bubble .time { flex: none; margin-left: auto; font-size: var(--fs-xs); font-weight: var(--fw-medium); line-height: 1.6; opacity: 0.85; white-space: nowrap; }
+.bubble .bubble-retry { flex: 1 0 100%; }
 .bubble-me { align-self: flex-end; background: var(--primary); color: var(--on-primary); border-bottom-right-radius: var(--tail); }
 .bubble-me.bubble-cont { border-top-right-radius: var(--tail); }
 .bubble-other { align-self: flex-start; background: var(--surface); color: var(--text); border: var(--bw) solid var(--border); border-bottom-left-radius: var(--tail); }
