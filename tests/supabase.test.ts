@@ -147,3 +147,31 @@ test('markWrong: solo messaggi assistant, idempotente (23505 ignorato); appendAs
   db.rpcs['__insert:audit_log'] = () => ({ error: { code: 'XX001', message: 'boom' } });
   assert.match(await code(rec.markWrong('m1')), /db_error/);
 });
+
+test('0010 personalizzazione: solo il direttore; interruttori con le chiavi del database; immagini caricate col service role', async () => {
+  const { db, store } = staffDb();
+  db.seed('hotels', [{ ...H1, logo_url: 'https://x.test/storage/v1/object/public/hotel-media/h1/logo-vecchio.png' }, H2]);
+  db.files.set('hotel-media/h1/logo-vecchio.png', { type: 'image/png', size: 3 });
+  db.joins['hotel_staff.hotels'] = (r) => db.table('hotels').find((h) => h.id === r.hotel_id);
+  const api = (await store.staff(sess('tok-u1')))!;
+  assert.equal(api.info.hotel.features.social, true, 'senza chiavi = tutto acceso');
+  await api.saveCustomization({ welcome: { it: ' Ciao ' }, features: { publicChat: false }, bonusEnabled: false });
+  const h1 = db.table('hotels').find((h) => h.id === 'h1')!;
+  assert.deepEqual(h1.welcome, { it: 'Ciao' });
+  assert.equal(h1.features.public_chat, false);
+  assert.equal(h1.bonus_enabled, false);
+  const up = db.calls.filter((c) => c.name === 'hotels:update');
+  assert.equal(up.at(-1)?.role, 'authenticated', 'benvenuto e interruttori con il token del direttore (RLS)');
+
+  const r = await api.uploadMedia('logo', new Uint8Array([0x89, 0x50, 0x4e, 0x47]), 'image/png');
+  assert.match(r.url, /^https:\/\/x\.test\/storage\/v1\/object\/public\/hotel-media\/h1\/logo-[0-9a-f-]{36}\.png$/);
+  assert.equal(h1.logo_url, r.url);
+  assert.equal(db.calls.filter((c) => c.name === 'hotels:update').at(-1)?.role, 'service_role', 'logo_url solo dal server');
+  assert.equal(db.files.has('hotel-media/h1/logo-vecchio.png'), false, 'il file precedente si cancella');
+  assert.equal([...db.files.keys()].filter((k) => k.startsWith('hotel-media/h1/')).length, 1);
+
+  const rec = (await store.staff(sess('tok-u1'), { hotelId: 'h2' }))!; // reception su h2
+  assert.equal(await code(rec.saveCustomization({ features: { social: false } })), 'CH004:forbidden');
+  assert.equal(await code(rec.uploadMedia('cover', new Uint8Array([0xff, 0xd8, 0xff]), 'image/jpeg')), 'CH004:forbidden');
+  assert.equal(db.table('hotels').find((h) => h.id === 'h2')!.features, undefined);
+});

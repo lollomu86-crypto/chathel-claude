@@ -5,6 +5,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { ThreadSummary } from '@/lib/types';
 import { call } from './client-api';
+import { useFeatures } from './Features';
 import { safeStore, usePolling } from './hooks';
 
 const KEY = 'ch_seen_v1';
@@ -38,8 +39,11 @@ export function SocialBadgeProvider({ children }: { children: ReactNode }) {
   const [available, setAvailable] = useState(true);
   const [seen, setSeen] = useState<Seen>({});
   const loaded = useRef(false);
+  const { social } = useFeatures();
 
   const reload = useCallback(async () => {
+    // livello sociale spento dal direttore: nessuna richiesta
+    if (!social) { setThreads([]); setAvailable(false); return; }
     const r = await call('/api/guest/social-threads');
     if (!loaded.current) { loaded.current = true; setSeen(readSeen()); }
     if (r.ok) {
@@ -52,7 +56,7 @@ export function SocialBadgeProvider({ children }: { children: ReactNode }) {
       setAvailable(false);
       setError(false);
     } else setError(true);
-  }, []);
+  }, [social]);
 
   // ogni 12 s a schermo visibile; piu' di rado se le funzioni non sono disponibili per questa persona
   usePolling(async () => { await reload(); return true; }, available ? 12_000 : 60_000);

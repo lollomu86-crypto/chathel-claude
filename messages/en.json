@@ -31,7 +31,10 @@
     "confirm": "Confirm",
     "more": "More actions",
     "skipToContent": "Skip to content",
-    "sectionError": "This part did not load. The rest works."
+    "sectionError": "This part did not load. The rest works.",
+    "featureOff": "This feature is not active at this hotel.",
+    "backHome": "Back to Home",
+    "poweredBy": "Powered by"
   },
   "nav": {
     "home": "Home",
@@ -124,7 +127,8 @@
     "bonusBadge": "Bonus",
     "socialRequests": "Chat requests waiting: {n}",
     "socialNew": "New messages from other guests",
-    "socialOpen": "Open Guests"
+    "socialOpen": "Open Guests",
+    "hotelWelcome": "A message from {hotel}"
   },
   "bonus": {
     "title": "Your bonus",
@@ -518,7 +522,10 @@
       "codeTitle": "Hotel numeric code",
       "codeHelp": "Guests without a QR can enter by typing these 6 digits. Share it at reception or print it on the room card.",
       "codeRotate": "Generate a new code",
-      "codeRotateWarn": "The old code stops working immediately. Guests already inside stay inside."
+      "codeRotateWarn": "The old code stops working immediately. Guests already inside stay inside.",
+      "bonusState": "Status",
+      "bonusOn": "On",
+      "bonusOff": "Off"
     },
     "social": {
       "title": "Social: reports and numbers",
@@ -684,6 +691,52 @@
       "empty": "Guests who have joined the app and have a stay in progress appear here.",
       "noMatch": "No guest matches the search.",
       "privacy": "For privacy, private chats, contacts between guests, emails and photos never appear here. Active = used the app in the last 24 hours."
+    },
+    "custom": {
+      "title": "Customisation",
+      "intro": "How the app looks to your guests: logo, photo, welcome message and active features.",
+      "saved": "Saved.",
+      "logo": "Hotel logo",
+      "logoHint": "Replaces the ChatHel logo in the app header.",
+      "logoAlt": "Current logo",
+      "logoRemove": "Remove the logo",
+      "cover": "Cover photo",
+      "coverHint": "At the top of Home and of the entry page. Landscape works best.",
+      "coverAlt": "Current cover",
+      "coverRemove": "Remove the cover",
+      "none": "No image",
+      "upload": "Upload",
+      "change": "Change",
+      "uploading": "Uploading…",
+      "remove": "Remove",
+      "removeConfirm": "Guests will no longer see it.",
+      "imageRules": "JPG, PNG or WebP up to 2 MB. The image is resized before sending and the photo's hidden information (such as location) is removed.",
+      "welcomeTitle": "Welcome message",
+      "welcomeHint": "At the top of Home. If the guest's language is missing, the hotel's main language is used. Leave empty to hide it.",
+      "welcome_it": "Italian",
+      "welcome_en": "English",
+      "welcome_de": "German",
+      "welcome_ru": "Russian",
+      "chars": "{n}/{max} characters",
+      "welcomeSave": "Save message",
+      "featuresTitle": "Active features",
+      "featuresHint": "A feature that is off disappears from the guest app. You can turn it back on at any time.",
+      "f_social": "Guest social",
+      "f_socialHint": "Guest list, public chat, private chats, coupons and challenges.",
+      "f_publicChat": "Public chat",
+      "f_publicChatHint": "The chat for all the hotel's guests.",
+      "f_challenges": "Challenges",
+      "f_challengesHint": "Challenges on the hotel's games, in private or in the public chat.",
+      "f_coupons": "Coupons",
+      "f_couponsHint": "Coupons to give to another guest in private chats.",
+      "f_bookings": "Bookings",
+      "f_bookingsHint": "Booking of services (spa, pool…). Bookings already made stay.",
+      "f_reception": "AI reception",
+      "f_receptionHint": "The assistant that answers guests' questions.",
+      "f_bonus": "Welcome bonus",
+      "f_bonusHint": "The bonus for new guests. Those who already got it keep it.",
+      "needsSocial": "Off because guest social is off.",
+      "offKeeps": "Turning a feature off deletes nothing: messages, bookings and coupons stay and are visible again when you turn it back on."
     }
   },
   "privacy": {
@@ -750,7 +803,12 @@
     "report_closed": "Report already closed.",
     "social_not_available": "Social features are not yet available with this database.",
     "method_not_allowed": "Operation not allowed.",
-    "invalid_code": "Invalid code. Check the 6 digits or ask the front desk."
+    "invalid_code": "Invalid code. Check the 6 digits or ask the front desk.",
+    "feature_disabled": "This feature is not active at this hotel.",
+    "invalid_image": "Invalid image: use a JPG, PNG or WebP file.",
+    "image_too_large": "Image too large (2 MB max).",
+    "welcome_too_long": "The message is longer than 500 characters.",
+    "unsupported_media_type": "Format not supported: use JPG, PNG or WebP."
   },
   "ai": {
     "notKnown": "I don't have this information. I'm connecting you with reception: the staff will reply as soon as possible.",

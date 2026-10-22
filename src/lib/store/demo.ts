@@ -14,6 +14,7 @@ import { SlotBook, type BookingPolicy } from '../rules/slots';
 import { SocialHub, sanitizeNickname } from '../rules/social';
 import { isCouponToken } from '../rules/coupons';
 import { cleanGameInput, GAME_LIMITS } from '../rules/games';
+import { ALL_FEATURES_ON, cleanWelcome, effectiveFeatures, requireFeature, type MediaType } from '../rules/features';
 import { DemoSocialGuest, DemoSocialStaff } from './demo-social';
 import { addDaysKey, isDayKey, localDayKey, zonedTime } from '../time';
 import { DEFAULT_LOCALE, isLocale, type AdminEvent, type AdminFacility, type AdminNotification, type AiContext,
@@ -22,7 +23,8 @@ import { DEFAULT_LOCALE, isLocale, type AdminEvent, type AdminFacility, type Adm
   type HandoffConversation, type HandoffPriority, type HandoffReason, type I18nText, type Kpis, type Locale, type NotificationView,
   type Period, type PublicHotel, type PublishNotificationInput, type RedeemResult, type SaveEventInput,
   type SaveKnowledgeInput, type StaffInfo, type StaffRole, type StartStayInput, type StartStayResult,
-  type StartStayBonus, type AdminGame, type GameView, type SaveGameInput, type StaffGuest } from '../types';
+  type StartStayBonus, type AdminGame, type GameView, type SaveGameInput, type StaffGuest,
+  type FeatureKey, type HotelFeatures, type HotelMediaKind, type SaveCustomizationInput } from '../types';
 import type { GuestApi, StaffApi, Store } from './types';
 import { DEMO_EVENTS, DEMO_FACILITIES, DEMO_GAMES, DEMO_KB, DEMO_STAFF } from './demo-data';
 
@@ -57,6 +59,7 @@ interface Hotel {
   bonusFunding: 'hotel' | 'chathel_grant'; seasonYear: number; qrTtlSeconds: number;
   maxPerGuestDay: number; cancelCutoffMinutes: number; qrToken: string; accessCode: string; qrPrevToken: string | null; qrPrevUntil: Date | null;
   bonusMaxPerHour: number; receptionPhone: string | null;
+  logoUrl: string | null; coverUrl: string | null; welcome: I18nText; features: HotelFeatures;
 }
 interface G { id: string; name: string; locale: Locale; isAdult: boolean; createdAt: Date; expiresAt: Date; stayId: string; startBonus: StartStayBonus; identityKey: string; lastSeenAt?: Date | null }
 interface Stay { id: string; guestId: string | null; startedAt: Date; expiresAt: Date; status: 'active' | 'ended'; firstActionAt: Date | null }
@@ -103,6 +106,7 @@ export class DemoStore implements Store {
       qrTtlSeconds: 90, maxPerGuestDay: 2, cancelCutoffMinutes: 60,
       qrToken: opts.qrToken ?? 'demo-qr-token', accessCode: /^\d{6}$/.test(opts.accessCode ?? '') ? (opts.accessCode as string) : '482915', qrPrevToken: null, qrPrevUntil: null,
       bonusMaxPerHour: opts.bonusMaxPerHour ?? BONUS_MAX_PER_HOUR_DEFAULT, receptionPhone: opts.receptionPhone === undefined ? 'interno 9' : opts.receptionPhone,
+      logoUrl: null, coverUrl: null, welcome: {}, features: { ...ALL_FEATURES_ON },
     };
     this.social = new SocialHub({
       timezone: this.hotel.timezone,
@@ -113,6 +117,13 @@ export class DemoStore implements Store {
   }
 
   id(prefix: string) { return `${prefix}${++this.seq}`; }
+
+  /** Immagini caricate dal pannello (solo in memoria, come il resto della demo). */
+  mediaFiles = new Map<string, { type: MediaType; bytes: Uint8Array }>();
+  media(id: string) { return this.mediaFiles.get(id) ?? null; }
+  /** Interruttori effettivi; come i trigger di 0010, una funzione spenta rifiuta le scritture. */
+  features(): HotelFeatures { return effectiveFeatures(this.hotel.features); }
+  requireFeature(...keys: FeatureKey[]) { requireFeature(this.features(), ...keys); }
 
   /** Gioco attivo dell'hotel, per le sfide (come social_challenge_create in SQL). */
   activeGame(id: string): GameView {
@@ -219,7 +230,7 @@ export class DemoStore implements Store {
   async publicHotel(slug: string): Promise<PublicHotel | null> {
     const h = this.hotel;
     if (slug !== h.slug) return null;
-    return { slug: h.slug, name: h.name, logoUrl: null, defaultLocale: h.defaultLocale, supportedLocales: ['it', 'en', 'de'] };
+    return { slug: h.slug, name: h.name, logoUrl: h.logoUrl, coverUrl: h.coverUrl, defaultLocale: h.defaultLocale, supportedLocales: ['it', 'en', 'de'] };
   }
 
   async startStay(input: StartStayInput): Promise<StartStayResult> {
@@ -326,7 +337,8 @@ class DemoGuestApi implements GuestApi {
     const h = this.h;
     return { name: this.g.name, locale: this.g.locale, expiresAt: this.g.expiresAt.toISOString(),
       hotel: { slug: h.slug, name: h.name, timezone: h.timezone, bonusLabel: h.bonusLabel, bonusEnabled: h.bonusEnabled,
-        cancelCutoffMinutes: h.cancelCutoffMinutes, maxBookingsPerDay: h.maxPerGuestDay } };
+        cancelCutoffMinutes: h.cancelCutoffMinutes, maxBookingsPerDay: h.maxPerGuestDay,
+        defaultLocale: h.defaultLocale, logoUrl: h.logoUrl, coverUrl: h.coverUrl, welcome: { ...h.welcome }, features: this.s.features() } };
   }
   async setLocale(locale: Locale) { if (isLocale(locale)) this.g.locale = locale; }
 
@@ -396,6 +408,7 @@ class DemoGuestApi implements GuestApi {
         canCancel: this.s.book.canCancel(b, this.s.policy(), now) }));
   }
   async book(slotId: string, partySize: number) {
+    this.s.requireFeature('bookings');
     this.s.book.book(HOTEL_ID, this.gid, slotId, partySize, this.s.policy(), this.s.now());
     this.s.markAction(this.gid);
   }
@@ -422,6 +435,7 @@ class DemoGuestApi implements GuestApi {
     return this.s.msgs.filter((m) => mine.has(m.convId) && m.role === 'guest' && m.createdAt >= start).length;
   }
   async appendGuestMessage(text: string) {
+    this.s.requireFeature('reception');
     const now = this.s.now();
     let c = this.myConv();
     if (!c || c.status === 'closed') {
@@ -476,7 +490,32 @@ class DemoStaffApi implements StaffApi {
     const h = s.hotel;
     this.info = { role: u.role, displayName: u.name, hotel: { id: h.id, slug: h.slug, name: h.name, timezone: h.timezone,
       defaultLocale: h.defaultLocale, bonusLabel: h.bonusLabel, bonusValueCents: h.bonusValueCents, bonusSeasonCap: h.bonusCap,
-      bonusFunding: h.bonusFunding, seasonYear: h.seasonYear } };
+      bonusFunding: h.bonusFunding, seasonYear: h.seasonYear, bonusEnabled: h.bonusEnabled,
+      logoUrl: h.logoUrl, coverUrl: h.coverUrl, welcome: { ...h.welcome }, features: { ...h.features } } };
+  }
+
+  // ---- personalizzazione (come 0010: solo il direttore; spegnere non cancella nulla)
+  async saveCustomization(input: SaveCustomizationInput) {
+    this.need(ADMIN);
+    const h = this.s.hotel;
+    if (input.welcome) h.welcome = cleanWelcome(input.welcome);
+    if (input.features) h.features = { ...h.features, ...input.features };
+    if (input.bonusEnabled !== undefined) h.bonusEnabled = input.bonusEnabled;
+  }
+  async uploadMedia(kind: HotelMediaKind, bytes: Uint8Array, type: MediaType) {
+    this.need(ADMIN);
+    const id = `${kind}-${randomUUID()}`;
+    this.s.mediaFiles.set(id, { type, bytes: new Uint8Array(bytes) });
+    const url = `/api/media/${id}`;
+    this.setMedia(kind, url);
+    return { url };
+  }
+  async removeMedia(kind: HotelMediaKind) { this.need(ADMIN); this.setMedia(kind, null); }
+  private setMedia(kind: HotelMediaKind, url: string | null) {
+    const h = this.s.hotel;
+    const prev = kind === 'logo' ? h.logoUrl : h.coverUrl;
+    if (prev?.startsWith('/api/media/')) this.s.mediaFiles.delete(prev.slice('/api/media/'.length));
+    if (kind === 'logo') h.logoUrl = url; else h.coverUrl = url;
   }
   /** Rispecchia le policy RLS: ruolo non ammesso = 403. */
   private need(roles: StaffRole[]) { if (!roles.includes(this.u.role)) throw new ChError('CH004', 'forbidden'); }

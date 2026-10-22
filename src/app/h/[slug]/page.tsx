@@ -6,7 +6,8 @@ import { makeT } from '@/lib/i18n';
 import { I18nProvider } from '@/components/I18n';
 import { EntryFlow } from '@/components/EntryFlow';
 import { LangSwitch } from '@/components/LangSwitch';
-import { LogoMark } from '@/components/LogoMark';
+import { LogoMark, PoweredBy } from '@/components/LogoMark';
+import { safeImage } from '@/lib/safe-image';
 import { Icon } from '@/components/ui/Icon';
 
 export const dynamic = 'force-dynamic';
@@ -23,19 +24,21 @@ export default async function HotelEntry({ params, searchParams }: { params: Pro
 
   const locale = await getLocale(); // cookie, poi lingua del browser (QR-04): la lingua predefinita dell hotel non la scavalca
   const t = makeT(locale);
-  const logo = hotel?.logoUrl && /^https:\/\//.test(hotel.logoUrl) ? hotel.logoUrl : null;
+  const logo = safeImage(hotel?.logoUrl);
+  const cover = safeImage(hotel?.coverUrl);
   return (
     <I18nProvider locale={locale} messages={messagesFor(locale)}>
       <header className="entry-head">
-        <LogoMark size="lg" />
+        {/* con il logo dell'hotel la tessera ChatHel scende in fondo alla pagina ("Powered by ChatHel") */}
+        {hotel && logo ? <img className="hotel-logo" src={logo} alt={hotel.name} /> : <LogoMark size="lg" />}
         {hotel ? (
           <>
-            {logo && <img className="hotel-logo" src={logo} alt="" width={56} height={56} />}
             <h1>{t('onboarding.title', { hotel: hotel.name })}</h1>
             <p>{t('onboarding.subtitle')}</p>
           </>
         ) : <h1>{t('onboarding.hotelNotFound')}</h1>}
       </header>
+      {hotel && cover && <div className="entry-cover"><img className="cover" src={cover} alt="" /></div>}
       <main id="main" className="shell shell-bare">
         {!hotel ? (
           <div className="notice notice-err" role="alert">
@@ -52,6 +55,7 @@ export default async function HotelEntry({ params, searchParams }: { params: Pro
           </>
         )}
         <p className="small"><Link className="link-tap" href="/privacy">{t('landing.privacy')}</Link></p>
+        {hotel && logo && <PoweredBy label={t('common.poweredBy')} />}
       </main>
     </I18nProvider>
   );

@@ -6,6 +6,7 @@ import type { SocialSettings } from '@/lib/types';
 import { formatDateTime } from '@/lib/format';
 import { call } from './client-api';
 import { ConsentFields, NO_CONSENTS, type SocialConsents } from './ConsentFields';
+import { useFeatures } from './Features';
 import { useErrorText, useI18n } from './I18n';
 import { SocialPeople } from './SocialPeople';
 import { SocialPublicChat } from './SocialPublicChat';
@@ -26,6 +27,8 @@ export function SocialClient({ initial, hotelName, timezone, initialTab }: { ini
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [consents, setConsents] = useState<SocialConsents>(NO_CONSENTS);
+  const { publicChat } = useFeatures();
+  const current: SocialTab = tab === 'chat' && !publicChat ? 'people' : tab;
 
   const reload = useCallback(async () => {
     const r = await call('/api/guest/social-settings');
@@ -33,9 +36,10 @@ export function SocialClient({ initial, hotelName, timezone, initialTab }: { ini
   }, []);
 
   const go = useCallback((id: string) => {
+    if (id === 'chat' && !publicChat) id = 'people';
     setTab(id as SocialTab);
     window.history.replaceState(null, '', `/stay/social?tab=${id}`);
-  }, []);
+  }, [publicChat]);
 
   const join = async () => {
     setBusy(true); setError(null);
@@ -68,7 +72,8 @@ export function SocialClient({ initial, hotelName, timezone, initialTab }: { ini
     );
   }
 
-  const tabs = SOCIAL_TABS.map((x) => ({
+  // chat pubblica spenta dal direttore: niente scheda
+  const tabs = SOCIAL_TABS.filter((x) => x !== 'chat' || publicChat).map((x) => ({
     id: x,
     label: t(`social.tabs.${x}`),
     badge: x === 'private' ? badge.unread : undefined,
@@ -82,11 +87,11 @@ export function SocialClient({ initial, hotelName, timezone, initialTab }: { ini
           <Icon name="alert" />{t('social.settings.muted', { when: settings.mutedUntil ? formatDateTime(settings.mutedUntil, locale, timezone) : '' })}
         </p>
       )}
-      <Tabs tabs={tabs} active={tab} onChange={go} label={t('social.title')} idPrefix="soc">
-        {tab === 'people' && <SocialPeople hotelName={hotelName} settings={settings} onGoChat={() => go('chat')} onGoPrivate={() => go('private')} />}
-        {tab === 'chat' && <SocialPublicChat hotelName={hotelName} settings={settings} timezone={timezone} onChanged={reload} />}
-        {tab === 'private' && <SocialThreads timezone={timezone} onGoPeople={() => go('people')} />}
-        {tab === 'settings' && <SocialSettingsPanel settings={settings} onChanged={(s) => { setSettings(s); void badge.reload(); }} />}
+      <Tabs tabs={tabs} active={current} onChange={go} label={t('social.title')} idPrefix="soc">
+        {current === 'people' && <SocialPeople hotelName={hotelName} settings={settings} onGoChat={() => go('chat')} onGoPrivate={() => go('private')} />}
+        {current === 'chat' && <SocialPublicChat hotelName={hotelName} settings={settings} timezone={timezone} onChanged={reload} />}
+        {current === 'private' && <SocialThreads timezone={timezone} onGoPeople={() => go('people')} />}
+        {current === 'settings' && <SocialSettingsPanel settings={settings} onChanged={(s) => { setSettings(s); void badge.reload(); }} />}
       </Tabs>
     </>
   );

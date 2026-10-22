@@ -3,6 +3,7 @@ import { formatDateTime, formatTime, pick } from '@/lib/format';
 import { addDaysKey, localDayKey, zonedTime } from '@/lib/time';
 import { BookClient, type BookDay } from '@/components/BookClient';
 import { dateChip } from '@/components/format-ui';
+import { FeatureOff } from '@/components/FeatureOff';
 import { titleFor } from '@/components/page-meta';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,12 @@ export const generateMetadata = titleFor('book.title');
 export default async function BookPage() {
   const { api, view, locale, t } = await requireGuest();
   const tz = view.hotel.timezone;
-  const [facilities, bookings, games] = await Promise.all([api.facilities(), api.myBookings(), api.games()]);
+  const f = view.hotel.features;
+  const [facilities, bookings, games] = await Promise.all([
+    f.bookings ? api.facilities() : [], api.myBookings(), f.challenges ? api.games() : [],
+  ]);
+  // tutto spento e nessuna prenotazione da disdire: solo l'avviso
+  if (!f.bookings && !f.challenges && bookings.length === 0) return <FeatureOff title={t('book.title')} t={t} />;
   const today = localDayKey(new Date(), tz);
   const days: BookDay[] = Array.from({ length: 7 }, (_, i) => {
     const key = addDaysKey(today, i);
@@ -23,6 +29,7 @@ export default async function BookPage() {
     <BookClient
       days={days}
       cutoff={view.hotel.cancelCutoffMinutes}
+      servicesOn={f.bookings}
       facilities={facilities.map((f) => ({
         id: f.id,
         name: pick(f.name, locale, 'it'),
