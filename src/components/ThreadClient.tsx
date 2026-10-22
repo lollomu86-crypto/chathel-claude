@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { COUPON_KINDS, type ChallengeView, type CouponKind, type CouponView, type ReportReason, type ThreadDetail } from '@/lib/types';
 import { ChallengeCard, ChallengeDialog } from './Challenge';
+import { useFeatures } from './Features';
 import { formatDateTime } from '@/lib/format';
 import { call } from './client-api';
 import { CouponQr } from './CouponQr';
@@ -18,6 +19,7 @@ import { Icon } from './ui/Icon';
 /** Conversazione privata: richiesta iniziale (accetta/rifiuta), messaggi con il nome, coupon come biglietti, blocca e segnala ovunque. */
 export function ThreadClient({ initial, timezone, couponsLeft }: { initial: ThreadDetail; timezone: string; couponsLeft: number }) {
   const { t, locale } = useI18n();
+  const { coupons: couponsOn, challenges: challengesOn } = useFeatures();
   const errText = useErrorText();
   const ask = useConfirm();
   const router = useRouter();
@@ -186,17 +188,21 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
       {info && <p className="notice notice-ok" role="status"><Icon name="check" />{info}</p>}
       {error && <p className="error-text" role="alert"><Icon name="alert" />{error}</p>}
 
-      {th.canSendCoupon && (
-        <section className="stack-sm" aria-label={t('social.thread.couponsTitle')}>
+      {th.canSendCoupon && (couponsOn || challengesOn) && (
+        <section className="stack-sm" aria-label={couponsOn ? t('social.thread.couponsTitle') : t('challenge.button')}>
           <div className="btn-group">
-            <button type="button" className="btn btn-secondary btn-small" aria-expanded={couponOpen} aria-controls="cp-panel" onClick={() => setCouponOpen((o) => !o)}>
-              <Icon name="ticket" />{t('social.thread.couponsTitle')}
-            </button>
-            <button type="button" className="btn btn-secondary btn-small" onClick={() => setChallenging(true)}>
-              <Icon name="trophy" />{t('challenge.button')}
-            </button>
+            {couponsOn && (
+              <button type="button" className="btn btn-secondary btn-small" aria-expanded={couponOpen} aria-controls="cp-panel" onClick={() => setCouponOpen((o) => !o)}>
+                <Icon name="ticket" />{t('social.thread.couponsTitle')}
+              </button>
+            )}
+            {challengesOn && (
+              <button type="button" className="btn btn-secondary btn-small" onClick={() => setChallenging(true)}>
+                <Icon name="trophy" />{t('challenge.button')}
+              </button>
+            )}
           </div>
-          {couponOpen && (
+          {couponsOn && couponOpen && (
             <div className="card stack" id="cp-panel">
               <p className="hint">{t('social.thread.couponsNote')}</p>
               <div className="chips" role="group" aria-label={t('social.thread.couponsTitle')}>

@@ -26,6 +26,8 @@ export class FakeSupabase {
   calls: { kind: 'rpc' | 'from'; name: string; args?: Row; role: string; uid?: string }[] = [];
   /** join semplici: "hotels(...)" nelle select */
   joins: Record<string, (row: Row, db: FakeSupabase) => any> = {};
+  /** Storage: "bucket/percorso" -> file. Come il bucket hotel-media di 0010: scrive solo service_role. */
+  files = new Map<string, { type: string; size: number }>();
 
   table(name: string): Row[] { return (this.tables[name] ??= []); }
   seed(name: string, rows: Row[]) { this.table(name).push(...rows); return this; }
@@ -127,6 +129,21 @@ class Query implements PromiseLike<{ data: any; error: PgErr | null; count?: num
 class FakeClient {
   constructor(private db: FakeSupabase, private who: Caller) {}
   from(name: string) { return new Query(this.db, name, this.who); }
+  storage = {
+    from: (bucket: string) => ({
+      upload: async (path: string, body: Uint8Array, o?: { contentType?: string }) => {
+        if (this.who.role !== 'service_role') return { data: null, error: { message: 'new row violates row-level security policy' } };
+        this.db.files.set(`${bucket}/${path}`, { type: o?.contentType ?? '', size: body.length });
+        return { data: { path }, error: null };
+      },
+      getPublicUrl: (path: string) => ({ data: { publicUrl: `https://x.test/storage/v1/object/public/${bucket}/${path}` } }),
+      remove: async (paths: string[]) => {
+        if (this.who.role !== 'service_role') return { data: null, error: { message: 'denied' } };
+        for (const p of paths) this.db.files.delete(`${bucket}/${p}`);
+        return { data: paths, error: null };
+      },
+    }),
+  };
   rpc(fn: string, args: Row = {}) {
     this.db.calls.push({ kind: 'rpc', name: fn, args, role: this.who.role, uid: this.who.uid });
     const f = this.db.rpcs[fn];

@@ -2,6 +2,7 @@ import { requireGuest } from '@/lib/server';
 import { SocialClient } from '@/components/SocialClient';
 import { SOCIAL_TABS, type SocialTab } from '@/components/social-tabs';
 import { titleFor } from '@/components/page-meta';
+import { FeatureOff } from '@/components/FeatureOff';
 import { Icon } from '@/components/ui/Icon';
 
 export const dynamic = 'force-dynamic';
@@ -10,6 +11,7 @@ export const generateMetadata = titleFor('social.title');
 export default async function SocialPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const sp = await searchParams;
   const { api, view, t } = await requireGuest();
+  if (!view.hotel.features.social) return <FeatureOff title={t('social.title')} t={t} />;
   let settings;
   try {
     settings = await api.social().settings();

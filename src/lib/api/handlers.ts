@@ -18,7 +18,8 @@ import { EMERGENCY_MAX_PER_MINUTE, GUEST_MESSAGES_PER_DAY, GUEST_MESSAGES_PER_MI
 import { logEvent } from '../log';
 import { hashKey, hit, ipKey, withLock } from '../ratelimit';
 import type { Store } from '../store/types';
-import { isLocale, type Period } from '../types';
+import { FEATURE_KEYS, isLocale, type FeatureKey, type Period, type SaveCustomizationInput } from '../types';
+import { checkImage, requireFeature } from '../rules/features';
 import { preCheck } from '../ai/guardrails';
 import { makeT } from '../i18n';
 import { socialGuestAction, socialStaffAction } from './social-handlers';
@@ -190,10 +191,28 @@ export async function hotelByCode(ctx: Ctx, raw: unknown): Promise<Res> {
 // ----------------------------------------------------------------------------- ospite
 const idSchema = z.string().min(1).max(80);
 
+/**
+ * Funzioni che servono a un'azione dell'ospite (interruttori del direttore, 0010). Spenta = 403 feature_disabled.
+ * Restano possibili disdire una prenotazione e annullare un coupon o una sfida gia' fatti: spegnere non toglie nulla all'ospite.
+ */
+export function featuresFor(action: string, raw: unknown): FeatureKey[] {
+  const q = (raw ?? {}) as Record<string, unknown>;
+  const publicScope = !q.threadId && !q.thread;
+  if (action === 'book') return ['bookings'];
+  if (action === 'games') return ['challenges'];
+  if (!action.startsWith('social-')) return [];
+  if (['social-feed', 'social-post', 'social-report'].includes(action)) return ['social', 'publicChat'];
+  if (['social-coupon-send', 'social-coupon-qr'].includes(action)) return ['social', 'coupons'];
+  if (action === 'social-challenge-create' || action === 'social-challenges') return publicScope ? ['social', 'challenges', 'publicChat'] : ['social', 'challenges'];
+  return ['social'];
+}
+
 export async function guestAction(ctx: Ctx, action: string, raw: unknown): Promise<Res> {
   return guarded(`guest/${action}`, async () => {
     const g = await ctx.store.guest(ctx.guest);
     if (!g) return { ...fail(401, 'unauthorized'), guestCookie: null };
+    const need = featuresFor(action, raw);
+    if (need.length) requireFeature((await g.view()).hotel.features, ...need);
     const get = ctx.method === 'GET';
     switch (action) {
       case 'ping':
@@ -279,6 +298,8 @@ export async function aiChat(ctx: Ctx, raw: unknown): Promise<Res> {
 
     return withLock(`aichat:${gk}`, async () => {
       const view = await g.view();
+      // reception AI spenta dal direttore: la pagina mostra il contatto della reception, qui nessun messaggio
+      requireFeature(view.hotel.features, 'reception');
       const t = makeT(view.locale);
 
       // ---- 1. emergenze
@@ -490,9 +511,44 @@ export async function staffAction(ctx: Ctx, action: string, raw: unknown): Promi
       case 'rotate-code':
         if (!post) return fail(405, 'method_not_allowed');
         return ok(await s.rotateAccessCode());
+      case 'customization-save': {
+        if (!post) return fail(405, 'method_not_allowed');
+        const t4 = z.object({ it: z.string().max(600), en: z.string().max(600), de: z.string().max(600), ru: z.string().max(600) }).partial();
+        const b = z.object({
+          welcome: t4.optional(),
+          features: z.object(Object.fromEntries(FEATURE_KEYS.map((k) => [k, z.boolean()]))).partial().strict().optional(),
+          bonusEnabled: z.boolean().optional(),
+        }).strict().parse(raw);
+        await s.saveCustomization(b as SaveCustomizationInput);
+        logEvent('hotel.customize', { status: 'ok' });
+        return ok();
+      }
+      case 'media-remove': {
+        if (!post) return fail(405, 'method_not_allowed');
+        await s.removeMedia(z.object({ kind: z.enum(['logo', 'cover']) }).parse(raw).kind);
+        return ok();
+      }
       default:
         return (await socialStaffAction(ctx, s, action, raw)) ?? fail(404, 'not_found');
     }
+  });
+}
+
+/**
+ * Logo o copertina dal pannello (solo direttore). Il corpo e' l'immagine stessa (gia' ridotta nel browser):
+ * tipo reale controllato dai primi byte, al massimo 2 MB, niente SVG. Limite di frequenza per sessione.
+ */
+export async function staffMedia(ctx: Ctx, kindRaw: string | null, bytes: Uint8Array, contentType: string): Promise<Res> {
+  return guarded('staff/media', async () => {
+    const s = await ctx.store.staff(ctx.staff, { hotelId: ctx.hotel });
+    if (!s) return { ...fail(401, 'unauthorized'), staffCookie: null };
+    if (s.info.role !== 'hotel_admin') return fail(403, 'forbidden');
+    const kind = z.enum(['logo', 'cover']).parse(kindRaw);
+    if (!(await hit(`media:${hashKey(ctx.staff ?? '')}`, 20, 10 * 60_000))) return fail(429, 'rate_limited');
+    const type = checkImage(bytes, contentType);
+    const r = await s.uploadMedia(kind, bytes, type);
+    logEvent('hotel.media', { status: kind });
+    return ok({ url: r.url });
   });
 }
 

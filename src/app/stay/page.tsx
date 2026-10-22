@@ -6,6 +6,8 @@ import { HomeSocial } from '@/components/HomeSocial';
 import { InstallHint } from '@/components/InstallHint';
 import { Icon } from '@/components/ui/Icon';
 import { titleFor } from '@/components/page-meta';
+import { safeImage } from '@/lib/safe-image';
+import { welcomeFor } from '@/lib/rules/features';
 
 export const dynamic = 'force-dynamic';
 export const generateMetadata = titleFor('nav.home');
@@ -20,6 +22,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
   const events = eventsR.status === 'fulfilled' ? eventsR.value : null;
   const notifs = notifsR.status === 'fulfilled' ? notifsR.value : [];
   const label = view.hotel.bonusLabel;
+  const f = view.hotel.features;
+  const cover = safeImage(view.hotel.coverUrl);
+  const welcome = welcomeFor(view.hotel.welcome, locale, view.hotel.defaultLocale);
   const sectionError = (
     <div className="notice notice-err" role="alert">
       <Icon name="alert" />
@@ -29,8 +34,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
   );
   return (
     <>
+      {cover && <img className="cover" src={cover} alt="" />}
       <h1>{t('home.welcome', { name: view.name })}</h1>
       {sp.welcome === '1' && <p className="notice notice-ok" role="status"><Icon name="check" />{t('home.welcomeNew', { hotel: view.hotel.name })}</p>}
+      {welcome && (
+        <section className="card stack-sm" aria-labelledby="hw">
+          <h2 id="hw" className="t-sub">{t('home.hotelWelcome', { hotel: view.hotel.name })}</h2>
+          <p className="welcome-note">{welcome}</p>
+        </section>
+      )}
 
       {!bonus && sectionError}
       {bonus?.state === 'issued' && (
@@ -53,24 +65,25 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
           <p>{t('home.bonusRedeemed', { date: formatDateTime(bonus.redeemedAt!, locale, tz) })}</p>
           <div className="btn-group">
             <Link className="btn btn-secondary" href="/stay/events">{t('bonus.nextEvents')}</Link>
-            <Link className="btn btn-secondary" href="/stay/book">{t('bonus.nextBook')}</Link>
+            {f.bookings && <Link className="btn btn-secondary" href="/stay/book">{t('bonus.nextBook')}</Link>}
           </div>
         </section>
       )}
-      {bonus && (['expired', 'void', 'cap_reached', 'none'] as const).includes(bonus.state as never) && (
+      {/* bonus spento dal direttore: chi l'ha gia' ricevuto lo vede ancora, agli altri non si dice nulla */}
+      {bonus && (view.hotel.bonusEnabled || bonus.state !== 'none') && (['expired', 'void', 'cap_reached', 'none'] as const).includes(bonus.state as never) && (
         <section className="card card-muted stack">
           <p>{t(bonus.state === 'expired' ? 'home.bonusExpired' : bonus.state === 'void' ? 'home.bonusVoid' : bonus.state === 'cap_reached' ? 'home.bonusCap' : 'home.bonusNone')}</p>
           {bonus.state === 'cap_reached' && <Link className="btn btn-secondary btn-small" href="/stay/events">{t('bonus.nextEvents')}</Link>}
         </section>
       )}
 
-      <HomeSocial />
+      {f.social && <HomeSocial />}
 
       <h2 className="t-sub section">{t('home.shortcuts')}</h2>
       <div className="shortcuts">
         <Link className="shortcut" href="/stay/events"><Icon name="calendar" />{t('nav.events')}</Link>
-        <Link className="shortcut" href="/stay/book"><Icon name="clock" />{t('nav.book')}</Link>
-        <Link className="shortcut" href="/stay/reception"><Icon name="chat" />{t('nav.reception')}</Link>
+        {(f.bookings || f.challenges) && <Link className="shortcut" href="/stay/book"><Icon name="clock" />{t('nav.book')}</Link>}
+        {f.reception && <Link className="shortcut" href="/stay/reception"><Icon name="chat" />{t('nav.reception')}</Link>}
       </div>
 
       {notifs.length > 0 && (

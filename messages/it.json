@@ -31,7 +31,10 @@
     "confirm": "Conferma",
     "more": "Altre azioni",
     "skipToContent": "Vai al contenuto",
-    "sectionError": "Questa parte non si è caricata. Il resto funziona."
+    "sectionError": "Questa parte non si è caricata. Il resto funziona.",
+    "featureOff": "Questa funzione non è attiva in questo hotel.",
+    "backHome": "Torna alla Home",
+    "poweredBy": "Powered by"
   },
   "nav": {
     "home": "Home",
@@ -124,7 +127,8 @@
     "bonusBadge": "Bonus",
     "socialRequests": "Richieste di chat da gestire: {n}",
     "socialNew": "Ci sono nuovi messaggi dagli altri ospiti",
-    "socialOpen": "Apri Ospiti"
+    "socialOpen": "Apri Ospiti",
+    "hotelWelcome": "Un messaggio da {hotel}"
   },
   "bonus": {
     "title": "Il tuo bonus",
@@ -518,7 +522,10 @@
       "codeTitle": "Codice numerico dell'hotel",
       "codeHelp": "Gli ospiti senza QR possono entrare digitando queste 6 cifre. Comunicalo in reception o scrivilo sul cartoncino della camera.",
       "codeRotate": "Genera un nuovo codice",
-      "codeRotateWarn": "Il vecchio codice smette di funzionare subito. Chi è già dentro resta dentro."
+      "codeRotateWarn": "Il vecchio codice smette di funzionare subito. Chi è già dentro resta dentro.",
+      "bonusState": "Stato",
+      "bonusOn": "Attivo",
+      "bonusOff": "Spento"
     },
     "social": {
       "title": "Social: segnalazioni e numeri",
@@ -684,6 +691,52 @@
       "empty": "Qui compaiono gli ospiti che sono entrati nell'app e hanno il soggiorno in corso.",
       "noMatch": "Nessun ospite corrisponde alla ricerca.",
       "privacy": "Per la privacy qui non compaiono chat private, contatti tra ospiti, e-mail o foto. Attivo = ha usato l'app nelle ultime 24 ore."
+    },
+    "custom": {
+      "title": "Personalizzazione",
+      "intro": "Come appare l'app ai tuoi ospiti: logo, foto, messaggio di benvenuto e funzioni attive.",
+      "saved": "Salvato.",
+      "logo": "Logo dell'hotel",
+      "logoHint": "Prende il posto del logo ChatHel nella testata dell'app.",
+      "logoAlt": "Logo attuale",
+      "logoRemove": "Rimuovi il logo",
+      "cover": "Foto di copertina",
+      "coverHint": "In cima alla Home e alla pagina d'ingresso. Meglio orizzontale.",
+      "coverAlt": "Copertina attuale",
+      "coverRemove": "Rimuovi la copertina",
+      "none": "Nessuna immagine",
+      "upload": "Carica",
+      "change": "Cambia",
+      "uploading": "Caricamento…",
+      "remove": "Rimuovi",
+      "removeConfirm": "Gli ospiti non la vedranno più.",
+      "imageRules": "JPG, PNG o WebP fino a 2 MB. L'immagine viene ridotta prima dell'invio e le informazioni nascoste della foto (come la posizione) vengono tolte.",
+      "welcomeTitle": "Messaggio di benvenuto",
+      "welcomeHint": "In cima alla Home. Se manca la lingua dell'ospite si usa quella principale dell'hotel. Lascia vuoto per non mostrarlo.",
+      "welcome_it": "Italiano",
+      "welcome_en": "Inglese",
+      "welcome_de": "Tedesco",
+      "welcome_ru": "Russo",
+      "chars": "{n}/{max} caratteri",
+      "welcomeSave": "Salva il messaggio",
+      "featuresTitle": "Funzioni attive",
+      "featuresHint": "Una funzione spenta sparisce dall'app degli ospiti. Puoi riaccenderla quando vuoi.",
+      "f_social": "Social tra ospiti",
+      "f_socialHint": "Elenco degli ospiti, chat pubblica, chat private, coupon e sfide.",
+      "f_publicChat": "Chat pubblica",
+      "f_publicChatHint": "La chat di tutti gli ospiti dell'hotel.",
+      "f_challenges": "Sfide",
+      "f_challengesHint": "Sfide ai giochi dell'hotel, in privato o nella chat pubblica.",
+      "f_coupons": "Coupon",
+      "f_couponsHint": "Coupon da regalare a un altro ospite nelle chat private.",
+      "f_bookings": "Prenotazioni",
+      "f_bookingsHint": "Prenotazione dei servizi (spa, piscina…). Le prenotazioni già fatte restano.",
+      "f_reception": "Reception AI",
+      "f_receptionHint": "L'assistente che risponde alle domande degli ospiti.",
+      "f_bonus": "Bonus di benvenuto",
+      "f_bonusHint": "Il bonus ai nuovi ospiti. Chi l'ha già ricevuto lo conserva.",
+      "needsSocial": "Spenta perché il social tra ospiti è spento.",
+      "offKeeps": "Spegnere una funzione non cancella nulla: messaggi, prenotazioni e coupon restano e tornano visibili quando la riaccendi."
     }
   },
   "privacy": {
@@ -750,7 +803,12 @@
     "report_closed": "Segnalazione già chiusa.",
     "social_not_available": "Le funzioni social non sono ancora disponibili con questo database.",
     "method_not_allowed": "Operazione non consentita.",
-    "invalid_code": "Codice non valido. Controlla le 6 cifre o chiedi alla reception."
+    "invalid_code": "Codice non valido. Controlla le 6 cifre o chiedi alla reception.",
+    "feature_disabled": "Questa funzione non è attiva in questo hotel.",
+    "invalid_image": "Immagine non valida: usa un file JPG, PNG o WebP.",
+    "image_too_large": "Immagine troppo grande (massimo 2 MB).",
+    "welcome_too_long": "Il messaggio supera i 500 caratteri.",
+    "unsupported_media_type": "Formato non supportato: usa JPG, PNG o WebP."
   },
   "ai": {
     "notKnown": "Non ho questa informazione. Ti metto in contatto con la reception: ti risponde lo staff appena possibile.",

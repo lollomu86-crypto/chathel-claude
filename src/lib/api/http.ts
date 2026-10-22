@@ -80,6 +80,31 @@ export async function runApi(req: Request, fn: (ctx: Ctx, input: unknown) => Pro
     input = Object.fromEntries(new URL(req.url).searchParams);
   }
 
+  return respond(req, method, (ctx) => fn(ctx, input));
+}
+
+export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024;
+const UPLOAD_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+/**
+ * Caricamento di un'immagine (solo POST): il corpo e' il file, con Content-Type immagine. Un form di un altro sito non puo'
+ * inviare questi tipi senza il controllo CORS del browser, quindi la difesa di "solo JSON" resta valida.
+ */
+export async function runUpload(req: Request, fn: (ctx: Ctx, bytes: Uint8Array, contentType: string) => Promise<Res>): Promise<Response> {
+  const noStore = { 'Cache-Control': 'no-store' };
+  if (req.method !== 'POST') return Response.json({ ok: false, error: 'method_not_allowed' }, { status: 405, headers: noStore });
+  const type = (req.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
+  if (!UPLOAD_TYPES.includes(type)) return Response.json({ ok: false, error: 'unsupported_media_type' }, { status: 415, headers: noStore });
+  if (Number(req.headers.get('content-length') ?? '0') > MAX_UPLOAD_BYTES) {
+    return Response.json({ ok: false, error: 'image_too_large' }, { status: 413, headers: noStore });
+  }
+  const bytes = new Uint8Array(await req.arrayBuffer());
+  if (bytes.length > MAX_UPLOAD_BYTES) return Response.json({ ok: false, error: 'image_too_large' }, { status: 413, headers: noStore });
+  return respond(req, 'POST', (ctx) => fn(ctx, bytes, type));
+}
+
+async function respond(req: Request, method: 'GET' | 'POST', fn: (ctx: Ctx) => Promise<Res>): Promise<Response> {
+  const noStore = { 'Cache-Control': 'no-store' };
   const cookies = parseCookies(req.headers.get('cookie'));
   let res: Res;
   try {
@@ -88,7 +113,7 @@ export async function runApi(req: Request, fn: (ctx: Ctx, input: unknown) => Pro
     res = await fn({
       store, identityProvider, guest: cookies[GUEST_COOKIE], staff: cookies[STAFF_COOKIE], identityCookie: cookies[IDENT_COOKIE],
       hotel: cookies[HOTEL_COOKIE], ip: clientIp(req), method,
-    }, input);
+    });
   } catch (e) {
     if (e instanceof ConfigError) return Response.json({ ok: false, error: 'service_unavailable' }, { status: 503, headers: noStore });
     throw e;

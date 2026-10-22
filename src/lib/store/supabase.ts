@@ -9,6 +9,7 @@
 // segnalazione "risposta AI sbagliata" (audit_log), contatori di frequenza condivisi. Non compare mai in codice client.
 // `createClient` e' iniettato (src/lib/store/index.ts lo importa dinamicamente): niente dipendenza statica da supabase-js.
 
+import { randomUUID } from 'node:crypto';
 import { ChError, fromPgError } from '../errors';
 import { kpisFromCounts } from '../kpi';
 import { pick } from '../i18n';
@@ -23,8 +24,9 @@ import { isLocale, type AdminEvent, type AdminFacility, type AdminNotification, 
   type GenerateSlotsInput, type GuestView, type HandoffConversation, type Kpis, type Locale, type NotificationView,
   type Period, type PublicHotel, type PublishNotificationInput, type RedeemResult, type SaveEventInput,
   type SaveKnowledgeInput, type StaffInfo, type StaffRole, type StartStayInput, type StartStayResult, type StartStayBonus,
-  type I18nText, type AdminGame, type GameView, type SaveGameInput, type StaffGuest } from '../types';
+  type I18nText, type AdminGame, type GameView, type SaveGameInput, type StaffGuest, type HotelMediaKind, type SaveCustomizationInput } from '../types';
 import { cleanGameInput, GAME_LIMITS } from '../rules/games';
+import { cleanWelcome, effectiveFeatures, featuresFromDb, featuresToDb, MEDIA_EXT, type MediaType } from '../rules/features';
 import type { GuestApi, StaffApi, Store } from './types';
 import { SbSocialGuest, SbSocialStaff } from './supabase-social';
 import type { RateBackend } from '../ratelimit';
@@ -35,6 +37,8 @@ export type CreateClient = (url: string, key: string, options?: Record<string, u
 export interface SupabaseDeps { createClient: CreateClient }
 
 const opts = { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } } as const;
+/** Bucket di Storage delle immagini dell'hotel (migrazione 0010). */
+export const MEDIA_BUCKET = 'hotel-media';
 
 /** Converte un errore PostgREST in ChError (SQLSTATE CHxxx) oppure in errore generico. */
 export function raise(error: { code?: string; message?: string } | null): never {
@@ -116,7 +120,7 @@ export class SupabaseStore implements Store {
     if (error) raise(error);
     const row = Array.isArray(data) ? data[0] : data;
     if (!row) return null;
-    return { slug, name: row.name, logoUrl: row.logo_url ?? null, defaultLocale: row.default_locale,
+    return { slug, name: row.name, logoUrl: row.logo_url ?? null, coverUrl: row.cover_url ?? null, defaultLocale: row.default_locale,
       supportedLocales: (row.supported_locales ?? ['it', 'en', 'de']).filter(isLocale) };
   }
 
@@ -142,7 +146,7 @@ export class SupabaseStore implements Store {
     const who = await db.rpc('current_guest_id');
     if (who.error || !who.data) return null; // token scaduto/non valido (il middleware prova il refresh prima) o soggiorno scaduto
     const { data: g, error } = await db.from('guests')
-      .select('id, hotel_id, display_name, locale, is_adult, last_seen_at, hotels(slug, name, timezone, default_locale, bonus_label, bonus_enabled, bonus_season_cap, booking_cancel_cutoff_minutes, max_bookings_per_guest_day, reception_phone)')
+      .select('id, hotel_id, display_name, locale, is_adult, last_seen_at, hotels(slug, name, timezone, default_locale, bonus_label, bonus_enabled, bonus_season_cap, booking_cancel_cutoff_minutes, max_bookings_per_guest_day, reception_phone, logo_url, cover_url, welcome, features)')
       .eq('id', who.data).maybeSingle();
     if (error || !g) return null;
     const { data: stay } = await db.from('stays').select('expires_at, status').eq('guest_id', g.id).eq('status', 'active')
@@ -166,7 +170,7 @@ export class SupabaseStore implements Store {
 
   private async memberships(db: Db, uid: string): Promise<any[]> {
     const rows = ok(await db.from('hotel_staff')
-      .select('id, role, display_name, hotels(id, slug, name, timezone, default_locale, bonus_label, bonus_value_cents, bonus_season_cap, bonus_funding, season_year)')
+      .select('id, role, display_name, hotels(id, slug, name, timezone, default_locale, bonus_label, bonus_value_cents, bonus_season_cap, bonus_funding, season_year, bonus_enabled, logo_url, cover_url, welcome, features)')
       .eq('active', true).eq('user_id', uid).order('hotel_id')) as any[];
     return rows.filter((r) => r.hotels);
   }
@@ -194,7 +198,8 @@ export class SupabaseStore implements Store {
     const h: any = st.hotels;
     const info: StaffInfo = { role: st.role, displayName: st.display_name, hotel: { id: h.id, slug: h.slug, name: h.name, timezone: h.timezone,
       defaultLocale: h.default_locale, bonusLabel: h.bonus_label, bonusValueCents: h.bonus_value_cents, bonusSeasonCap: h.bonus_season_cap,
-      bonusFunding: h.bonus_funding, seasonYear: h.season_year } };
+      bonusFunding: h.bonus_funding, seasonYear: h.season_year, bonusEnabled: h.bonus_enabled !== false,
+      logoUrl: h.logo_url ?? null, coverUrl: h.cover_url ?? null, welcome: h.welcome ?? {}, features: featuresFromDb(h.features) } };
     return new SbStaffApi(this, db, info, st.id, user.user.id);
   }
 }
@@ -215,7 +220,9 @@ class SbGuestApi implements GuestApi {
     const h = this.hotel;
     return { name: this.g.display_name, locale: this.g.locale, expiresAt: iso(this.expiresAt)!,
       hotel: { slug: h.slug, name: h.name, timezone: h.timezone, bonusLabel: h.bonus_label, bonusEnabled: h.bonus_enabled,
-        cancelCutoffMinutes: h.booking_cancel_cutoff_minutes, maxBookingsPerDay: h.max_bookings_per_guest_day } };
+        cancelCutoffMinutes: h.booking_cancel_cutoff_minutes, maxBookingsPerDay: h.max_bookings_per_guest_day,
+        defaultLocale: isLocale(h.default_locale) ? h.default_locale : 'it', logoUrl: h.logo_url ?? null, coverUrl: h.cover_url ?? null,
+        welcome: h.welcome ?? {}, features: effectiveFeatures(featuresFromDb(h.features)) } };
   }
   async setLocale(locale: Locale) {
     if (!isLocale(locale)) return;
@@ -564,6 +571,48 @@ class SbStaffApi implements StaffApi {
     if (!m || m.role !== 'assistant') throw new ChError('CH003', 'invalid_message');
     const r = await this.store.serviceClient().from('audit_log').insert({ hotel_id: this.hid, actor_user_id: this.userId, action: 'ai.marked_wrong', entity: 'ai_message', meta: { message_id: m.id } });
     if (r.error && r.error.code !== '23505') raise(r.error);
+  }
+
+  // ---- personalizzazione (0010): solo il direttore
+  async saveCustomization(input: SaveCustomizationInput) {
+    this.need(['hotel_admin']);
+    const patch: Record<string, unknown> = {};
+    if (input.welcome) patch.welcome = cleanWelcome(input.welcome);
+    if (input.features) patch.features = featuresToDb({ ...this.info.hotel.features, ...input.features });
+    if (input.bonusEnabled !== undefined) patch.bonus_enabled = input.bonusEnabled;
+    if (Object.keys(patch).length === 0) return;
+    touched(await this.db.from('hotels').update(patch).eq('id', this.hid).select('id'));
+  }
+  /**
+   * Immagini nel bucket "hotel-media": il client non puo' scriverci (nessuna policy) e logo_url non e' modificabile dai client,
+   * quindi caricamento e indirizzo passano dalla chiave di servizio, DOPO il controllo del ruolo qui sopra.
+   */
+  async uploadMedia(kind: HotelMediaKind, bytes: Uint8Array, type: MediaType): Promise<{ url: string }> {
+    this.need(['hotel_admin']);
+    const svc = this.store.serviceClient();
+    const path = `${this.hid}/${kind}-${randomUUID()}.${MEDIA_EXT[type]}`;
+    const up = await svc.storage.from(MEDIA_BUCKET).upload(path, bytes, { contentType: type, upsert: false, cacheControl: '31536000' });
+    if (up.error) throw new Error('storage_upload');
+    const url: string = svc.storage.from(MEDIA_BUCKET).getPublicUrl(path).data.publicUrl;
+    await this.setMedia(kind, url);
+    return { url };
+  }
+  async removeMedia(kind: HotelMediaKind) {
+    this.need(['hotel_admin']);
+    await this.setMedia(kind, null);
+  }
+  /** Salva il nuovo indirizzo e cancella il file precedente (solo se era nel nostro bucket e di questo hotel). */
+  private async setMedia(kind: HotelMediaKind, url: string | null) {
+    const svc = this.store.serviceClient();
+    const col = kind === 'logo' ? 'logo_url' : 'cover_url';
+    const prev = (kind === 'logo' ? this.info.hotel.logoUrl : this.info.hotel.coverUrl) ?? '';
+    touched(await svc.from('hotels').update({ [col]: url }).eq('id', this.hid).select('id'));
+    const marker = `/${MEDIA_BUCKET}/${this.hid}/`;
+    const i = prev.indexOf(marker);
+    if (i >= 0) {
+      const old = prev.slice(i + MEDIA_BUCKET.length + 2);
+      try { await svc.storage.from(MEDIA_BUCKET).remove([old]); } catch { /* resta un file orfano: nessun danno per l'ospite */ }
+    }
   }
 
   async rotateQr() {

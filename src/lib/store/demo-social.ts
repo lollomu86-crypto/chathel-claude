@@ -11,7 +11,8 @@ import type { DemoStore } from './demo';
 
 export class DemoSocialGuest implements SocialGuestApi {
   constructor(private s: DemoStore, private gid: string) {}
-  private get hub(): SocialHub { return this.s.social; }
+  /** Come app.social_profile in 0010: con il livello sociale spento niente letture ne' scritture. */
+  private get hub(): SocialHub { this.s.requireFeature('social'); return this.s.social; }
   private now() { return this.s.now(); }
 
   async settings(): Promise<SocialSettings> { return this.hub.settings(this.gid, this.now()); }
@@ -22,8 +23,9 @@ export class DemoSocialGuest implements SocialGuestApi {
   }
   async acceptRules() { this.hub.acceptRules(this.gid, this.now()); }
   async guests() { return this.hub.listGuests(this.gid); }
-  async publicFeed() { return this.hub.publicFeed(this.gid); }
+  async publicFeed() { this.s.requireFeature('publicChat'); return this.hub.publicFeed(this.gid); }
   async postPublic(text: string): Promise<PublicMessageView> {
+    this.s.requireFeature('publicChat');
     const m = this.hub.postPublic(this.gid, text, this.now());
     this.s.markAction(this.gid);
     return m;
@@ -42,7 +44,10 @@ export class DemoSocialGuest implements SocialGuestApi {
   async unblock(targetId: string) { this.hub.unblock(this.gid, targetId); }
   async blocked() { return this.hub.blocked(this.gid); }
   async reportPrivate(threadId: string, messageId: string, reason: ReportReason) { this.hub.reportPrivate(this.gid, threadId, messageId, reason, this.now()); }
-  async sendCoupon(threadId: string, kind: CouponKind): Promise<CouponView> { return this.hub.sendCoupon(this.gid, threadId, kind, this.now()); }
+  async sendCoupon(threadId: string, kind: CouponKind): Promise<CouponView> {
+    this.s.requireFeature('coupons');
+    return this.hub.sendCoupon(this.gid, threadId, kind, this.now());
+  }
   async couponQr(couponId: string): Promise<CouponQrView> {
     const r = this.hub.couponQr(this.gid, couponId, this.now());
     return { token: r.token, expiresAt: r.expiresAt.toISOString(), kind: r.coupon.kind };
@@ -52,6 +57,8 @@ export class DemoSocialGuest implements SocialGuestApi {
   }
   async challenges(threadId?: string | null) { return this.hub.challengesFor(this.gid, threadId ?? null, this.now()); }
   async createChallenge(i: CreateChallengeInput): Promise<ChallengeView> {
+    // come il trigger di 0010: le sfide nella chat pubblica richiedono anche la chat pubblica
+    this.s.requireFeature('challenges', ...(i.threadId ? [] : (['publicChat'] as const)));
     const game = this.s.activeGame(i.gameId);
     const r = this.hub.createChallenge(this.gid, { game, startsAt: new Date(i.startsAt), stake: i.stake, threadId: i.threadId ?? null }, this.now());
     this.s.markAction(this.gid);

@@ -22,12 +22,21 @@ export type MessageRole = 'guest' | 'assistant' | 'operator' | 'system';
 export type FacilityKind = 'spa' | 'pool' | 'gamesroom' | 'other';
 export type Period = 'today' | '7d' | 'season';
 
+/** Funzioni che il direttore accende e spegne (migrazione 0010). "social" e' l'interruttore generale del livello sociale. */
+export const FEATURE_KEYS = ['social', 'publicChat', 'challenges', 'coupons', 'bookings', 'reception'] as const;
+export type FeatureKey = (typeof FEATURE_KEYS)[number];
+export type HotelFeatures = Record<FeatureKey, boolean>;
+
+/** Immagini dell'hotel caricate dal pannello. */
+export type HotelMediaKind = 'logo' | 'cover';
+
 // ---------------------------------------------------------------- pubblico / ospite
 
 export interface PublicHotel {
   slug: string;
   name: string;
   logoUrl: string | null;
+  coverUrl: string | null;
   defaultLocale: Locale;
   supportedLocales: Locale[];
 }
@@ -87,6 +96,12 @@ export interface GuestView {
     bonusEnabled: boolean;
     cancelCutoffMinutes: number;
     maxBookingsPerDay: number;
+    defaultLocale: Locale;
+    logoUrl: string | null;
+    coverUrl: string | null;
+    welcome: I18nText;
+    /** gia' "effettive": con social spento sono spente anche chat pubblica, sfide e coupon */
+    features: HotelFeatures;
   };
 }
 
@@ -208,7 +223,19 @@ export interface StaffInfo {
     bonusSeasonCap: number;
     bonusFunding: 'hotel' | 'chathel_grant';
     seasonYear: number;
+    bonusEnabled: boolean;
+    logoUrl: string | null;
+    coverUrl: string | null;
+    welcome: I18nText;
+    /** come salvati (non effettivi): il pannello mostra anche le scelte sotto un social spento */
+    features: HotelFeatures;
   };
+}
+
+export interface SaveCustomizationInput {
+  welcome?: I18nText;
+  features?: Partial<HotelFeatures>;
+  bonusEnabled?: boolean;
 }
 
 export type RedeemFailReason =

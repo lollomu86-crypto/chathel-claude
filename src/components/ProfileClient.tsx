@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { call } from './client-api';
+import { useFeatures } from './Features';
 import { useConfirm, useErrorText, useI18n } from './I18n';
 import { LangSwitch } from './LangSwitch';
 import { PushSettings } from './PushSettings';
@@ -25,6 +26,7 @@ export function ProfileClient({ expires }: { expires: string }) {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(readTheme);
+  const { social } = useFeatures();
 
   const pickTheme = (v: Theme) => {
     setTheme(v);
@@ -61,11 +63,13 @@ export function ProfileClient({ expires }: { expires: string }) {
           ))}
         </div>
       </section>
-      <section className="card stack" aria-labelledby="ps">
-        <h2 id="ps" className="t-sub">{t('profile.socialTitle')}</h2>
-        <p className="muted">{t('profile.socialBody')}</p>
-        <Link className="btn btn-secondary" href="/stay/social?tab=settings">{t('profile.socialOpen')}</Link>
-      </section>
+      {social && (
+        <section className="card stack" aria-labelledby="ps">
+          <h2 id="ps" className="t-sub">{t('profile.socialTitle')}</h2>
+          <p className="muted">{t('profile.socialBody')}</p>
+          <Link className="btn btn-secondary" href="/stay/social?tab=settings">{t('profile.socialOpen')}</Link>
+        </section>
+      )}
       <p className="muted">{t('profile.expires', { date: expires })}</p>
       <section className="card stack" aria-labelledby="pd">
         <h2 id="pd" className="t-sub">{t('profile.deleteTitle')}</h2>

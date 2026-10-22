@@ -51,7 +51,10 @@ import type {
   StaffRole,
   StartStayInput,
   StartStayResult,
+  HotelMediaKind,
+  SaveCustomizationInput,
 } from '../types';
+import type { MediaType } from '../rules/features';
 
 /** Livello sociale lato ospite (elenco, chat pubblica, chat privata, coupon). Ogni metodo applica le regole di rules/social.ts. */
 export interface SocialGuestApi {
@@ -169,6 +172,11 @@ export interface StaffApi {
   /** Codice numerico (6 cifre) con cui l'ospite entra senza QR */
   currentAccessCode(): Promise<string | null>;
   rotateAccessCode(): Promise<{ code: string }>;
+  /** Benvenuto, interruttori delle funzioni e bonus (solo direttore). */
+  saveCustomization(input: SaveCustomizationInput): Promise<void>;
+  /** Logo o copertina gia' controllati (tipo reale e dimensione, rules/features.ts). Solo direttore. */
+  uploadMedia(kind: HotelMediaKind, bytes: Uint8Array, type: MediaType): Promise<{ url: string }>;
+  removeMedia(kind: HotelMediaKind): Promise<void>;
 }
 
 export interface Store {
@@ -185,4 +193,6 @@ export interface Store {
   staff(session: string | undefined, opts?: { hotelId?: string }): Promise<StaffApi | null>;
   /** Hotel dove l'utente e' staff attivo (per la scelta quando sono piu' di uno). */
   staffHotels(session: string | undefined): Promise<{ id: string; slug: string; name: string; role: StaffRole }[]>;
+  /** Solo demo: immagine caricata dal pannello (in memoria), servita da /api/media/[id]. */
+  media?(id: string): { type: MediaType; bytes: Uint8Array } | null;
 }

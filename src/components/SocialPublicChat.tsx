@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChallengeView, PublicMessageView, ReportReason, SocialSettings } from '@/lib/types';
 import { ChallengeCard, ChallengeDialog } from './Challenge';
+import { useFeatures } from './Features';
 import { call } from './client-api';
 import { dayKeyOf, dayLabel, chatTime } from './format-ui';
 import { nearBottom, scrollToBottom, usePolling } from './hooks';
@@ -14,6 +15,7 @@ import { EmptyState, ErrorState } from './ui/States';
 /** Chat comune della struttura. Regole d'uso mostrate prima della prima scrittura; segnala e blocca su ogni messaggio altrui. */
 export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: { hotelName: string; settings: SocialSettings; timezone: string; onChanged: () => void }) {
   const { t, locale } = useI18n();
+  const { challenges: challengesOn } = useFeatures();
   const errText = useErrorText();
   const ask = useConfirm();
   const [msgs, setMsgs] = useState<PublicMessageView[] | null>(null);
@@ -138,7 +140,7 @@ export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: {
       {info && <p className="notice notice-ok" role="status"><Icon name="check" />{info}</p>}
       {error && <p className="error-text" role="alert"><Icon name="alert" />{error}</p>}
       <form className="composer" onSubmit={(e) => { e.preventDefault(); void send(); }}>
-        {canWrite && (
+        {canWrite && challengesOn && (
           <button type="button" className="icon-btn icon-btn-plain composer-extra" aria-label={t('challenge.title')} title={t('challenge.title')} onClick={() => setChallenging(true)}>
             <Icon name="trophy" />
           </button>

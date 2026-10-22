@@ -18,7 +18,8 @@ export interface BookGame { id: string; name: string; description: string; locat
  * Prenota, nello stile degli Eventi: le mie prenotazioni in alto, poi una card per servizio (foto, nome, descrizione);
  * "Prenota" apre dentro la card giorno -> persone -> orario -> conferma. In fondo i giochi: non si prenotano, si sfida.
  */
-export function BookClient({ facilities, days, bookings, cutoff, games }: { facilities: BookFacility[]; days: BookDay[]; bookings: BookBooking[]; cutoff: number; games: BookGame[] }) {
+/** `servicesOn` false = prenotazioni spente dal direttore: restano le prenotazioni gia' fatte (disdicibili) e i giochi. */
+export function BookClient({ facilities, days, bookings, cutoff, games, servicesOn = true }: { facilities: BookFacility[]; days: BookDay[]; bookings: BookBooking[]; cutoff: number; games: BookGame[]; servicesOn?: boolean }) {
   const { t } = useI18n();
   const errText = useErrorText();
   const ask = useConfirm();
@@ -64,15 +65,17 @@ export function BookClient({ facilities, days, bookings, cutoff, games }: { faci
         </section>
       )}
 
-      <section className="stack-sm" aria-labelledby="svc">
-        <h2 id="svc" className="t-sub section">{t('book.services')}</h2>
-        {facilities.length === 0 && (
-          <div className="card empty"><Icon name="clock" /><p className="empty-title">{t('book.emptyTitle')}</p><p>{t('book.emptyBody')}</p></div>
-        )}
-        {facilities.map((f) => (
-          <FacilityCard key={f.id} f={f} days={days} open={openFac === f.id} onToggle={() => setOpenFac(openFac === f.id ? null : f.id)} />
-        ))}
-      </section>
+      {servicesOn && (
+        <section className="stack-sm" aria-labelledby="svc">
+          <h2 id="svc" className="t-sub section">{t('book.services')}</h2>
+          {facilities.length === 0 && (
+            <div className="card empty"><Icon name="clock" /><p className="empty-title">{t('book.emptyTitle')}</p><p>{t('book.emptyBody')}</p></div>
+          )}
+          {facilities.map((f) => (
+            <FacilityCard key={f.id} f={f} days={days} open={openFac === f.id} onToggle={() => setOpenFac(openFac === f.id ? null : f.id)} />
+          ))}
+        </section>
+      )}
 
       {games.length > 0 && (
         <section className="stack-sm" aria-labelledby="gms">
