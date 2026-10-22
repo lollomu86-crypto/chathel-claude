@@ -27,11 +27,11 @@ Fatti importanti: dopo il login Google il browser NON deve chiamare `signOut` (r
 
 ## Notifiche push (stato: ATTIVE in produzione dal 22/10/2026)
 Provate da Lorenzo su telefono Android: gli avvisi dell'hotel arrivano (anche con app chiusa). Tipi: avvisi hotel, risposte reception, messaggi privati, chat pubblica (per ospite, spenta di default, max 1 ogni 10 min). Testi generici, mai contenuti dei messaggi né nickname; l'avviso mostra come titolo il nome dell'hotel e sotto titolo e testo scritti dall'hotel. Migrazione 0007 applicata; variabili VAPID_* create in Vercel. Limite avvisi hotel: 10 al giorno (`src/lib/limits.ts`). Icone dell'app/notifica: solo H con C (`scripts/gen-icons.py`, sorgente JPG a bassa risoluzione: serve il vettoriale); iconcina monocroma `public/icons/badge-96.png`.
-Da provare ancora: iPhone (serve app aggiunta alla Home, iOS >=16.4), notifiche di reception/privati/chat pubblica, ritardo di consegna (uno degli avvisi è arrivato in ritardo: probabile causa `Urgency: normal`, ora `high` tranne la chat pubblica). Ogni avviso ha un `tag` unico (restano tutti sul telefono); la chat pubblica ha tag fisso e sostituisce il precedente. Le push partono solo verso i servizi push dei browser (`isPushEndpoint`) e solo a ospiti con soggiorno attivo e non scaduto (`activeOnly`).
+Provato da Lorenzo il 22/10/2026 dopo la PR #1 (`Urgency: high` tranne la chat pubblica, `tag` unico per avviso): avvisi hotel puntuali su Android anche a telefono bloccato (il ritardo di prima era `Urgency: normal`), ricevuti su iPhone (app aggiunta alla Home), due avvisi di fila restano visibili entrambi. La chat pubblica ha tag fisso e sostituisce il precedente. Da provare ancora: notifiche di reception/privati/chat pubblica. Le push partono solo verso i servizi push dei browser (`isPushEndpoint`) e solo a ospiti con soggiorno attivo e non scaduto (`activeOnly`).
 Privacy: l'iscrizione è dato personale, si cancella con l'ospite; paragrafo in `messages/*.json` (privacy.push).
 
 ## Da fare (in ordine di priorità)
-1. Completare le prove delle push (iPhone, reception, privati, chat pubblica).
+1. Completare le prove delle push (reception, privati, chat pubblica; avvisi hotel su Android e iPhone già verificati).
 2. Provare il percorso demo con Jacopo (copione); inserire email e telefono nella scheda hotel; Jacopo rivede il copione.
 3. Reception AI: decidere budget e inserire ANTHROPIC_API_KEY.
 4. Prima del lancio: Vercel Pro e Supabase Pro (Free va in pausa e non ha backup), MFA staff, osservabilità (Sentry/uptime), CSP, prova di carico, test dell'avviso di emergenza (webhook), verifica del job di cancellazione al check-out (pg_cron), strumento per creare hotel senza SQL, caricamento foto dal pannello (oggi `image_url` solo da Supabase).
