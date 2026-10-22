@@ -25,17 +25,31 @@ tile.save(BRAND / "chathel-logo-tessera.png", optimize=True)
 print("scritto brand/chathel-logo-tessera.png", tile.size)
 
 
-def icon(name, size, fraction):
-    """Logo su fondo bianco, largo `fraction` del lato, centrato."""
+# Simbolo (H con la C) senza la scritta: per le ICONE dell'app e delle notifiche (decisione di Lorenzo, 22/10/2026).
+# Si taglia nella prima riga vuota sotto il simbolo; nessuna ricolorazione.
+_dark = content.convert("L").point(lambda v: 255 if v < 200 else 0)
+_rows = [_dark.crop((0, y, _dark.width, y + 1)).getbbox() is not None for y in range(_dark.height)]
+_top = next(y for y, r in enumerate(_rows) if r)
+_gap = next(y for y in range(_top, len(_rows)) if not _rows[y])
+symbol = content.crop((0, 0, content.width, _gap))
+print("simbolo", symbol.size)
+
+
+def icon(name, size, fraction, src=None):
+    """Immagine su fondo bianco, larga `fraction` del lato, centrata (di norma il solo simbolo)."""
+    src = src or symbol
     w = round(size * fraction)
-    h = round(content.height * w / content.width)
+    h = round(src.height * w / src.width)
+    if h > size * fraction:  # simbolo quasi quadrato: limitare anche l'altezza
+        h = round(size * fraction)
+        w = round(src.width * h / src.height)
     img = Image.new("RGB", (size, size), (255, 255, 255))
-    img.paste(content.resize((w, h), Image.LANCZOS), ((size - w) // 2, (size - h) // 2))
+    img.paste(src.resize((w, h), Image.LANCZOS), ((size - w) // 2, (size - h) // 2))
     img.save(ICONS / name, optimize=True)
     print("scritto icons/" + name, size)
 
 
-icon("icon-192.png", 192, 0.78)
-icon("icon-512.png", 512, 0.78)
-icon("icon-maskable-512.png", 512, 0.52)  # dentro la zona sicura (cerchio del 80%) delle maschere Android
-icon("apple-touch-icon.png", 180, 0.70)   # iOS arrotonda da solo; nessuna trasparenza
+icon("icon-192.png", 192, 0.66)
+icon("icon-512.png", 512, 0.66)
+icon("icon-maskable-512.png", 512, 0.46)  # dentro la zona sicura (cerchio del 80%) delle maschere Android
+icon("apple-touch-icon.png", 180, 0.60)   # iOS arrotonda da solo; nessuna trasparenza
