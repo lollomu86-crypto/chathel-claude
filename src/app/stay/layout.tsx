@@ -18,7 +18,7 @@ export default async function StayLayout({ children }: { children: React.ReactNo
           <div className="app-head-in">
             <LogoMark />
             <Link href="/stay" className="app-head-title">
-              {view.hotel.name}
+              <span className="app-head-name">{view.hotel.name}</span>
               <span className="app-head-sub">{t('head.greeting', { name: view.name })}</span>
             </Link>
             <div className="app-head-actions">

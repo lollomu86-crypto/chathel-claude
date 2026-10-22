@@ -35,7 +35,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <div className="app-head-in app-head-wide">
           <LogoMark />
           <p className="app-head-title">
-            {staff.info.hotel.name}
+            <span className="app-head-name">{staff.info.hotel.name}</span>
             <span className="app-head-sub">{t(`staff.roles.${staff.info.role}`)} · {staff.info.displayName}</span>
           </p>
           <div className="app-head-actions">

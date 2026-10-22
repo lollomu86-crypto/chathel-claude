@@ -1,12 +1,13 @@
 /* ChatHel: fogli di stile globale (design v2, 13 ottobre 2026). Responsabile: agente Design.
    Struttura: (1) token, copia ESATTA di docs/design-tokens-v2.css; (2) base e componenti. Guida per il frontend: docs/12-revisione-design-sistema.md, sezione 9. */
 /* TOKENS-INIZIO */
-/* ChatHel design tokens v2 (ADOTTATI il 13 ottobre 2026: src/app/globals.css ne contiene la copia esatta tra i marcatori TOKENS-INIZIO e TOKENS-FINE; dopo ogni modifica qui, ricopiare e lanciare il confronto descritto in docs/12, sezione 9).
-   Sostituisce docs/design-tokens.css (v0.1, app) e il blocco :root dell'anteprima (nomi diversi: --ink, --line, --brand).
+/* ChatHel design tokens v2 (adottati il 13 ottobre 2026; forma aggiornata il 22 ottobre). Questo blocco e' l'UNICA fonte dei token:
+   i componenti sotto usano solo questi nomi, mai valori scritti a mano.
    Direzione: "blu pieno" approvata dall'utente (logo, #0030B0, #0A55E0, corallo solo per le azioni che offrono o spendono).
-   Tutti i contrasti sono verificati da docs/verifica-contrasti-v2.py (lancialo dopo ogni modifica ai colori).
+   I COLORI NON SI CAMBIANO senza richiesta esplicita di Lorenzo. I contrasti erano verificati da docs/verifica-contrasti-v2.py
+   (doc 12), che non e' nel repository: dopo ogni modifica ai colori vanno ricontrollati.
    Tema chiaro di default; scuro automatico (prefers-color-scheme) o forzato con data-theme="dark".
-   I due blocchi scuri devono restare identici: lo script controlla che lo siano. */
+   I due blocchi scuri devono restare identici. */
 
 :root {
   /* ---------- Colore: superfici e testo ---------- */
@@ -71,22 +72,26 @@
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
   --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px;
 
-  /* ---------- Raggi: quattro livelli + pillola (solo badge e contatori) ---------- */
-  --radius-sm: 8px;    /* chip, avatar, bandiera, tag */
-  --radius-md: 12px;   /* pulsanti, campi, segmenti, pill della tab attiva */
-  --radius-lg: 16px;   /* card, biglietto, bolle */
+  /* ---------- Raggi: scala + ruoli (i componenti usano i ruoli) ---------- */
+  --radius-sm: 8px;    /* avatar, bandiera, tag */
+  --radius-md: 12px;   /* segmenti, avvisi, menu, date */
+  --radius-lg: 16px;   /* bolle */
   --radius-xl: 24px;   /* fogli, risultato del barista */
   --radius-pill: 999px;
+  --radius-control: var(--radius-pill); /* pulsanti e chip */
+  --radius-field: var(--radius-lg);     /* campi di testo, select */
+  --radius-card: var(--radius-xl);      /* card, biglietti, scorciatoie */
 
-  /* ---------- Bordi e ombra (stile piatto come il logo: l'ombra c'e' solo su cio' che galleggia) ---------- */
+  /* ---------- Bordi e ombre ---------- */
   --bw: 1px;           /* decorativo */
   --bw-strong: 2px;    /* controlli interattivi */
-  --shadow-float: 0 8px 24px -8px rgba(11, 20, 38, 0.28);   /* barra di conferma, toast, menu */
+  --shadow-card: 0 6px 18px -12px rgba(11, 20, 38, 0.35);   /* card e scorciatoie; nel tema scuro nessuna */
+  --shadow-float: 0 8px 24px -8px rgba(11, 20, 38, 0.28);   /* barra di conferma, toast, menu, tab bar */
+  --header-hover: rgba(255, 255, 255, 0.16);                /* hover dei pulsanti sulla testata blu */
 
   /* ---------- Interazione e layout ---------- */
   --tap: 44px;         /* area minima di tocco */
   --tap-lg: 56px;      /* azione principale e tutta la vista barista */
-  --tap-sm: 40px;      /* pulsanti piccoli: mai sotto (oggi 36) */
   --tabbar-h: 60px;
   --shell-max: 560px;  /* app ospite e barista */
   --wide-max: 1120px;  /* pannello hotel */
@@ -117,6 +122,7 @@
     --warning: #F2C078;  --warning-bg: #38280F;
     --danger:  #FF8A8A;  --danger-bg:  #3A1717;
 
+    --shadow-card: none;
     --shadow-float: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
   }
 }
@@ -140,6 +146,7 @@
   --warning: #F2C078;  --warning-bg: #38280F;
   --danger:  #FF8A8A;  --danger-bg:  #3A1717;
 
+  --shadow-card: none;
   --shadow-float: 0 8px 24px -8px rgba(0, 0, 0, 0.6);
 }
 
@@ -238,8 +245,11 @@ hr, .divider { border: 0; border-top: var(--bw) solid var(--border); margin: var
 /* Testata dell'app ospite: fascia blu a tutta larghezza, contenuto nella colonna dell'app */
 .app-head { background: var(--header-bg); color: var(--on-header); }
 .app-head-in { max-width: var(--shell-max); margin: 0 auto; padding: var(--space-3) var(--space-4); display: flex; align-items: center; gap: var(--space-3); min-height: 68px; }
-.app-head-title { flex: 1; min-width: 0; margin: 0; font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-lg); line-height: var(--lh-tight); color: var(--on-header);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+/* Titolo = nome dell'hotel (al massimo due righe, poi puntini: i nomi lunghi in tedesco/russo vanno a capo senza spingere via
+   le icone) + saluto sotto. Il nome sta in .app-head-name. */
+.app-head-title { flex: 1; min-width: 0; margin: 0; display: flex; flex-direction: column; justify-content: center; min-height: var(--tap);
+  font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-lg); line-height: var(--lh-tight); color: var(--on-header); text-decoration: none; }
+.app-head-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
 .app-head-actions { display: flex; gap: var(--space-1); align-items: center; flex: none; }
 .app-head a { color: var(--on-header); }
 .app-head-sub { display: block; font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--on-header); font-family: var(--font-body); }
@@ -251,7 +261,7 @@ hr, .divider { border: 0; border-top: var(--bw) solid var(--border); margin: var
 /* Pulsanti-icona della testata (44 x 44), campanella con contatore */
 .icon-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; width: var(--tap); height: var(--tap); border-radius: var(--radius-md); border: 0; background: transparent; color: inherit; cursor: pointer; text-decoration: none; transition: background var(--ease); }
 .icon-btn svg { width: 24px; height: 24px; }
-.icon-btn:hover { background: rgba(255, 255, 255, 0.16); }
+.icon-btn:hover { background: var(--header-hover); }
 .icon-btn-plain:hover { background: var(--surface-2); }
 .icon-btn .count { position: absolute; top: 2px; right: 0; }
 
@@ -259,9 +269,9 @@ hr, .divider { border: 0; border-top: var(--bw) solid var(--border); margin: var
 .iconlink { display: inline-flex; align-items: center; justify-content: center; min-width: var(--tap); min-height: var(--tap); border-radius: var(--radius-md); color: var(--text); text-decoration: none; background: var(--surface); border: var(--bw) solid var(--border); font-size: var(--fs-sm); font-weight: var(--fw-semibold); padding: 0 var(--space-3); }
 
 /* =====================================================================
-   CARD E AVVISI (stile piatto: bordo, niente ombra)
+   CARD E AVVISI (bordo sottile; ombra leggera solo nel tema chiaro, --shadow-card)
    ===================================================================== */
-.card { background: var(--surface); border: var(--bw) solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4); margin: 0; }
+.card { background: var(--surface); border: var(--bw) solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: var(--space-4); margin: 0; }
 .card > :last-child { margin-bottom: 0; }
 .card-muted { background: var(--surface-2); }
 .card-flush { padding: 0; overflow: hidden; }
@@ -288,10 +298,10 @@ hr, .divider { border: 0; border-top: var(--bw) solid var(--border); margin: var
 /* =====================================================================
    PULSANTI
    btn-primary blu (azione normale) | btn-cta corallo (SOLO bonus/barista/conferma: UNO per schermata) | secondary | ghost | danger
-   Larghezza automatica; .btn-block per il 100%. Altezze: 44 standard, .btn-lg 56, .btn-small 40.
+   Larghezza automatica; .btn-block per il 100%. Altezze: 44 standard e .btn-small, .btn-lg 56.
    ===================================================================== */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: var(--tap); padding: 0 var(--space-5);
-  border-radius: var(--radius-md); border: var(--bw-strong) solid transparent; font-family: var(--font-body); font-size: var(--fs-md); font-weight: var(--fw-semibold); line-height: 1.2;
+  border-radius: var(--radius-control); border: var(--bw-strong) solid transparent; font-family: var(--font-body); font-size: var(--fs-md); font-weight: var(--fw-semibold); line-height: 1.2;
   cursor: pointer; text-decoration: none; text-align: center; transition: background var(--ease), border-color var(--ease), color var(--ease); -webkit-tap-highlight-color: transparent; }
 .btn svg { width: 20px; height: 20px; flex: none; }
 .btn-primary { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
@@ -306,7 +316,7 @@ hr, .divider { border: 0; border-top: var(--bw) solid var(--border); margin: var
 .btn-danger { background: var(--danger-bg); border-color: var(--danger); color: var(--danger); }
 .btn-danger:hover { background: var(--surface); }
 .btn-lg { min-height: var(--tap-lg); font-size: var(--fs-lg); }
-.btn-small { min-height: var(--tap-sm); padding: 0 var(--space-4); font-size: var(--fs-sm); }
+.btn-small { min-height: var(--tap); padding: 0 var(--space-4); font-size: var(--fs-sm); }
 .btn-block { width: 100%; align-self: stretch; }
 .btn[disabled], .btn[aria-disabled="true"], .chip[disabled] { background: var(--surface-2); border-color: var(--surface-2); color: var(--text-muted); cursor: not-allowed; }
 .btn[aria-busy="true"] { cursor: progress; pointer-events: none; }
@@ -324,7 +334,7 @@ label, .label { display: block; font-weight: var(--fw-semibold); font-size: var(
 .form { display: flex; flex-direction: column; gap: var(--space-4); }
 input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="tel"], input[type="date"], input[type="time"], input[type="number"], input[type="datetime-local"], select, textarea {
   font-family: var(--font-body); font-size: var(--fs-md); width: 100%; min-height: var(--tap); padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-md); border: var(--bw-strong) solid var(--border-strong); background: var(--surface); color: var(--text); }
+  border-radius: var(--radius-field); border: var(--bw-strong) solid var(--border-strong); background: var(--surface); color: var(--text); }
 input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 1; }
 textarea { min-height: 96px; resize: vertical; }
 input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; border-color: var(--focus); }
@@ -350,7 +360,7 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
    Chip = filtri e scelte multiple (tagli di coupon, aree). Mai per le schede: per quelle ci sono i segmenti.
    ===================================================================== */
 .chips { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-.chip { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--tap-sm); padding: 0 var(--space-4); border-radius: var(--radius-pill); border: var(--bw-strong) solid var(--border-strong); background: var(--surface); color: var(--text); font-weight: var(--fw-medium); font-size: var(--fs-sm); cursor: pointer; transition: background var(--ease); }
+.chip { display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--tap); padding: 0 var(--space-4); border-radius: var(--radius-control); border: var(--bw-strong) solid var(--border-strong); background: var(--surface); color: var(--text); font-weight: var(--fw-medium); font-size: var(--fs-sm); cursor: pointer; transition: background var(--ease); }
 .chip:hover { background: var(--surface-2); }
 .chip-on, .chip[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: var(--on-primary); font-weight: var(--fw-semibold); }
 .chip-on:hover, .chip[aria-pressed="true"]:hover { background: var(--primary-hover); }
@@ -379,26 +389,26 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
 .lang-opt[aria-checked="true"], .lang-opt[aria-pressed="true"] { border-color: var(--primary); background: var(--primary-soft); color: var(--on-primary-soft); font-weight: var(--fw-bold); }
 .lang-opt[aria-checked="true"]::after, .lang-opt[aria-pressed="true"]::after { content: ""; position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; background: var(--primary); clip-path: polygon(14% 52%, 0 66%, 38% 100%, 100% 22%, 86% 8%, 38% 70%); }
 .on-header .lang-opt, .app-head .lang-opt { background: transparent; color: var(--on-header); border-color: transparent; }
-.on-header .lang-opt:hover, .app-head .lang-opt:hover { background: rgba(255, 255, 255, 0.14); }
+.on-header .lang-opt:hover, .app-head .lang-opt:hover { background: var(--header-hover); }
 .on-header .lang-opt[aria-checked="true"], .app-head .lang-opt[aria-checked="true"] { border-color: var(--on-header); background: transparent; color: var(--on-header); }
 .on-header .lang-opt[aria-checked="true"]::after, .app-head .lang-opt[aria-checked="true"]::after { background: var(--on-header); }
 /* compact: un pulsante 44 x 44 con bandiera e codice, menu con le quattro lingue */
 .lang-compact { position: relative; display: inline-block; }
-.lang-compact-btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; width: var(--tap); height: var(--tap); min-width: var(--tap); border-radius: var(--radius-md); border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 10px; font-weight: var(--fw-bold); line-height: 1; }
-.lang-compact-btn:hover { background: rgba(255, 255, 255, 0.16); }
+.lang-compact-btn { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: var(--tap); height: var(--tap); min-width: var(--tap); border-radius: var(--radius-md); border: 0; background: transparent; color: inherit; cursor: pointer; font-size: var(--fs-xs); font-weight: var(--fw-bold); line-height: 1; }
+.lang-compact-btn > .flag { height: 16px; }
+.lang-compact-btn:hover { background: var(--header-hover); }
 
 /* =====================================================================
    SEGMENTI (schede, periodi, giorni). Sostituiscono i chip con role=tab.
    <div class="seg" role="tablist"><button role="tab" aria-selected="true">...
    ===================================================================== */
 .seg { display: flex; gap: 2px; padding: 3px; overflow-x: auto; scrollbar-width: none; max-width: 100%; background: var(--surface); border: var(--bw) solid var(--border); border-radius: var(--radius-md); }
-.seg > button, .seg > a { flex: 1 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1); min-height: var(--tap-sm); padding: 0 var(--space-3); border: 0; border-radius: 9px; background: transparent; color: var(--text-muted); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; text-decoration: none; white-space: nowrap; transition: background var(--ease); }
+.seg > button, .seg > a { flex: 1 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1); min-height: var(--tap); padding: 0 var(--space-3); border: 0; border-radius: calc(var(--radius-md) - 3px); background: transparent; color: var(--text-muted); font-size: var(--fs-sm); font-weight: var(--fw-semibold); cursor: pointer; text-decoration: none; white-space: nowrap; transition: background var(--ease); }
 .seg > button:hover, .seg > a:hover { background: var(--surface-2); }
 .seg > [aria-selected="true"], .seg > [aria-pressed="true"], .seg > [aria-current="page"] { background: var(--primary); color: var(--on-primary); }
 .seg > [aria-selected="true"]:hover, .seg > [aria-pressed="true"]:hover, .seg > [aria-current="page"]:hover { background: var(--primary-hover); }
 .seg::-webkit-scrollbar { display: none; }
 .seg-scroll > button, .seg-scroll > a { flex: 0 0 auto; } /* alias: .seg scorre gia' di suo se le voci non stanno */
-@media (max-width: 480px) { .seg > button, .seg > a { min-height: var(--tap); } }
 
 /* =====================================================================
    NAVIGAZIONE OSPITE: tab bar (5 voci). Fino a 560 px centrata come il contenuto, da 900 px colonna laterale.
@@ -421,7 +431,7 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
 
 /* Scorciatoie della home */
 .shortcuts { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
-.shortcut { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-2); background: var(--surface); border: var(--bw) solid var(--border); border-radius: var(--radius-lg); text-decoration: none; color: var(--text); font-weight: var(--fw-semibold); text-align: center; font-size: var(--fs-sm); min-height: var(--tap); }
+.shortcut { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-2); background: var(--surface); border: var(--bw) solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); text-decoration: none; color: var(--text); font-weight: var(--fw-semibold); text-align: center; font-size: var(--fs-sm); min-height: var(--tap); }
 .shortcut:hover { background: var(--surface-2); }
 .shortcut svg { width: 28px; height: 28px; color: var(--link); }
 
@@ -461,7 +471,7 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
    - .bubble-staff  reception (operatore): --primary-soft, etichetta
    ===================================================================== */
 .chat { display: flex; flex-direction: column; gap: var(--space-2); }
-.bubble { position: relative; max-width: 85%; padding: var(--space-2) var(--space-4); border-radius: var(--radius-lg); font-size: 0.9375rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble { position: relative; max-width: 85%; padding: var(--space-2) var(--space-4); border-radius: var(--radius-lg); font-size: var(--fs-md); white-space: pre-wrap; overflow-wrap: anywhere; }
 .bubble .who { display: flex; align-items: center; gap: 6px; font-size: var(--fs-xs); font-weight: var(--fw-bold); margin-bottom: 2px; }
 .bubble .time { display: block; font-size: var(--fs-xs); font-weight: var(--fw-medium); margin-top: 2px; }
 .bubble-me { align-self: flex-end; background: var(--primary); color: var(--on-primary); border-bottom-right-radius: var(--tail); }
@@ -489,7 +499,10 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
 .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: blink 1.2s infinite ease-in-out; }
 .typing i:nth-child(2) { animation-delay: 0.2s; } .typing i:nth-child(3) { animation-delay: 0.4s; }
 @keyframes blink { 0%, 80%, 100% { opacity: 0.25; } 40% { opacity: 1; } }
-.composer { position: sticky; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); display: flex; gap: var(--space-2); background: var(--bg); padding: var(--space-2) 0; align-items: center; }
+.composer { position: sticky; z-index: 5; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom)); display: flex; gap: var(--space-2); background: var(--bg); padding: var(--space-2) 0; align-items: center; }
+/* fondo pieno dalla barra di scrittura fino al bordo dello schermo: i messaggi non si vedono sotto o accanto alla tab bar fluttuante */
+.composer::before { content: ""; position: absolute; z-index: -1; top: 0; left: calc(var(--space-4) * -1); right: calc(var(--space-4) * -1);
+  bottom: calc((var(--tabbar-h) + var(--space-6) + env(safe-area-inset-bottom)) * -1); background: var(--bg); pointer-events: none; }
 .composer input { flex: 1; min-width: 0; }
 .composer .btn { min-width: 88px; }
 .date-sep { align-self: center; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--text-muted); padding: var(--space-1) var(--space-3); }
@@ -525,13 +538,13 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
      <h3 class="ticket-title">...</h3><p class="ticket-code">AB12</p> [<div class="ticket-qr">..</div>] <div class="ticket-foot">..</div></div>
    Compatto (coupon in chat): .ticket.ticket-compact con .ticket-body + .ticket-side. Stati: .ticket-used, .ticket-expired. Allineamento in chat: .ticket-mine / .ticket-theirs.
    ===================================================================== */
-.ticket { --ticket-pad: var(--space-5); position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4) var(--ticket-pad); border-radius: var(--radius-lg); background: var(--primary-soft); color: var(--text);
+.ticket { --ticket-pad: var(--space-5); position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4) var(--ticket-pad); border-radius: var(--radius-card); background: var(--primary-soft); color: var(--text);
   -webkit-mask: radial-gradient(circle var(--notch) at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle var(--notch) at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
           mask: radial-gradient(circle var(--notch) at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(circle var(--notch) at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat; }
 .ticket::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; border: var(--bw) dashed var(--ticket-line); }
 .ticket-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; }
 .ticket-meta { font-size: var(--fs-sm); color: var(--text-muted); }
-.ticket-title { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: 1.1875rem; line-height: var(--lh-tight); margin: 0; color: var(--text); }
+.ticket-title { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-lg); line-height: var(--lh-tight); margin: 0; color: var(--text); }
 .ticket-code { margin: 0; text-align: center; font-family: var(--font-mono); font-weight: var(--fw-bold); font-size: var(--fs-3xl); letter-spacing: 0.18em; padding-left: 0.18em; color: var(--on-primary-soft); line-height: 1.1; overflow-wrap: anywhere; }
 .ticket-qr { align-self: center; background: #fff; padding: var(--space-2); border-radius: var(--radius-sm); line-height: 0; }
 .ticket-qr canvas, .ticket-qr svg, .ticket-qr img { display: block; width: min(60vw, 220px); height: auto; image-rendering: pixelated; }
@@ -634,8 +647,6 @@ table.t th { color: var(--text-muted); font-weight: var(--fw-semibold); white-sp
 .tall { min-height: 12rem; }
 .link-tap { display: inline-flex; align-items: center; min-height: var(--tap); }
 .sk-48 { height: 48px; } .sk-56 { height: 56px; } .sk-64 { height: 64px; } .sk-72 { height: 72px; } .sk-88 { height: 88px; } .sk-120 { height: 120px; } .sk-title { height: 32px; width: 55%; }
-.btn-small, .chip { min-height: var(--tap); }
-.seg a, .seg button { display: inline-flex; align-items: center; justify-content: center; min-height: var(--tap); }
 .hotel-logo { border-radius: var(--radius-md); background: #fff; object-fit: contain; }
 .hotel-switch { margin: var(--space-2) 0; }
 .hotel-switch select { min-height: var(--tap); }
@@ -673,42 +684,31 @@ progress.bar-meter::-webkit-progress-bar { background: var(--surface-2); }
 progress.bar-meter::-webkit-progress-value { background: var(--primary); }
 progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 @media (prefers-reduced-motion: reduce) { .dialog, .menu, .toast { animation: none; transition: none; } }
-/* FRONTEND: il nome dell'hotel va a capo invece di essere tagliato con i puntini (390px, parole lunghe in tedesco/russo) */
-.app-head-title { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
 .kpis-compact { grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 900px) { .kpis-compact { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); } }
 .chips a.chip { text-decoration: none; }
-a.app-head-title { display: flex; flex-direction: column; justify-content: center; min-height: var(--tap); }
 
 /* =====================================================================
    REVISIONE "APP DA VACANZA" (19 ottobre 2026)
-   Solo forma, tipografia e ritmo: NESSUN colore nuovo, tutto usa i token sopra.
-   Onda sotto la testata, titoli con Fraunces, card piu' morbide, scorciatoie in cerchi, tab bar fluttuante.
+   Solo forma e ritmo: NESSUN colore nuovo. Raggi e ombre sono nei token (--radius-control, --radius-field,
+   --radius-card, --shadow-card); qui restano onda sotto la testata, scorciatoie in cerchi, tab bar fluttuante.
+   I titoli restano Montserrat (doc 12): niente serif di sistema, che cambiava da un telefono all'altro.
    ===================================================================== */
-:root { --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif; /* serif di sistema: nessun download, ha il cirillico */ --wave-h: 20px;
+:root { --wave-h: 20px;
   --wave-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 20' preserveAspectRatio='none'%3E%3Cpath d='M0 0H1200V8C1100 20 1000 20 900 10S700 -2 600 8 400 20 300 10 100 -2 0 10Z'/%3E%3C/svg%3E"); }
 
-/* Titoli grandi in corsivo-serif caldo; per il cirillico (Fraunces non lo ha) il font passa a Montserrat da solo */
-h1, .t-title { font-family: var(--font-serif); font-weight: 600; letter-spacing: -0.01em; }
-.shell > h1:first-child { font-size: var(--fs-3xl); line-height: 1.1; margin-top: var(--space-2); }
+.shell > h1:first-child { line-height: 1.1; margin-top: var(--space-2); }
 
 /* Onda sotto la testata (ospite e pagina d'ingresso) */
 .app-head, .entry-head { position: relative; margin-bottom: calc(var(--wave-h) - 1px); }
 .app-head::after, .entry-head::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: var(--wave-h); background: var(--header-bg);
   -webkit-mask: var(--wave-mask) center / 100% 100% no-repeat; mask: var(--wave-mask) center / 100% 100% no-repeat; pointer-events: none; }
 .app-head-in { min-height: 76px; }
-.app-head-title { font-size: var(--fs-xl); }
 .entry-head { padding-bottom: var(--space-8); }
 .entry-head h1 { font-size: var(--fs-3xl); }
 
-/* Card: angoli piu' ampi, bordo sottile e ombra leggera */
-.card, .ticket, .shortcut { border-radius: var(--radius-xl); }
-.card, .shortcut { box-shadow: 0 6px 18px -12px rgba(11, 20, 38, 0.35); }
 .card-link { transition: transform var(--ease), box-shadow var(--ease); }
 .card-link:hover { transform: translateY(-1px); }
-.btn { border-radius: var(--radius-pill); }
-.btn-small { border-radius: var(--radius-pill); }
-input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="tel"], input[type="date"], input[type="time"], input[type="number"], input[type="datetime-local"], select, textarea { border-radius: var(--radius-lg); }
 
 /* Scorciatoie: icona in un cerchio tenue */
 .shortcut { gap: var(--space-3); padding: var(--space-5) var(--space-2); }
@@ -716,11 +716,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
 
 /* Data degli eventi: segnalibro con filo in alto */
 .date-chip { width: 56px; height: 64px; border-radius: var(--radius-lg); border-top: 5px solid var(--cta); }
-.date-chip strong { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-2xl); }
-
-/* Sezioni: titoli serif */
-h2, .t-heading, .t-sub, h3 { font-family: var(--font-serif); font-weight: 600; }
-.ticket-title, .empty-title { font-family: var(--font-serif); }
+.date-chip strong { font-size: var(--fs-2xl); }
 
 /* Tab bar fluttuante a pillola (telefono); da 900 px resta colonna laterale */
 @media (max-width: 899px) {
@@ -730,8 +726,6 @@ h2, .t-heading, .t-sub, h3 { font-family: var(--font-serif); font-weight: 600; }
   .confirm-bar, .composer { bottom: calc(var(--tabbar-h) + var(--space-4) + env(safe-area-inset-bottom)); }
   .toast { bottom: calc(var(--tabbar-h) + var(--space-6) + env(safe-area-inset-bottom)); }
 }
-[data-theme="dark"] .card, [data-theme="dark"] .shortcut { box-shadow: none; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .card, :root:not([data-theme="light"]) .shortcut { box-shadow: none; } }
 @media (prefers-reduced-motion: reduce) { .card-link { transition: none; } .card-link:hover { transform: none; } }
 
 /* ---- Immagini di eventi e servizi (nessun colore nuovo) ---- */

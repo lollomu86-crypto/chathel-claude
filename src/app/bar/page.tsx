@@ -16,7 +16,7 @@ export default async function BarPage() {
   return (
     <I18nProvider locale={locale} messages={messagesFor(locale)}>
       {staff && staff.info.role !== 'reception' && (
-<header className="app-head"><div className="app-head-in"><LogoMark /><p className="app-head-title">{staff.info.hotel.name}</p><LogoutButton to="/bar" /></div></header>
+<header className="app-head"><div className="app-head-in"><LogoMark /><p className="app-head-title"><span className="app-head-name">{staff.info.hotel.name}</span></p><LogoutButton to="/bar" /></div></header>
       )}
       <main id="main" className="shell shell-bare">
         {!staff ? (
