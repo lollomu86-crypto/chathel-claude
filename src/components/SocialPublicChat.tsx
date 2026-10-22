@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { PublicMessageView, ReportReason, SocialSettings } from '@/lib/types';
 import { call } from './client-api';
 import { dayKeyOf, dayLabel, chatTime } from './format-ui';
-import { nearBottom, usePolling } from './hooks';
+import { nearBottom, scrollToBottom, usePolling } from './hooks';
 import { useConfirm, useErrorText, useI18n } from './I18n';
 import { ReportDialog } from './ReportDialog';
 import { ActionMenu } from './ui/ActionMenu';
@@ -38,7 +38,7 @@ export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: {
 
   useEffect(() => {
     if (!msgs) return;
-    if (stick.current) end.current?.scrollIntoView({ block: 'end' });
+    if (stick.current) scrollToBottom();
     // lettori di schermo: si annunciano solo i messaggi NUOVI degli altri (la prima volta si memorizza lo storico senza leggerlo)
     if (known.current === null) { known.current = new Set(msgs.map((m) => m.id)); return; }
     for (const m of msgs) {
@@ -81,10 +81,10 @@ export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: {
     const grouped = !newDay && prev.authorId === m.authorId && new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime() < 5 * 60_000;
     if (newDay) rows.push(<div key={`d-${m.id}`} className="date-sep">{dayLabel(m.createdAt, locale, timezone)}</div>);
     if (m.mine) {
-      rows.push(<div key={m.id} className="bubble bubble-me">{m.text}<span className="time">{chatTime(m.createdAt, locale, timezone)}</span></div>);
+      rows.push(<div key={m.id} className={`bubble bubble-me${grouped ? ' bubble-cont' : ''}`}>{m.text}<span className="time">{chatTime(m.createdAt, locale, timezone)}</span></div>);
     } else {
       rows.push(
-        <div key={m.id} className="msg msg-other">
+        <div key={m.id} className={`msg msg-other${grouped ? ' msg-cont' : ''}`}>
           {grouped ? <span className="msg-gap" /> : <span className="avatar" aria-hidden="true">{[...m.nickname][0] ?? '?'}</span>}
           <div className="bubble bubble-other">
             {!grouped && <span className="who">{m.nickname}</span>}

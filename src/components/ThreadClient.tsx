@@ -7,7 +7,7 @@ import { formatDateTime } from '@/lib/format';
 import { call } from './client-api';
 import { CouponQr } from './CouponQr';
 import { chatTime, dayKeyOf, dayLabel } from './format-ui';
-import { nearBottom, usePolling } from './hooks';
+import { nearBottom, scrollToBottom, usePolling } from './hooks';
 import { useConfirm, useErrorText, useI18n } from './I18n';
 import { ReportDialog } from './ReportDialog';
 import { useSocialBadge } from './SocialBadge';
@@ -34,7 +34,7 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
   const [announce, setAnnounce] = useState('');
   const end = useRef<HTMLDivElement>(null);
   const known = useRef(new Set(initial.messages.map((m) => m.id)));
-  const stick = useRef(false);
+  const stick = useRef(true); // all'apertura si va all'ultimo messaggio; poi si segue solo chi e' gia' in fondo
   const name = th.peer.nickname;
   const peerId = initial.id;
 
@@ -49,7 +49,7 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
   // segna come visto ogni volta che arrivano messaggi nuovi (il server non traccia le letture)
   useEffect(() => { void badge.markSeen(peerId); }, [th.messages.length, th.status, peerId]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (stick.current) end.current?.scrollIntoView({ block: 'end' });
+    if (stick.current) scrollToBottom();
     for (const m of th.messages) {
       if (known.current.has(m.id)) continue;
       known.current.add(m.id);
@@ -122,10 +122,10 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
         </div>,
       );
     } else if (m.mine) {
-      rows.push(<div key={m.id} className="bubble bubble-me">{m.text}<span className="time">{chatTime(m.createdAt, locale, timezone)}</span></div>);
+      rows.push(<div key={m.id} className={`bubble bubble-me${grouped ? ' bubble-cont' : ''}`}>{m.text}<span className="time">{chatTime(m.createdAt, locale, timezone)}</span></div>);
     } else {
       rows.push(
-        <div key={m.id} className="msg msg-other">
+        <div key={m.id} className={`msg msg-other${grouped ? ' msg-cont' : ''}`}>
           {grouped ? <span className="msg-gap" /> : <span className="avatar" aria-hidden="true">{[...name][0] ?? '?'}</span>}
           <div className="bubble bubble-other">
             {!grouped && <span className="who">{name}</span>}
