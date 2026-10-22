@@ -25,7 +25,7 @@ self.addEventListener('push', (event) => {
   const title = typeof d.title === 'string' && d.title ? d.title : 'ChatHel';
   event.waitUntil(self.registration.showNotification(title, {
     body: typeof d.body === 'string' ? d.body : '',
-    icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+    badge: '/icons/badge-96.png', vibrate: [120, 60, 120],
     tag: typeof d.tag === 'string' ? d.tag : undefined, renotify: true,
     data: { url: typeof d.url === 'string' && /^\/[^/]/.test(d.url) ? d.url : '/stay' },
   }));

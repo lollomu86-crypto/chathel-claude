@@ -449,7 +449,7 @@ export async function staffAction(ctx: Ctx, action: string, raw: unknown): Promi
         if (!post) return fail(405, 'method_not_allowed');
         const b = z.object({ title: i18nText, body: i18nText.nullish() }).parse(raw);
         await s.publishNotification(b);
-        { const db = pushDb(ctx); if (db) { const hid = s.info.hotel.id; await defer(() => pushAnnouncement(db, hid, b.title, b.body ?? null)); } }
+        { const db = pushDb(ctx); if (db) { const hid = s.info.hotel.id, hn = s.info.hotel.name; await defer(() => pushAnnouncement(db, hid, b.title, b.body ?? null, hn)); } }
         return ok({ left: await s.notificationsLeftToday() });
       }
       case 'alerts':

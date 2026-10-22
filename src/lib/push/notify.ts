@@ -69,10 +69,10 @@ const cols = 'id, guest_id, endpoint, p256dh, auth, locale';
 const wants = (kind: Kind) => `prefs->>${kind}`;
 
 /** Avviso dell'hotel a tutti gli ospiti iscritti (testo e titolo scritti dall'hotel). */
-export async function pushAnnouncement(db: any, hotelId: string, title: any, body: any): Promise<void> {
+export async function pushAnnouncement(db: any, hotelId: string, title: any, body: any, hotelName = ''): Promise<void> {
   if (!vapidFromEnv()) return;
   const { data } = await db.from('push_subscriptions').select(cols).eq('hotel_id', hotelId).filter(wants('announcements'), 'eq', 'true').limit(MAX_RECIPIENTS);
-  await deliver(db, data ?? [], 'announcements', (l) => ({ title: pick(title, l) || 'ChatHel', body: pick(body, l) }));
+  await deliver(db, data ?? [], 'announcements', (l) => ({ title: hotelName || 'ChatHel', body: [pick(title, l), pick(body, l)].filter(Boolean).join(' — ') }));
 }
 
 /** Risposta della reception in una conversazione: avvisa l'ospite della conversazione. */
