@@ -2,124 +2,131 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getLocale, getStaff } from '@/lib/server';
 import { makeT } from '@/lib/i18n';
-import { formatMoney, pick } from '@/lib/format';
-import type { Period } from '@/lib/types';
+import { formatTime, pick } from '@/lib/format';
+import { addDaysKey, localDayKey } from '@/lib/time';
+import { dateChip } from '@/components/format-ui';
+import { Icon } from '@/components/ui/Icon';
 
 export const dynamic = 'force-dynamic';
 
-const PERIODS: Period[] = ['today', '7d', 'season'];
-const fmtPct = (v: number | null, na: string) => (v === null ? na : `${v}%`);
-
-export default async function Dashboard({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
-  const sp = await searchParams;
+/**
+ * Pagina iniziale del pannello: cosa serve adesso a direttore e reception. Emergenze e richieste in cima, poi le
+ * prenotazioni e gli eventi di oggi, qualche numero del giorno e le azioni rapide. Le statistiche stanno in /admin/stats.
+ */
+export default async function Today() {
   const staff = await getStaff();
   if (!staff) redirect('/admin/login');
-  if (staff.info.role !== 'hotel_admin') redirect('/admin/events');
   const locale = await getLocale(staff.info.hotel.defaultLocale);
   const t = makeT(locale);
-  const period: Period = PERIODS.includes(sp.period as Period) ? (sp.period as Period) : '7d';
-  const k = await staff.kpis(period);
-  const na = t('common.notAvailable');
-  const cap = k.i2.cap;
-  const capPct = cap > 0 ? (k.i2.capUsed / cap) * 100 : 0;
-  const def = (n: 1 | 2 | 3 | 4 | 5 | 6) => (
-    <details className="def"><summary>{t('admin.dashboard.definition')}</summary>{t(`admin.dashboard.i${n}.def`)}</details>
-  );
+  const tz = staff.info.hotel.timezone;
+  const admin = staff.info.role === 'hotel_admin';
+  const today = localDayKey(new Date(), tz);
+  const tomorrow = addDaysKey(today, 1);
+
+  const [urgent, queue, reports, facilities, events, kpis] = await Promise.all([
+    staff.urgentAlerts().catch(() => []),
+    staff.handoffQueue(false).catch(() => []),
+    staff.social().reports(false).catch(() => []),
+    staff.facilities().catch(() => []),
+    staff.events().catch(() => []),
+    admin ? staff.kpis('today').catch(() => null) : Promise.resolve(null),
+  ]);
+  const pending = queue.filter((c) => c.status === 'handoff_pending').length;
+  const bookings = facilities
+    .flatMap((f) => f.slots.filter((s) => s.booked > 0 && localDayKey(new Date(s.startsAt), tz) === today).map((s) => ({ f, s })))
+    .sort((a, b) => a.s.startsAt.localeCompare(b.s.startsAt));
+  const soon = events
+    .filter((e) => e.published && [today, tomorrow].includes(localDayKey(new Date(e.startsAt), tz)))
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  const dateLabel = new Intl.DateTimeFormat(locale, { timeZone: tz, weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+
   return (
     <>
-      <div className="row-between">
-        <h1>{t('admin.dashboard.title')}</h1>
-        <nav className="chips" aria-label={t('admin.social.periodLabel')}>
-          {PERIODS.map((p) => (
-            <Link key={p} href={`/admin?period=${p}`} className={`chip ${p === period ? 'chip-on' : ''}`} aria-current={p === period ? 'page' : undefined}>
-              {t(`admin.dashboard.period${p === 'today' ? 'Today' : p === '7d' ? '7d' : 'Season'}`)}
+      <div className="today-head">
+        <h1>{t('admin.today.title')}</h1>
+        <p className="muted">{dateLabel}</p>
+      </div>
+
+      {urgent.length > 0 && (
+        <section className="stack-sm" aria-labelledby="t-urg">
+          <h2 id="t-urg" className="t-sub">{t('admin.today.urgent')}</h2>
+          {urgent.map((u) => (
+            <Link key={u.conversationId} href="/admin/inbox" className="card card-link card-urgent today-row">
+              <Icon name="alert" />
+              <span className="grow"><strong>{u.topic}</strong><span className="muted small block">{formatTime(u.at, locale, tz)}</span></span>
+              <span className="btn btn-primary btn-small">{t('admin.today.open')}</span>
             </Link>
           ))}
-        </nav>
+        </section>
+      )}
+
+      <div className="today-tiles">
+        <Link href="/admin/inbox" className={`card card-link today-tile${pending > 0 ? ' today-tile-on' : ''}`}>
+          <Icon name="chat" />
+          <span className="num">{pending}</span>
+          <span className="stat-label">{t('admin.today.toHandle')}</span>
+        </Link>
+        <Link href="/admin/social" className={`card card-link today-tile${reports.length > 0 ? ' today-tile-on' : ''}`}>
+          <Icon name="flag" />
+          <span className="num">{reports.length}</span>
+          <span className="stat-label">{t('admin.today.reports')}</span>
+        </Link>
+        <Link href="/admin/services" className="card card-link today-tile">
+          <Icon name="clock" />
+          <span className="num">{bookings.reduce((n, b) => n + b.s.booked, 0)}</span>
+          <span className="stat-label">{t('admin.today.bookedSeats')}</span>
+        </Link>
+        {kpis && (
+          <Link href="/admin/stats" className="card card-link today-tile">
+            <Icon name="users" />
+            <span className="num">{kpis.i1.activated}</span>
+            <span className="stat-label">{t('admin.today.activated')}</span>
+          </Link>
+        )}
       </div>
 
-      {cap > 0 && capPct >= 100 && <p className="notice notice-err" role="alert">{t('admin.dashboard.capAlert100', { used: k.i2.capUsed, cap })}</p>}
-      {cap > 0 && capPct >= 80 && capPct < 100 && <p className="notice notice-warn" role="alert">{t('admin.dashboard.capAlert80', { used: k.i2.capUsed, cap })}</p>}
-
-      <div className="kpis">
-        <section className="card kpi">
-          <h2 className="h3">I1 · {t('admin.dashboard.i1.name')}</h2>
-          <div className="num">{k.i1.activated}</div>
-          <dl><dt>{t('admin.dashboard.activationRate')}</dt><dd>{na}</dd></dl>
-          <p className="hint">{t('admin.dashboard.activationRateNa')}</p>
-          {def(1)}
-        </section>
-
-        <section className="card kpi">
-          <h2 className="h3">I2 · {t('admin.dashboard.i2.name')}</h2>
-          <div className="num">{k.i2.redeemed}</div>
-          <dl>
-            <dt>{t('admin.dashboard.issued')}</dt><dd>{k.i2.issued}</dd>
-            <dt>{t('admin.dashboard.redemptionRate')}</dt><dd>{fmtPct(k.i2.redemptionRatePct, na)}</dd>
-            <dt>{t('admin.dashboard.capUsage')}</dt><dd>{k.i2.capUsed}/{cap} ({fmtPct(k.i2.capUsagePct, na)})</dd>
-            <dt>{t('admin.dashboard.cost')}</dt><dd>{formatMoney(k.i2.costCents, locale)}</dd>
-          </dl>
-          <progress className="bar-meter" max={100} value={Math.min(100, Math.round(capPct))} aria-label={t('admin.dashboard.capUsage')} />
-          {def(2)}
-        </section>
-
-        <section className="card kpi">
-          <h2 className="h3">I3 · {t('admin.dashboard.i3.name')}</h2>
-          <div className="num">{k.i3.bookings}</div>
-          <dl>
-            {k.i3.perFacility.map((f) => (
-              <div key={f.facilityId} className="contents">
-                <dt>{t('admin.dashboard.saturation')} · {pick(f.name, locale, 'it')}</dt>
-                <dd>{f.saturationPct === null ? na : `${f.saturationPct}% (${f.bookedSeats}/${f.availableSeats})`}</dd>
-              </div>
-            ))}
-          </dl>
-          {def(3)}
-        </section>
-
-        <section className="card kpi">
-          <h2 className="h3">I4 · {t('admin.dashboard.i4.name')}</h2>
-          <div className="num">{k.i4.totalRsvps}</div>
-          <dl>
-            {k.i4.events.map((e) => (
-              <div key={e.id} className="contents">
-                <dt>{pick(e.title, locale, 'it')}</dt>
-                <dd>{e.rsvps} · {t('admin.dashboard.attended')}: {e.attended === null ? t('admin.dashboard.attendedNa') : e.attended}</dd>
-              </div>
-            ))}
-          </dl>
-          {def(4)}
-        </section>
-
-        <section className="card kpi">
-          <h2 className="h3">I5 · {t('admin.dashboard.i5.name')}</h2>
-          <div className="num">{k.i5.resolvedByAi}</div>
-          <dl>
-            <dt>{t('admin.dashboard.conversations')}</dt><dd>{k.i5.conversations}</dd>
-            <dt>{t('admin.dashboard.handoffs')}</dt><dd>{k.i5.handoffs}</dd>
-            <dt>{t('admin.dashboard.wrongRate')}</dt><dd>{k.i5.wrongMarked} ({fmtPct(k.i5.wrongRatePct, na)})</dd>
-            <dt>{t('admin.dashboard.hoursSaved')}</dt><dd>{k.i5.hoursSavedEstimate} h</dd>
-          </dl>
-          {def(5)}
-        </section>
-
-        <section className="card kpi">
-          <h2 className="h3">I6 · {t('admin.dashboard.i6.name')}</h2>
-          <div className="num">{fmtPct(k.i6.engagedPct, na)}</div>
-          <dl>
-            <dt>{t('admin.dashboard.engaged24')}</dt><dd>{fmtPct(k.i6.engaged24hPct, na)}</dd>
-            <dt>{t('admin.dashboard.engaged72')}</dt><dd>{fmtPct(k.i6.engaged72hPct, na)}</dd>
-          </dl>
-          {def(6)}
-        </section>
-      </div>
-
-      <p className="notice notice-warn">{t('admin.dashboard.euroNote')}</p>
-      <section className="card card-muted">
-        <h2 className="h3">{t('admin.dashboard.limitations')}</h2>
-        <ul>{k.limitations.map((key) => <li key={key}>{t(key)}</li>)}</ul>
+      <section className="stack-sm" aria-labelledby="t-bk">
+        <div className="row-between"><h2 id="t-bk" className="t-sub">{t('admin.today.bookings')}</h2><Link className="link-tap" href="/admin/services">{t('admin.today.seeAll')}</Link></div>
+        {bookings.length === 0
+          ? <p className="card muted">{t('admin.today.bookingsNone')}</p>
+          : (
+            <ul className="card today-list">
+              {bookings.map(({ f, s }) => (
+                <li key={s.id} className="today-item">
+                  <span className="today-time">{formatTime(s.startsAt, locale, tz)}</span>
+                  <span className="grow">{pick(f.name, locale, 'it')}</span>
+                  <span className={`badge ${s.booked >= s.capacity ? 'badge-warn' : 'badge-info'}`}>{t('admin.today.seats', { booked: s.booked, capacity: s.capacity })}</span>
+                </li>
+              ))}
+            </ul>
+          )}
       </section>
-      <a className="btn btn-secondary" href={`/api/staff/export?period=${period}`}>{t('admin.dashboard.export')}</a>
+
+      <section className="stack-sm" aria-labelledby="t-ev">
+        <div className="row-between"><h2 id="t-ev" className="t-sub">{t('admin.today.events')}</h2><Link className="link-tap" href="/admin/events">{t('admin.today.seeAll')}</Link></div>
+        {soon.length === 0 && <p className="card muted">{t('admin.today.eventsNone')}</p>}
+        {soon.map((e) => {
+          const chip = dateChip(e.startsAt, locale, tz);
+          return (
+            <article key={e.id} className="card row row-nowrap">
+              <span className="date-chip" aria-hidden="true"><small>{chip.weekday}</small><strong>{chip.day}</strong></span>
+              <div className="grow">
+                <h3 className="t-sub">{pick(e.title, locale, 'it')}</h3>
+                <div className="event-meta">{formatTime(e.startsAt, locale, tz)}{e.location ? ` · ${e.location}` : ''}</div>
+              </div>
+              <span className="badge badge-info">{e.capacity ? t('admin.today.rsvpsOf', { n: e.rsvps, capacity: e.capacity }) : t('admin.today.rsvps', { n: e.rsvps })}</span>
+            </article>
+          );
+        })}
+      </section>
+
+      <section className="stack-sm" aria-labelledby="t-q">
+        <h2 id="t-q" className="t-sub">{t('admin.today.quick')}</h2>
+        <div className="btn-group">
+          <Link className="btn btn-primary" href="/admin/notifications"><Icon name="bell" />{t('admin.today.sendNotice')}</Link>
+          <Link className="btn btn-secondary" href="/admin/events"><Icon name="calendar" />{t('admin.today.newEvent')}</Link>
+        </div>
+      </section>
     </>
   );
 }

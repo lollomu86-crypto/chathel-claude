@@ -49,7 +49,7 @@
     "demoTitle": "Prova in locale (modalità demo)",
     "demoGuest": "Entra come ospite dell'hotel demo",
     "demoAdmin": "Pannello hotel (/admin)",
-    "demoBar": "Vista barista (/bar)",
+    "demoBar": "Bar (/bar)",
     "demoNote": "Credenziali demo (solo per prove): codice hotel 482915; direttore admin@demo.chathel.test / demo-admin; reception reception@demo.chathel.test / demo-reception; barista bar@demo.chathel.test / demo-bar.",
     "resume": "Torna alla tua app",
     "privacy": "Informativa privacy",
@@ -250,7 +250,7 @@
     "socialOpen": "Apri Ospiti"
   },
   "bar": {
-    "title": "Vista barista",
+    "title": "Bar",
     "scan": "Scansiona il QR",
     "stopScan": "Chiudi fotocamera",
     "manualLabel": "Oppure incolla il codice del QR",
@@ -303,10 +303,16 @@
       "social": "Social",
       "label": "Sezioni del pannello",
       "toHandle": "{n} da gestire",
-      "games": "Giochi"
+      "games": "Giochi",
+      "today": "Oggi",
+      "stats": "Statistiche",
+      "menu": "Menu",
+      "groupGuests": "Ospiti",
+      "groupServices": "Servizi",
+      "groupHotel": "Hotel"
     },
     "dashboard": {
-      "title": "Numeri chiave",
+      "title": "Statistiche",
       "periodToday": "Oggi",
       "period7d": "7 giorni",
       "periodSeason": "Stagione",
@@ -505,7 +511,7 @@
       "rotate": "Rigenera il QR",
       "rotateWarn": "Il nuovo codice si vede una sola volta: scaricalo ora.",
       "download": "Scarica PNG",
-      "staffTitle": "Vista barista",
+      "staffTitle": "Accesso del bar",
       "staffHelp": "I baristi accedono da /bar con il loro account personale.",
       "qrAlt": "QR di ingresso dell'hotel",
       "codeTitle": "Codice numerico dell'hotel",
@@ -619,6 +625,26 @@
       "errors": {
         "invalid_game": "Gioco non valido: serve almeno il nome in italiano (massimo 60 caratteri)."
       }
+    },
+    "today": {
+      "title": "Oggi",
+      "urgent": "Emergenze aperte",
+      "open": "Apri",
+      "toHandle": "Richieste alla reception",
+      "reports": "Segnalazioni social",
+      "bookedSeats": "Posti prenotati oggi",
+      "activated": "Ospiti entrati oggi",
+      "bookings": "Prenotazioni di oggi",
+      "bookingsNone": "Nessuna prenotazione per oggi.",
+      "seats": "{booked}/{capacity} posti",
+      "events": "Eventi di oggi e domani",
+      "eventsNone": "Nessun evento oggi e domani.",
+      "rsvps": "{n} adesioni",
+      "rsvpsOf": "{n}/{capacity} adesioni",
+      "seeAll": "Vedi tutto",
+      "quick": "Azioni rapide",
+      "sendNotice": "Manda un avviso",
+      "newEvent": "Nuovo evento"
     }
   },
   "privacy": {

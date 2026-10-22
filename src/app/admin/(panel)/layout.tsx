@@ -19,16 +19,23 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   // richieste passate all'operatore ancora da prendere in carico (aggiornato a ogni navigazione e azione)
   const queue = await staff.handoffQueue(false).catch(() => []);
   const inbox = queue.filter((c) => c.status === 'handoff_pending').length;
-  const items = [
-    ...(admin ? [{ href: '/admin', label: t('admin.nav.dashboard') }] : []),
-    { href: '/admin/inbox', label: t('admin.nav.inbox'), badge: 'inbox' as const },
-    { href: '/admin/social', label: t('admin.nav.social'), badge: 'social' as const },
-    { href: '/admin/events', label: t('admin.nav.events') },
-    { href: '/admin/services', label: t('admin.nav.services') },
-    { href: '/admin/games', label: t('admin.nav.games') },
-    { href: '/admin/ai', label: t('admin.nav.ai') },
-    { href: '/admin/notifications', label: t('admin.nav.notifications') },
-    ...(admin ? [{ href: '/admin/settings', label: t('admin.nav.settings') }] : []),
+  // menu per uso: oggi, ospiti (cosa chiedono e scrivono), servizi (cosa offre l'hotel), hotel (impostazioni e numeri)
+  const groups = [
+    { label: null, items: [{ href: '/admin', label: t('admin.nav.today') }] },
+    { label: t('admin.nav.groupGuests'), items: [
+      { href: '/admin/inbox', label: t('admin.nav.inbox'), badge: 'inbox' as const },
+      { href: '/admin/social', label: t('admin.nav.social'), badge: 'social' as const },
+      { href: '/admin/notifications', label: t('admin.nav.notifications') },
+    ] },
+    { label: t('admin.nav.groupServices'), items: [
+      { href: '/admin/events', label: t('admin.nav.events') },
+      { href: '/admin/services', label: t('admin.nav.services') },
+      { href: '/admin/games', label: t('admin.nav.games') },
+    ] },
+    { label: t('admin.nav.groupHotel'), items: [
+      { href: '/admin/ai', label: t('admin.nav.ai') },
+      ...(admin ? [{ href: '/admin/stats', label: t('admin.nav.stats') }, { href: '/admin/settings', label: t('admin.nav.settings') }] : []),
+    ] },
   ];
   return (
     <StaffStatusProvider inbox={inbox} canModerate>
@@ -49,7 +56,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
         <HotelSwitch currentId={staff.info.hotel.id} />
         <UrgentBanner />
         <div className="admin-shell">
-          <AdminNav items={items} />
+          <AdminNav groups={groups} />
           <main id="main" className="admin-main">{children}</main>
         </div>
       </div>
