@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { requireGuest, messagesFor } from '@/lib/server';
 import { I18nProvider } from '@/components/I18n';
+import { HtmlLang } from '@/components/HtmlLang';
 import { LangSwitch } from '@/components/LangSwitch';
 import { LogoMark } from '@/components/LogoMark';
 import { SocialBadgeProvider } from '@/components/SocialBadge';
@@ -14,6 +15,7 @@ export default async function StayLayout({ children }: { children: React.ReactNo
   return (
     <I18nProvider locale={locale} messages={messagesFor(locale)}>
       <SocialBadgeProvider>
+        <HtmlLang locale={locale} />
         <header className="app-head">
           <div className="app-head-in">
             <LogoMark />
