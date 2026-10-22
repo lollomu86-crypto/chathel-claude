@@ -682,7 +682,15 @@ table.t th { color: var(--text-muted); font-weight: var(--fw-semibold); white-sp
 .thread { padding: 0; }
 .thread-main { display: flex; align-items: center; gap: var(--space-3); min-height: 64px; padding: var(--space-3); color: inherit; text-decoration: none; }
 .thread .btn-group { padding: 0 var(--space-3) var(--space-3); }
-.thread-side { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); flex: none; }
+/* Riga della conversazione: nome e data sulla stessa riga in alto (la data non toglie spazio a stato e anteprima),
+   stato in un badge che puo' andare a capo, anteprima troncata. */
+.thread-text { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.thread-top { display: flex; align-items: baseline; gap: var(--space-2); width: 100%; min-width: 0; }
+.thread-top > strong { flex: 1; min-width: 0; }
+.thread-when { flex: none; white-space: nowrap; }
+.thread-top > .dot { flex: none; align-self: center; }
+.thread-status { white-space: normal; max-width: 100%; }
+.thread-text > .truncate { max-width: 100%; }
 .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--cta); }
 
 .person-block + .person-block { border-top: var(--bw) solid var(--border); }
