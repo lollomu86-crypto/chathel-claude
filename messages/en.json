@@ -49,7 +49,7 @@
     "demoTitle": "Try it locally (demo mode)",
     "demoGuest": "Enter as a guest of the demo hotel",
     "demoAdmin": "Hotel panel (/admin)",
-    "demoBar": "Bartender view (/bar)",
+    "demoBar": "Bar (/bar)",
     "demoNote": "Demo credentials (tests only): hotel code 482915; manager admin@demo.chathel.test / demo-admin; front desk reception@demo.chathel.test / demo-reception; bartender bar@demo.chathel.test / demo-bar.",
     "resume": "Back to your app",
     "privacy": "Privacy notice",
@@ -250,7 +250,7 @@
     "socialOpen": "Open Guests"
   },
   "bar": {
-    "title": "Bartender view",
+    "title": "Bar",
     "scan": "Scan the QR",
     "stopScan": "Close camera",
     "manualLabel": "Or paste the QR code value",
@@ -303,10 +303,16 @@
       "social": "Social",
       "label": "Panel sections",
       "toHandle": "{n} to handle",
-      "games": "Games"
+      "games": "Games",
+      "today": "Today",
+      "stats": "Statistics",
+      "menu": "Menu",
+      "groupGuests": "Guests",
+      "groupServices": "Services",
+      "groupHotel": "Hotel"
     },
     "dashboard": {
-      "title": "Key numbers",
+      "title": "Statistics",
       "periodToday": "Today",
       "period7d": "7 days",
       "periodSeason": "Season",
@@ -505,7 +511,7 @@
       "rotate": "Regenerate the QR",
       "rotateWarn": "The new code is shown only once: download it now.",
       "download": "Download PNG",
-      "staffTitle": "Bartender view",
+      "staffTitle": "Bar access",
       "staffHelp": "Bartenders sign in at /bar with their personal account.",
       "qrAlt": "Hotel entry QR code",
       "codeTitle": "Hotel numeric code",
@@ -619,6 +625,26 @@
       "errors": {
         "invalid_game": "Invalid game: at least the Italian name is required (max 60 characters)."
       }
+    },
+    "today": {
+      "title": "Today",
+      "urgent": "Open emergencies",
+      "open": "Open",
+      "toHandle": "Requests to the front desk",
+      "reports": "Social reports",
+      "bookedSeats": "Places booked today",
+      "activated": "Guests who joined today",
+      "bookings": "Today's bookings",
+      "bookingsNone": "No bookings for today.",
+      "seats": "{booked}/{capacity} places",
+      "events": "Events today and tomorrow",
+      "eventsNone": "No events today or tomorrow.",
+      "rsvps": "{n} going",
+      "rsvpsOf": "{n}/{capacity} going",
+      "seeAll": "See all",
+      "quick": "Quick actions",
+      "sendNotice": "Send a notice",
+      "newEvent": "New event"
     }
   },
   "privacy": {

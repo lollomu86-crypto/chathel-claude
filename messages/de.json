@@ -49,7 +49,7 @@
     "demoTitle": "Lokal ausprobieren (Demo-Modus)",
     "demoGuest": "Als Gast des Demo-Hotels eintreten",
     "demoAdmin": "Hotel-Bereich (/admin)",
-    "demoBar": "Barkeeper-Ansicht (/bar)",
+    "demoBar": "Bar (/bar)",
     "demoNote": "Demo-Zugangsdaten (nur zum Testen): Hotelcode 482915; Direktion admin@demo.chathel.test / demo-admin; Rezeption reception@demo.chathel.test / demo-reception; Barkeeper bar@demo.chathel.test / demo-bar.",
     "resume": "Zurück zu deiner App",
     "privacy": "Datenschutzhinweis",
@@ -250,7 +250,7 @@
     "socialOpen": "Gäste öffnen"
   },
   "bar": {
-    "title": "Barkeeper-Ansicht",
+    "title": "Bar",
     "scan": "QR scannen",
     "stopScan": "Kamera schließen",
     "manualLabel": "Oder den QR-Code-Wert einfügen",
@@ -303,10 +303,16 @@
       "social": "Social",
       "label": "Bereiche des Panels",
       "toHandle": "{n} offen",
-      "games": "Spiele"
+      "games": "Spiele",
+      "today": "Heute",
+      "stats": "Statistiken",
+      "menu": "Menü",
+      "groupGuests": "Gäste",
+      "groupServices": "Angebote",
+      "groupHotel": "Hotel"
     },
     "dashboard": {
-      "title": "Kennzahlen",
+      "title": "Statistiken",
       "periodToday": "Heute",
       "period7d": "7 Tage",
       "periodSeason": "Saison",
@@ -505,7 +511,7 @@
       "rotate": "QR neu erzeugen",
       "rotateWarn": "Der neue Code wird nur einmal angezeigt: Lade ihn jetzt herunter.",
       "download": "PNG herunterladen",
-      "staffTitle": "Barkeeper-Ansicht",
+      "staffTitle": "Bar-Zugang",
       "staffHelp": "Barkeeper melden sich unter /bar mit ihrem persönlichen Konto an.",
       "qrAlt": "Eingangs-QR-Code des Hotels",
       "codeTitle": "Numerischer Hotelcode",
@@ -619,6 +625,26 @@
       "errors": {
         "invalid_game": "Ungültiges Spiel: mindestens der italienische Name ist nötig (max. 60 Zeichen)."
       }
+    },
+    "today": {
+      "title": "Heute",
+      "urgent": "Offene Notfälle",
+      "open": "Öffnen",
+      "toHandle": "Anfragen an die Rezeption",
+      "reports": "Social-Meldungen",
+      "bookedSeats": "Heute gebuchte Plätze",
+      "activated": "Heute angemeldete Gäste",
+      "bookings": "Buchungen heute",
+      "bookingsNone": "Heute keine Buchungen.",
+      "seats": "{booked}/{capacity} Plätze",
+      "events": "Events heute und morgen",
+      "eventsNone": "Heute und morgen keine Events.",
+      "rsvps": "{n} Zusagen",
+      "rsvpsOf": "{n}/{capacity} Zusagen",
+      "seeAll": "Alle anzeigen",
+      "quick": "Schnellaktionen",
+      "sendNotice": "Hinweis senden",
+      "newEvent": "Neues Event"
     }
   },
   "privacy": {
