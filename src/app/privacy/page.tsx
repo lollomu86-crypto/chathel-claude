@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function Privacy() {
   const t = makeT(await getLocale());
-  const sections = ['what', 'ai', 'retention', 'people', 'push', 'rights'] as const;
+  const sections = ['what', 'hotel', 'ai', 'retention', 'people', 'push', 'rights'] as const;
   return (
     <main className="shell shell-bare">
       <h1>{t('privacy.title')}</h1>

@@ -309,7 +309,8 @@
       "menu": "Menu",
       "groupGuests": "Ospiti",
       "groupServices": "Servizi",
-      "groupHotel": "Hotel"
+      "groupHotel": "Hotel",
+      "guests": "Ospiti"
     },
     "dashboard": {
       "title": "Statistiche",
@@ -645,6 +646,44 @@
       "quick": "Azioni rapide",
       "sendNotice": "Manda un avviso",
       "newEvent": "Nuovo evento"
+    },
+    "guests": {
+      "title": "Ospiti",
+      "intro": "Gli ospiti con il soggiorno in corso. Tocca un nome per vedere prenotazioni, eventi e bonus.",
+      "search": "Cerca per nome",
+      "filter": "Filtra gli ospiti",
+      "filters": {
+        "all": "Tutti",
+        "active": "Attivi",
+        "inactive": "Inattivi",
+        "leaving": "Partono oggi"
+      },
+      "active": "Attivo",
+      "inactive": "Inattivo",
+      "leavesToday": "Parte oggi",
+      "stay": "{from} → {to}",
+      "lastSeen": "Ultimo accesso: {when}",
+      "never": "mai",
+      "minutesAgo": "{n} min fa",
+      "todayAt": "oggi alle {time}",
+      "yesterdayAt": "ieri alle {time}",
+      "daysAgo": "{n} giorni fa",
+      "counts": "{b} prenot. · {e} eventi",
+      "bookings": "Prenotazioni",
+      "events": "Eventi",
+      "bonus": "Bonus di benvenuto",
+      "none": "Nessuna.",
+      "bonusNone": "Nessun bonus.",
+      "bonusStatus": {
+        "issued": "Da usare",
+        "redeemed": "Usato il {when}",
+        "expired": "Scaduto senza essere usato",
+        "void": "Annullato"
+      },
+      "emptyTitle": "Nessun ospite in questo momento",
+      "empty": "Qui compaiono gli ospiti che sono entrati nell'app e hanno il soggiorno in corso.",
+      "noMatch": "Nessun ospite corrisponde alla ricerca.",
+      "privacy": "Per la privacy qui non compaiono chat private, contatti tra ospiti, e-mail o foto. Attivo = ha usato l'app nelle ultime 24 ore."
     }
   },
   "privacy": {
@@ -663,7 +702,9 @@
     "socialTitle": "Chat tra ospiti e segnalazioni",
     "social": "Puoi uscire dall'elenco, bloccare o segnalare chiunque in ogni momento. L'hotel non legge le chat private: se segnali un messaggio privato, condividi con l'hotel solo quel messaggio e al massimo i 4 precedenti. I messaggi pubblici possono essere nascosti dall'hotel. Al check-out elenco, chat, richieste e coupon non usati vengono cancellati.",
     "pushTitle": "Notifiche sul telefono",
-    "push": "Se le attivi dal Profilo, salviamo l'indirizzo tecnico del tuo dispositivo per inviarti le notifiche, passando dal servizio del tuo browser (Google, Apple o Mozilla). Le notifiche non contengono mai i tuoi messaggi né i nickname. Puoi disattivarle in ogni momento; vengono cancellate anche alla partenza."
+    "push": "Se le attivi dal Profilo, salviamo l'indirizzo tecnico del tuo dispositivo per inviarti le notifiche, passando dal servizio del tuo browser (Google, Apple o Mozilla). Le notifiche non contengono mai i tuoi messaggi né i nickname. Puoi disattivarle in ogni momento; vengono cancellate anche alla partenza.",
+    "hotelTitle": "Cosa vede l'hotel",
+    "hotel": "Il personale dell'hotel (direzione e reception) vede il tuo nome, la lingua, le date del soggiorno, quando hai usato l'app l'ultima volta, le tue prenotazioni, gli eventi a cui partecipi e se hai usato il bonus. Non vede le chat private, con chi parli né i tuoi dati Google (e-mail, foto)."
   },
   "errors": {
     "invalid_input": "Dati non validi.",

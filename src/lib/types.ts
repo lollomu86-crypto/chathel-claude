@@ -304,6 +304,23 @@ export interface SaveEventInput {
 export interface AdminSlot extends SlotView {
   status: 'open' | 'closed';
 }
+/**
+ * Ospite visto dal pannello (direttore e reception), solo con soggiorno in corso. Nome di battesimo, lingua, soggiorno,
+ * ultimo accesso, prenotazioni, eventi e bonus: MAI chat, contatti tra ospiti, e-mail o id Google.
+ */
+export interface StaffGuest {
+  id: string;
+  name: string;
+  locale: Locale;
+  arrivedAt: string;
+  /** fine dell'accesso (check-out) */
+  expiresAt: string;
+  lastSeenAt: string | null;
+  bookings: { id: string; slotId: string; facility: I18nText; startsAt: string; party: number; status: 'confirmed' | 'attended' }[];
+  events: { id: string; title: I18nText; startsAt: string }[];
+  bonus: { status: 'issued' | 'redeemed' | 'expired' | 'void'; redeemedAt: string | null } | null;
+}
+
 export interface AdminFacility {
   id: string;
   kind: FacilityKind;

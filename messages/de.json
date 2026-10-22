@@ -309,7 +309,8 @@
       "menu": "Menü",
       "groupGuests": "Gäste",
       "groupServices": "Angebote",
-      "groupHotel": "Hotel"
+      "groupHotel": "Hotel",
+      "guests": "Gäste"
     },
     "dashboard": {
       "title": "Statistiken",
@@ -645,6 +646,44 @@
       "quick": "Schnellaktionen",
       "sendNotice": "Hinweis senden",
       "newEvent": "Neues Event"
+    },
+    "guests": {
+      "title": "Gäste",
+      "intro": "Gäste mit laufendem Aufenthalt. Tippe auf einen Namen, um Buchungen, Events und Bonus zu sehen.",
+      "search": "Nach Namen suchen",
+      "filter": "Gäste filtern",
+      "filters": {
+        "all": "Alle",
+        "active": "Aktiv",
+        "inactive": "Inaktiv",
+        "leaving": "Reisen heute ab"
+      },
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "leavesToday": "Reist heute ab",
+      "stay": "{from} → {to}",
+      "lastSeen": "Zuletzt aktiv: {when}",
+      "never": "nie",
+      "minutesAgo": "vor {n} Min.",
+      "todayAt": "heute um {time}",
+      "yesterdayAt": "gestern um {time}",
+      "daysAgo": "vor {n} Tagen",
+      "counts": "{b} Buchungen · {e} Events",
+      "bookings": "Buchungen",
+      "events": "Events",
+      "bonus": "Willkommensbonus",
+      "none": "Keine.",
+      "bonusNone": "Kein Bonus.",
+      "bonusStatus": {
+        "issued": "Noch nicht genutzt",
+        "redeemed": "Genutzt am {when}",
+        "expired": "Abgelaufen, ohne genutzt zu werden",
+        "void": "Storniert"
+      },
+      "emptyTitle": "Derzeit keine Gäste",
+      "empty": "Hier erscheinen Gäste, die die App nutzen und einen laufenden Aufenthalt haben.",
+      "noMatch": "Kein Gast entspricht der Suche.",
+      "privacy": "Aus Datenschutzgründen erscheinen hier nie private Chats, Kontakte zwischen Gästen, E-Mails oder Fotos. Aktiv = hat die App in den letzten 24 Stunden genutzt."
     }
   },
   "privacy": {
@@ -663,7 +702,9 @@
     "socialTitle": "Gäste-Chat und Meldungen",
     "social": "Du kannst jederzeit die Liste verlassen sowie jeden blockieren oder melden. Das Hotel liest keine privaten Chats: Wenn du eine private Nachricht meldest, teilst du mit dem Hotel nur diese Nachricht und höchstens die 4 davor. Öffentliche Nachrichten kann das Hotel ausblenden. Beim Check-out werden Liste, Chats, Anfragen und nicht eingelöste Gutscheine gelöscht.",
     "pushTitle": "Handy-Benachrichtigungen",
-    "push": "Wenn du sie im Profil aktivierst, speichern wir die technische Adresse deines Geräts, um dir Benachrichtigungen über den Dienst deines Browsers (Google, Apple oder Mozilla) zu senden. Sie enthalten nie deine Nachrichten oder Nicknames. Du kannst sie jederzeit deaktivieren; bei der Abreise werden sie ebenfalls gelöscht."
+    "push": "Wenn du sie im Profil aktivierst, speichern wir die technische Adresse deines Geräts, um dir Benachrichtigungen über den Dienst deines Browsers (Google, Apple oder Mozilla) zu senden. Sie enthalten nie deine Nachrichten oder Nicknames. Du kannst sie jederzeit deaktivieren; bei der Abreise werden sie ebenfalls gelöscht.",
+    "hotelTitle": "Was das Hotel sieht",
+    "hotel": "Das Hotelpersonal (Leitung und Rezeption) sieht deinen Namen, die Sprache, die Daten deines Aufenthalts, wann du die App zuletzt genutzt hast, deine Buchungen, die Events, an denen du teilnimmst, und ob du den Bonus genutzt hast. Es sieht keine privaten Chats, nicht mit wem du schreibst und keine Google-Daten (E-Mail, Foto)."
   },
   "errors": {
     "invalid_input": "Ungültige Daten.",

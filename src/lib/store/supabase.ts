@@ -23,7 +23,7 @@ import { isLocale, type AdminEvent, type AdminFacility, type AdminNotification, 
   type GenerateSlotsInput, type GuestView, type HandoffConversation, type Kpis, type Locale, type NotificationView,
   type Period, type PublicHotel, type PublishNotificationInput, type RedeemResult, type SaveEventInput,
   type SaveKnowledgeInput, type StaffInfo, type StaffRole, type StartStayInput, type StartStayResult, type StartStayBonus,
-  type I18nText, type AdminGame, type GameView, type SaveGameInput } from '../types';
+  type I18nText, type AdminGame, type GameView, type SaveGameInput, type StaffGuest } from '../types';
 import { cleanGameInput, GAME_LIMITS } from '../rules/games';
 import type { GuestApi, StaffApi, Store } from './types';
 import { SbSocialGuest, SbSocialStaff } from './supabase-social';
@@ -142,12 +142,16 @@ export class SupabaseStore implements Store {
     const who = await db.rpc('current_guest_id');
     if (who.error || !who.data) return null; // token scaduto/non valido (il middleware prova il refresh prima) o soggiorno scaduto
     const { data: g, error } = await db.from('guests')
-      .select('id, hotel_id, display_name, locale, is_adult, hotels(slug, name, timezone, default_locale, bonus_label, bonus_enabled, bonus_season_cap, booking_cancel_cutoff_minutes, max_bookings_per_guest_day, reception_phone)')
+      .select('id, hotel_id, display_name, locale, is_adult, last_seen_at, hotels(slug, name, timezone, default_locale, bonus_label, bonus_enabled, bonus_season_cap, booking_cancel_cutoff_minutes, max_bookings_per_guest_day, reception_phone)')
       .eq('id', who.data).maybeSingle();
     if (error || !g) return null;
     const { data: stay } = await db.from('stays').select('expires_at, status').eq('guest_id', g.id).eq('status', 'active')
       .gt('expires_at', new Date().toISOString()).limit(1).maybeSingle();
     if (!stay) return null; // soggiorno scaduto: l'accesso e' gia' chiuso anche dalle policy
+    // ultimo accesso (0009): si scrive solo se e' vecchio di 10 minuti, cosi' quasi tutte le pagine non fanno richieste in piu'
+    if (!g.last_seen_at || Date.now() - new Date(g.last_seen_at).getTime() >= 10 * 60_000) {
+      try { await db.rpc('touch_guest'); } catch { /* non blocca la pagina */ }
+    }
     return new SbGuestApi(this, db, g, stay.expires_at);
   }
 
@@ -422,6 +426,20 @@ class SbStaffApi implements StaffApi {
     if (i.status) patch.status = i.status;
     this.need(['hotel_admin', 'reception']);
     touched(await this.db.from('slots').update(patch).eq('id', i.id).eq('hotel_id', this.hid).select('id'));
+  }
+
+  // ---- ospiti (0009): una sola lettura, solo soggiorni in corso, mai chat
+  async guests(): Promise<StaffGuest[]> {
+    this.need(['hotel_admin', 'reception']);
+    const { data, error } = await this.db.rpc('staff_guests', { p_hotel: this.hid });
+    if (error) raise(error);
+    return ((data ?? []) as any[]).map((g) => ({
+      id: g.id, name: g.name, locale: isLocale(g.locale) ? g.locale : 'it', arrivedAt: iso(g.started_at)!, expiresAt: iso(g.expires_at)!,
+      lastSeenAt: iso(g.last_seen_at),
+      bookings: ((g.bookings ?? []) as any[]).map((b) => ({ id: b.id, slotId: b.slot_id, facility: b.facility ?? {}, startsAt: iso(b.starts_at)!, party: b.party, status: b.status })),
+      events: ((g.events ?? []) as any[]).map((e) => ({ id: e.id, title: e.title ?? {}, startsAt: iso(e.starts_at)! })),
+      bonus: g.bonus ? { status: g.bonus.status, redeemedAt: iso(g.bonus.redeemed_at) } : null,
+    }));
   }
 
   // ---- giochi (per le sfide; 0008)

@@ -23,14 +23,20 @@ export default async function Today() {
   const today = localDayKey(new Date(), tz);
   const tomorrow = addDaysKey(today, 1);
 
-  const [urgent, queue, reports, facilities, events, kpis] = await Promise.all([
+  const [urgent, queue, reports, facilities, events, kpis, guests] = await Promise.all([
     staff.urgentAlerts().catch(() => []),
     staff.handoffQueue(false).catch(() => []),
     staff.social().reports(false).catch(() => []),
     staff.facilities().catch(() => []),
     staff.events().catch(() => []),
     admin ? staff.kpis('today').catch(() => null) : Promise.resolve(null),
+    staff.guests().catch(() => []),
   ]);
+  // chi ha prenotato ciascun orario (nome di battesimo e persone), dall'elenco ospiti
+  const whoBySlot = new Map<string, string[]>();
+  for (const g of guests) for (const b of g.bookings) {
+    whoBySlot.set(b.slotId, [...(whoBySlot.get(b.slotId) ?? []), b.party > 1 ? `${g.name} (${b.party})` : g.name]);
+  }
   const pending = queue.filter((c) => c.status === 'handoff_pending').length;
   const bookings = facilities
     .flatMap((f) => f.slots.filter((s) => s.booked > 0 && localDayKey(new Date(s.startsAt), tz) === today).map((s) => ({ f, s })))
@@ -94,7 +100,10 @@ export default async function Today() {
               {bookings.map(({ f, s }) => (
                 <li key={s.id} className="today-item">
                   <span className="today-time">{formatTime(s.startsAt, locale, tz)}</span>
-                  <span className="grow">{pick(f.name, locale, 'it')}</span>
+                  <span className="grow">
+                    {pick(f.name, locale, 'it')}
+                    {whoBySlot.has(s.id) && <span className="today-names">{whoBySlot.get(s.id)!.join(', ')}</span>}
+                  </span>
                   <span className={`badge ${s.booked >= s.capacity ? 'badge-warn' : 'badge-info'}`}>{t('admin.today.seats', { booked: s.booked, capacity: s.capacity })}</span>
                 </li>
               ))}

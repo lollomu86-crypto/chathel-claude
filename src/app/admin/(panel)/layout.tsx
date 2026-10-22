@@ -23,6 +23,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
   const groups = [
     { label: null, items: [{ href: '/admin', label: t('admin.nav.today') }] },
     { label: t('admin.nav.groupGuests'), items: [
+      { href: '/admin/guests', label: t('admin.nav.guests') },
       { href: '/admin/inbox', label: t('admin.nav.inbox'), badge: 'inbox' as const },
       { href: '/admin/social', label: t('admin.nav.social'), badge: 'social' as const },
       { href: '/admin/notifications', label: t('admin.nav.notifications') },

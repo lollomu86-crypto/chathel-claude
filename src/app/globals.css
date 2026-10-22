@@ -646,6 +646,18 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
 .today-item { display: flex; align-items: center; gap: var(--space-3); min-height: var(--tap); padding: var(--space-2) 0; }
 .today-item + .today-item { border-top: var(--bw) solid var(--border); }
 .today-time { flex: none; min-width: 3.5em; font-weight: var(--fw-bold); font-variant-numeric: tabular-nums; }
+.today-names { display: block; font-size: var(--fs-sm); color: var(--text-muted); }
+
+/* Pagina "Ospiti": riga che si apre sul dettaglio (prenotazioni, eventi, bonus) */
+.guest-row { width: 100%; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+.guest-row:hover { background: var(--surface-2); }
+.guest-side { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); flex: none; }
+.guest-detail { padding: 0 var(--space-3) var(--space-3) calc(var(--avatar) + var(--space-6)); }
+.guest-detail .label { margin: var(--space-2) 0 0; color: var(--text-muted); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; }
+.guest-list { margin: 0; padding-left: var(--space-4); font-size: var(--fs-sm); }
+.guest-list li + li { margin-top: var(--space-1); }
+.seg-count { font-weight: var(--fw-regular); opacity: 0.8; }
+@media (max-width: 480px) { .guest-detail { padding-left: var(--space-3); } }
 .kpis { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 .kpi .num, .stat .num { display: block; font-size: var(--fs-3xl); line-height: 1.1; }
 .stat-label { font-size: var(--fs-sm); color: var(--text-muted); font-weight: var(--fw-medium); }

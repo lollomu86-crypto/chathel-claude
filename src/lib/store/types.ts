@@ -4,6 +4,7 @@
 // UI e handler API parlano solo con queste interfacce.
 
 import type {
+  StaffGuest,
   AdminGame,
   ChallengeView,
   CreateChallengeInput,
@@ -138,6 +139,8 @@ export interface StaffApi {
   facilities(): Promise<AdminFacility[]>;
   generateSlots(input: GenerateSlotsInput): Promise<number>;
   updateSlot(input: { id: string; capacity?: number; status?: 'open' | 'closed' }): Promise<void>;
+  /** Ospiti con soggiorno in corso (direttore e reception): nome, soggiorno, ultimo accesso, prenotazioni, eventi, bonus. */
+  guests(): Promise<StaffGuest[]>;
   /** Giochi dell'hotel (direttore e reception), anche quelli spenti. */
   games(): Promise<AdminGame[]>;
   saveGame(input: SaveGameInput): Promise<void>;
