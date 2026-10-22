@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { call } from './client-api';
 import { useConfirm, useErrorText, useI18n } from './I18n';
 import { LangSwitch } from './LangSwitch';
+import { PushSettings } from './PushSettings';
 import { Icon } from './ui/Icon';
 
 type Theme = 'system' | 'light' | 'dark';
@@ -49,6 +50,7 @@ export function ProfileClient({ expires }: { expires: string }) {
         <h2 id="pl" className="t-sub">{t('profile.language')}</h2>
         <LangSwitch saveToProfile />
       </section>
+      <PushSettings />
       <section className="card stack" aria-labelledby="pt">
         <h2 id="pt" className="t-sub">{t('profile.theme')}</h2>
         <div className="seg" role="group" aria-labelledby="pt">

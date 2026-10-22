@@ -5,6 +5,8 @@
 // Regole: nessun testo di messaggi / nickname / token nei log; errori verso il client come codici
 // (reason) tradotti dalla UI; l'hotel e' sempre dedotto dalla sessione, mai dal client.
 
+import { defer, pushAnnouncement, pushReceptionReply, removeSubscription, saveSubscription, subscriptionPrefs } from '../push/notify';
+import { vapidFromEnv } from '../push/webpush';
 import { z } from 'zod';
 import { aiMode, answerQuestion, safetyAnswer } from '../ai';
 import { raiseUrgent } from '../alerts';
@@ -232,6 +234,19 @@ export async function guestAction(ctx: Ctx, action: string, raw: unknown): Promi
         await g.endMyStay();
         return { ...ok(), guestCookie: null };
       }
+      case 'push-config':
+        return ok({ publicKey: pushDb(ctx) ? vapidFromEnv()?.publicKey ?? null : null });
+      case 'push-state': case 'push-subscribe': case 'push-unsubscribe': {
+        if (get) return fail(405, 'method_not_allowed');
+        const db = pushDb(ctx), ids = g.pushIds?.();
+        if (!db || !ids || !vapidFromEnv()) return fail(503, 'push_unavailable');
+        if (!(await hit(`push:${hashKey(ctx.guest ?? '')}`, 30, 10 * 60_000))) return fail(429, 'rate_limited');
+        const endpoint = z.object({ endpoint: z.string().url().max(1000).startsWith('https://') }).parse(raw).endpoint;
+        if (action === 'push-state') return ok({ prefs: await subscriptionPrefs(db, ids.guestId, endpoint) });
+        if (action === 'push-unsubscribe') { await removeSubscription(db, ids.guestId, endpoint); return ok(); }
+        const b = z.object({ p256dh: z.string().min(80).max(200), auth: z.string().min(16).max(100), locale: z.string().max(5).default('it'), prefs: z.unknown().optional() }).parse(raw);
+        return ok({ prefs: await saveSubscription(db, ids.hotelId, ids.guestId, { endpoint, p256dh: b.p256dh, auth: b.auth, locale: b.locale, prefs: b.prefs }) });
+      }
       default:
         return (await socialGuestAction(ctx, g, action, raw)) ?? fail(404, 'not_found');
     }
@@ -434,6 +449,7 @@ export async function staffAction(ctx: Ctx, action: string, raw: unknown): Promi
         if (!post) return fail(405, 'method_not_allowed');
         const b = z.object({ title: i18nText, body: i18nText.nullish() }).parse(raw);
         await s.publishNotification(b);
+        { const db = pushDb(ctx); if (db) { const hid = s.info.hotel.id; await defer(() => pushAnnouncement(db, hid, b.title, b.body ?? null)); } }
         return ok({ left: await s.notificationsLeftToday() });
       }
       case 'alerts':
@@ -443,6 +459,7 @@ export async function staffAction(ctx: Ctx, action: string, raw: unknown): Promi
         if (!post) return fail(405, 'method_not_allowed');
         const b = z.object({ conversationId: idSchema, text: z.string().min(1).max(1000) }).parse(raw);
         await s.handoffReply(b.conversationId, b.text);
+        { const db = pushDb(ctx); if (db) { const hid = s.info.hotel.id; await defer(() => pushReceptionReply(db, hid, b.conversationId)); } }
         return ok();
       }
       case 'handoff-close':
@@ -469,4 +486,9 @@ export async function health(): Promise<Res> {
   // 503 se la configurazione manca o e' ambigua: nessun dettaglio, solo il codice
   const problem = configProblem();
   return problem ? fail(503, 'service_unavailable', { config: problem }) : ok({ status: 'up' });
+}
+
+/** Client di servizio per le push, o null (store demo o chiavi mancanti). */
+function pushDb(ctx: Ctx): any {
+  try { return (ctx.store.pushDb?.() as any) ?? null; } catch { return null; }
 }

@@ -83,6 +83,8 @@ export interface SocialStaffApi {
 }
 
 export interface GuestApi {
+  /** Identificativi per le notifiche push (solo store Supabase). */
+  pushIds?(): { hotelId: string; guestId: string };
   /** Funzioni sociali (elenco, chat pubblica e privata, coupon). */
   social(): SocialGuestApi;
   /** Se valorizzato, il cookie di sessione va riscritto con questo valore (token rinnovato). */
@@ -151,6 +153,8 @@ export interface StaffApi {
 
 export interface Store {
   readonly mode: 'demo' | 'supabase';
+  /** Client con chiave di servizio per le notifiche push (solo store Supabase configurato), altrimenti assente/null. */
+  pushDb?(): unknown | null;
   publicHotel(slug: string): Promise<PublicHotel | null>;
   /** Hotel (slug) a cui appartiene un codice numerico di ingresso, o null */
   hotelSlugByCode(code: string): Promise<string | null>;

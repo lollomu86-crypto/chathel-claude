@@ -603,7 +603,9 @@
     "rightsTitle": "Your rights",
     "rights": "You can delete your data at any time from the Profile. For other requests contact the hotel's reception, the data controller.",
     "socialTitle": "Guest chat and reports",
-    "social": "You can leave the list, and block or report anyone, at any time. The hotel does not read private chats: if you report a private message, you share with the hotel only that message and at most the 4 before it. Public messages can be hidden by the hotel. At check-out the list, chats, requests and unused coupons are deleted."
+    "social": "You can leave the list, and block or report anyone, at any time. The hotel does not read private chats: if you report a private message, you share with the hotel only that message and at most the 4 before it. Public messages can be hidden by the hotel. At check-out the list, chats, requests and unused coupons are deleted.",
+    "pushTitle": "Phone notifications",
+    "push": "If you turn them on in Profile, we store your device's technical address to send you notifications through your browser's service (Google, Apple or Mozilla). Notifications never contain your messages or nicknames. You can turn them off at any time; they are also deleted when you leave."
   },
   "errors": {
     "invalid_input": "Invalid data.",
@@ -835,6 +837,23 @@
     "dm": {
       "label": "Accept private chat requests",
       "hint": "Another guest can ask to write to you privately. You decide whether to accept."
+    }
+  },
+  "push": {
+    "title": "Notifications",
+    "intro": "Get an alert on your phone for hotel news. Notification texts never contain your messages.",
+    "enable": "Turn on notifications",
+    "disable": "Turn off on this device",
+    "on": "Notifications are on for this device. Choose what to receive:",
+    "denied": "Notifications are blocked for this app. To turn them on, allow them in your phone or browser settings.",
+    "unsupported": "This device or browser does not support notifications.",
+    "iosInstall": "On iPhone, notifications only work after adding the app to your Home Screen (Share → Add to Home Screen), then open it from there.",
+    "error": "Something went wrong. Please try again shortly.",
+    "kinds": {
+      "announcements": "Hotel announcements",
+      "reception": "Front desk replies",
+      "private": "Private messages",
+      "public": "Public chat (at most one notification every 10 minutes)"
     }
   }
 }

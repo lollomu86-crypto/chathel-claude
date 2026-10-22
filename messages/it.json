@@ -603,7 +603,9 @@
     "rightsTitle": "I tuoi diritti",
     "rights": "Puoi cancellare i tuoi dati in ogni momento dal Profilo. Per altre richieste rivolgiti alla reception dell'hotel, titolare del trattamento.",
     "socialTitle": "Chat tra ospiti e segnalazioni",
-    "social": "Puoi uscire dall'elenco, bloccare o segnalare chiunque in ogni momento. L'hotel non legge le chat private: se segnali un messaggio privato, condividi con l'hotel solo quel messaggio e al massimo i 4 precedenti. I messaggi pubblici possono essere nascosti dall'hotel. Al check-out elenco, chat, richieste e coupon non usati vengono cancellati."
+    "social": "Puoi uscire dall'elenco, bloccare o segnalare chiunque in ogni momento. L'hotel non legge le chat private: se segnali un messaggio privato, condividi con l'hotel solo quel messaggio e al massimo i 4 precedenti. I messaggi pubblici possono essere nascosti dall'hotel. Al check-out elenco, chat, richieste e coupon non usati vengono cancellati.",
+    "pushTitle": "Notifiche sul telefono",
+    "push": "Se le attivi dal Profilo, salviamo l'indirizzo tecnico del tuo dispositivo per inviarti le notifiche, passando dal servizio del tuo browser (Google, Apple o Mozilla). Le notifiche non contengono mai i tuoi messaggi né i nickname. Puoi disattivarle in ogni momento; vengono cancellate anche alla partenza."
   },
   "errors": {
     "invalid_input": "Dati non validi.",
@@ -835,6 +837,23 @@
     "dm": {
       "label": "Accetto richieste di chat privata",
       "hint": "Un altro ospite può chiederti di scrivere in privato. Sei tu a decidere se accettare."
+    }
+  },
+  "push": {
+    "title": "Notifiche",
+    "intro": "Ricevi un avviso sul telefono per le novità dell'hotel. I testi delle notifiche non contengono mai i tuoi messaggi.",
+    "enable": "Attiva le notifiche",
+    "disable": "Disattiva su questo dispositivo",
+    "on": "Notifiche attive su questo dispositivo. Scegli cosa ricevere:",
+    "denied": "Le notifiche sono bloccate per questa app. Per attivarle, consentile dalle impostazioni del telefono o del browser.",
+    "unsupported": "Questo dispositivo o browser non supporta le notifiche.",
+    "iosInstall": "Su iPhone le notifiche funzionano solo dopo aver aggiunto l'app alla schermata Home (Condividi → Aggiungi a Home), poi riaprila da lì.",
+    "error": "Operazione non riuscita. Riprova tra poco.",
+    "kinds": {
+      "announcements": "Avvisi dell'hotel",
+      "reception": "Risposte della reception",
+      "private": "Messaggi privati",
+      "public": "Chat pubblica (al massimo una notifica ogni 10 minuti)"
     }
   }
 }

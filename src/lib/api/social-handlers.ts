@@ -8,6 +8,7 @@ import { logEvent } from '../log';
 import type { GuestApi, StaffApi } from '../store/types';
 import { COUPON_KINDS, REPORT_REASONS, type CouponKind, type ReportReason } from '../types';
 import type { Ctx, Res } from './handlers';
+import { defer, pushPrivate, pushPublic } from '../push/notify';
 
 const ok = (body: Record<string, unknown> = {}): Res => ({ status: 200, body: { ok: true, ...body } });
 const fail = (status: number, error: string): Res => ({ status, body: { ok: false, error } });
@@ -48,6 +49,7 @@ export async function socialGuestAction(ctx: Ctx, g: GuestApi, action: string, r
       if (!post) return fail(405, 'method_not_allowed');
       const b = z.object({ text }).parse(raw);
       const m = await s.postPublic(b.text);
+      notifySocial(ctx, g, (db, ids) => pushPublic(db, ids.hotelId, ids.guestId));
       logEvent('social.public_post', { status: 'ok' });
       return ok({ message: m, messages: await s.publicFeed() });
     }
@@ -73,6 +75,7 @@ export async function socialGuestAction(ctx: Ctx, g: GuestApi, action: string, r
       if (!post) return fail(405, 'method_not_allowed');
       const b = z.object({ to: id, text }).parse(raw);
       const r = await s.startThread(b.to, b.text);
+      notifySocial(ctx, g, (db, ids) => pushPrivate(db, ids.hotelId, ids.guestId, { toProfileId: b.to }));
       logEvent('social.thread_start', { status: 'ok' });
       return ok(r);
     }
@@ -86,6 +89,7 @@ export async function socialGuestAction(ctx: Ctx, g: GuestApi, action: string, r
       if (!post) return fail(405, 'method_not_allowed');
       const b = z.object({ threadId: id, text }).parse(raw);
       const m = await s.sendPrivate(b.threadId, b.text);
+      notifySocial(ctx, g, (db, ids) => pushPrivate(db, ids.hotelId, ids.guestId, { threadId: b.threadId }));
       return ok({ message: m });
     }
     case 'social-block': {
@@ -166,4 +170,13 @@ export async function socialStaffAction(ctx: Ctx, st: StaffApi, action: string, 
     default:
       return fail(404, 'not_found');
   }
+}
+
+/** Avvia l'invio push dopo l'azione riuscita (mai bloccante, mai con errori verso l'ospite). */
+function notifySocial(ctx: Ctx, g: GuestApi, job: (db: any, ids: { hotelId: string; guestId: string }) => Promise<unknown>): void {
+  const ids = g.pushIds?.();
+  let db: any = null;
+  try { db = ctx.store.pushDb?.() ?? null; } catch { db = null; }
+  if (!ids || !db) return;
+  void defer(() => job(db, ids));
 }

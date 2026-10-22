@@ -85,6 +85,7 @@ export class SupabaseStore implements Store {
     if (!k) throw new ConfigError('no_config', 'SUPABASE_SERVICE_ROLE_KEY mancante');
     return this.deps.createClient(this.cfg().url, k, opts);
   }
+  pushDb(): Db | null { try { return this.serviceClient(); } catch { return null; } }
   /** Client del solo server per il provider d'identita' (stessa configurazione). */
   clients() { return { anon: () => this.anonClient(), service: () => this.serviceClient() }; }
 
@@ -201,6 +202,7 @@ export function supabaseRateBackend(store: SupabaseStore): RateBackend {
 // ==================================================================== ospite
 class SbGuestApi implements GuestApi {
   social() { return new SbSocialGuest(this.db, this.g.hotels?.timezone ?? 'Europe/Rome'); }
+  pushIds() { return { hotelId: String(this.g.hotel_id), guestId: String(this.g.id) }; }
   private hotel: any;
   constructor(private store: SupabaseStore, private db: Db, private g: any, private expiresAt: string) { this.hotel = g.hotels; }
 

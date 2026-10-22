@@ -603,7 +603,9 @@
     "rightsTitle": "Deine Rechte",
     "rights": "Du kannst deine Daten jederzeit im Profil löschen. Für andere Anliegen wende dich an die Rezeption des Hotels, den Verantwortlichen der Datenverarbeitung.",
     "socialTitle": "Gäste-Chat und Meldungen",
-    "social": "Du kannst jederzeit die Liste verlassen sowie jeden blockieren oder melden. Das Hotel liest keine privaten Chats: Wenn du eine private Nachricht meldest, teilst du mit dem Hotel nur diese Nachricht und höchstens die 4 davor. Öffentliche Nachrichten kann das Hotel ausblenden. Beim Check-out werden Liste, Chats, Anfragen und nicht eingelöste Gutscheine gelöscht."
+    "social": "Du kannst jederzeit die Liste verlassen sowie jeden blockieren oder melden. Das Hotel liest keine privaten Chats: Wenn du eine private Nachricht meldest, teilst du mit dem Hotel nur diese Nachricht und höchstens die 4 davor. Öffentliche Nachrichten kann das Hotel ausblenden. Beim Check-out werden Liste, Chats, Anfragen und nicht eingelöste Gutscheine gelöscht.",
+    "pushTitle": "Handy-Benachrichtigungen",
+    "push": "Wenn du sie im Profil aktivierst, speichern wir die technische Adresse deines Geräts, um dir Benachrichtigungen über den Dienst deines Browsers (Google, Apple oder Mozilla) zu senden. Sie enthalten nie deine Nachrichten oder Nicknames. Du kannst sie jederzeit deaktivieren; bei der Abreise werden sie ebenfalls gelöscht."
   },
   "errors": {
     "invalid_input": "Ungültige Daten.",
@@ -835,6 +837,23 @@
     "dm": {
       "label": "Private Chat-Anfragen annehmen",
       "hint": "Ein anderer Gast kann Sie um einen privaten Chat bitten. Sie entscheiden, ob Sie annehmen."
+    }
+  },
+  "push": {
+    "title": "Benachrichtigungen",
+    "intro": "Erhalte eine Meldung auf dem Handy bei Neuigkeiten des Hotels. Die Texte enthalten nie deine Nachrichten.",
+    "enable": "Benachrichtigungen aktivieren",
+    "disable": "Auf diesem Gerät deaktivieren",
+    "on": "Benachrichtigungen sind auf diesem Gerät aktiv. Wähle, was du erhalten möchtest:",
+    "denied": "Benachrichtigungen sind für diese App blockiert. Erlaube sie in den Einstellungen deines Handys oder Browsers.",
+    "unsupported": "Dieses Gerät oder dieser Browser unterstützt keine Benachrichtigungen.",
+    "iosInstall": "Auf dem iPhone funktionieren Benachrichtigungen erst, nachdem du die App zum Home-Bildschirm hinzugefügt hast (Teilen → Zum Home-Bildschirm), und öffne sie dann von dort.",
+    "error": "Das hat nicht geklappt. Bitte versuche es gleich noch einmal.",
+    "kinds": {
+      "announcements": "Hotelmitteilungen",
+      "reception": "Antworten der Rezeption",
+      "private": "Private Nachrichten",
+      "public": "Öffentlicher Chat (höchstens eine Meldung alle 10 Minuten)"
     }
   }
 }
