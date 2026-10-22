@@ -1,4 +1,5 @@
 // Helper per i server component di Next.js (usano next/headers e next/navigation).
+import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getStore } from './store';
@@ -20,10 +21,11 @@ export async function getLocale(profileLocale?: Locale): Promise<Locale> {
   return detectLocale((await headers()).get('accept-language'), 'en');
 }
 
-export async function getGuest(): Promise<GuestApi | null> {
+/** Una sola lettura dell'ospite per richiesta (cache di React): layout, pagina e titolo la condividono. */
+export const getGuest = cache(async (): Promise<GuestApi | null> => {
   const jar = await cookies();
   return (await getStore()).guest(jar.get(GUEST_COOKIE)?.value);
-}
+});
 export async function getStaff(): Promise<StaffApi | null> {
   const jar = await cookies();
   return (await getStore()).staff(jar.get(STAFF_COOKIE)?.value);
