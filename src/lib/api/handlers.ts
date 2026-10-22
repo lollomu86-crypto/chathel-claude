@@ -6,7 +6,7 @@
 // (reason) tradotti dalla UI; l'hotel e' sempre dedotto dalla sessione, mai dal client.
 
 import { defer, pushAnnouncement, pushReceptionReply, removeSubscription, saveSubscription, subscriptionPrefs } from '../push/notify';
-import { vapidFromEnv } from '../push/webpush';
+import { isPushEndpoint, vapidFromEnv } from '../push/webpush';
 import { z } from 'zod';
 import { aiMode, answerQuestion, safetyAnswer } from '../ai';
 import { raiseUrgent } from '../alerts';
@@ -241,7 +241,8 @@ export async function guestAction(ctx: Ctx, action: string, raw: unknown): Promi
         const db = pushDb(ctx), ids = g.pushIds?.();
         if (!db || !ids || !vapidFromEnv()) return fail(503, 'push_unavailable');
         if (!(await hit(`push:${hashKey(ctx.guest ?? '')}`, 30, 10 * 60_000))) return fail(429, 'rate_limited');
-        const endpoint = z.object({ endpoint: z.string().url().max(1000).startsWith('https://') }).parse(raw).endpoint;
+        // solo servizi push dei browser: il server chiamera' questo indirizzo
+        const endpoint = z.object({ endpoint: z.string().url().max(1000).refine(isPushEndpoint) }).parse(raw).endpoint;
         if (action === 'push-state') return ok({ prefs: await subscriptionPrefs(db, ids.guestId, endpoint) });
         if (action === 'push-unsubscribe') { await removeSubscription(db, ids.guestId, endpoint); return ok(); }
         const b = z.object({ p256dh: z.string().min(80).max(200), auth: z.string().min(16).max(100), locale: z.string().max(5).default('it'), prefs: z.unknown().optional() }).parse(raw);
