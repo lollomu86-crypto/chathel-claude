@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatMessage, ChatView } from '@/lib/types';
 import { formatTime } from '@/lib/format';
 import { call } from './client-api';
-import { nearBottom, usePolling } from './hooks';
+import { nearBottom, scrollToBottom, usePolling } from './hooks';
 import { useI18n } from './I18n';
 import { Icon } from './ui/Icon';
 
@@ -26,13 +26,13 @@ export function ChatClient({ initial, hotelName, aiMode, timezone }: { initial: 
   const [announce, setAnnounce] = useState('');
   const end = useRef<HTMLDivElement>(null);
   const known = useRef(new Set(initial.messages.map((m) => m.id)));
-  const stick = useRef(false);
+  const stick = useRef(true); // all'apertura si va all'ultimo messaggio; poi si segue solo chi e' gia' in fondo
   const human = chat.status === 'handoff_pending' || chat.status === 'operator';
 
   const messages: Local[] = [...chat.messages, ...pending];
 
   useEffect(() => {
-    if (stick.current) end.current?.scrollIntoView({ block: 'end' });
+    if (stick.current) scrollToBottom();
     // annuncio ai lettori di schermo dei soli messaggi NUOVI che non sono dell'ospite
     for (const m of chat.messages) {
       if (known.current.has(m.id)) continue;

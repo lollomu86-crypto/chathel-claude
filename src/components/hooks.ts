@@ -51,6 +51,12 @@ export function nearBottom(px = 120): boolean {
   return el.scrollHeight - el.scrollTop - el.clientHeight < px;
 }
 
+/** Porta la pagina in fondo (stesso riferimento di nearBottom): l'ultimo messaggio e cio' che sta sotto la chat restano sopra la barra di scrittura. */
+export function scrollToBottom(): void {
+  const el = document.scrollingElement ?? document.documentElement;
+  el.scrollTop = el.scrollHeight;
+}
+
 /** localStorage sicuro: puo' mancare o lanciare (finestra privata, dati bloccati). Solo comodita' per-dispositivo. */
 export const safeStore = {
   get(key: string): string | null {
