@@ -309,7 +309,8 @@
       "menu": "Menu",
       "groupGuests": "Guests",
       "groupServices": "Services",
-      "groupHotel": "Hotel"
+      "groupHotel": "Hotel",
+      "guests": "Guests"
     },
     "dashboard": {
       "title": "Statistics",
@@ -645,6 +646,44 @@
       "quick": "Quick actions",
       "sendNotice": "Send a notice",
       "newEvent": "New event"
+    },
+    "guests": {
+      "title": "Guests",
+      "intro": "Guests with a stay in progress. Tap a name to see bookings, events and bonus.",
+      "search": "Search by name",
+      "filter": "Filter guests",
+      "filters": {
+        "all": "All",
+        "active": "Active",
+        "inactive": "Inactive",
+        "leaving": "Leaving today"
+      },
+      "active": "Active",
+      "inactive": "Inactive",
+      "leavesToday": "Leaves today",
+      "stay": "{from} → {to}",
+      "lastSeen": "Last seen: {when}",
+      "never": "never",
+      "minutesAgo": "{n} min ago",
+      "todayAt": "today at {time}",
+      "yesterdayAt": "yesterday at {time}",
+      "daysAgo": "{n} days ago",
+      "counts": "{b} bookings · {e} events",
+      "bookings": "Bookings",
+      "events": "Events",
+      "bonus": "Welcome bonus",
+      "none": "None.",
+      "bonusNone": "No bonus.",
+      "bonusStatus": {
+        "issued": "Not used yet",
+        "redeemed": "Used on {when}",
+        "expired": "Expired without being used",
+        "void": "Cancelled"
+      },
+      "emptyTitle": "No guests right now",
+      "empty": "Guests who have joined the app and have a stay in progress appear here.",
+      "noMatch": "No guest matches the search.",
+      "privacy": "For privacy, private chats, contacts between guests, emails and photos never appear here. Active = used the app in the last 24 hours."
     }
   },
   "privacy": {
@@ -663,7 +702,9 @@
     "socialTitle": "Guest chat and reports",
     "social": "You can leave the list, and block or report anyone, at any time. The hotel does not read private chats: if you report a private message, you share with the hotel only that message and at most the 4 before it. Public messages can be hidden by the hotel. At check-out the list, chats, requests and unused coupons are deleted.",
     "pushTitle": "Phone notifications",
-    "push": "If you turn them on in Profile, we store your device's technical address to send you notifications through your browser's service (Google, Apple or Mozilla). Notifications never contain your messages or nicknames. You can turn them off at any time; they are also deleted when you leave."
+    "push": "If you turn them on in Profile, we store your device's technical address to send you notifications through your browser's service (Google, Apple or Mozilla). Notifications never contain your messages or nicknames. You can turn them off at any time; they are also deleted when you leave.",
+    "hotelTitle": "What the hotel sees",
+    "hotel": "Hotel staff (management and front desk) see your name, language, the dates of your stay, when you last used the app, your bookings, the events you join and whether you have used the bonus. They do not see private chats, who you talk to or your Google data (email, photo)."
   },
   "errors": {
     "invalid_input": "Invalid data.",

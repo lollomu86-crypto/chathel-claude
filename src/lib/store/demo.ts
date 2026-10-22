@@ -22,7 +22,7 @@ import { DEFAULT_LOCALE, isLocale, type AdminEvent, type AdminFacility, type Adm
   type HandoffConversation, type HandoffPriority, type HandoffReason, type I18nText, type Kpis, type Locale, type NotificationView,
   type Period, type PublicHotel, type PublishNotificationInput, type RedeemResult, type SaveEventInput,
   type SaveKnowledgeInput, type StaffInfo, type StaffRole, type StartStayInput, type StartStayResult,
-  type StartStayBonus, type AdminGame, type GameView, type SaveGameInput } from '../types';
+  type StartStayBonus, type AdminGame, type GameView, type SaveGameInput, type StaffGuest } from '../types';
 import type { GuestApi, StaffApi, Store } from './types';
 import { DEMO_EVENTS, DEMO_FACILITIES, DEMO_GAMES, DEMO_KB, DEMO_STAFF } from './demo-data';
 
@@ -58,7 +58,7 @@ interface Hotel {
   maxPerGuestDay: number; cancelCutoffMinutes: number; qrToken: string; accessCode: string; qrPrevToken: string | null; qrPrevUntil: Date | null;
   bonusMaxPerHour: number; receptionPhone: string | null;
 }
-interface G { id: string; name: string; locale: Locale; isAdult: boolean; createdAt: Date; expiresAt: Date; stayId: string; startBonus: StartStayBonus; identityKey: string }
+interface G { id: string; name: string; locale: Locale; isAdult: boolean; createdAt: Date; expiresAt: Date; stayId: string; startBonus: StartStayBonus; identityKey: string; lastSeenAt?: Date | null }
 interface Stay { id: string; guestId: string | null; startedAt: Date; expiresAt: Date; status: 'active' | 'ended'; firstActionAt: Date | null }
 interface Ev { id: string; title: I18nText; description: I18nText | null; location: string | null; startsAt: Date; endsAt: Date | null; capacity: number | null; published: boolean }
 interface Att { eventId: string; guestId: string | null; status: 'going' | 'attended' | 'cancelled'; createdAt: Date }
@@ -280,7 +280,12 @@ export class DemoStore implements Store {
   async guest(session: string | undefined): Promise<GuestApi | null> {
     this.tick();
     const gid = session ? this.sessions.get(session) : undefined;
-    return gid && this.guests.has(gid) ? new DemoGuestApi(this, gid) : null;
+    const g = gid ? this.guests.get(gid) : undefined;
+    if (!g) return null;
+    // ultimo accesso, al massimo ogni 10 minuti (come touch_guest in 0009)
+    const now = this.now();
+    if (!g.lastSeenAt || now.getTime() - g.lastSeenAt.getTime() >= 10 * 60_000) g.lastSeenAt = now;
+    return new DemoGuestApi(this, g.id);
   }
 
   async staffLogin(email: string, password: string): Promise<{ session: string; role: StaffRole } | null> {
@@ -476,6 +481,33 @@ class DemoStaffApi implements StaffApi {
   /** Rispecchia le policy RLS: ruolo non ammesso = 403. */
   private need(roles: StaffRole[]) { if (!roles.includes(this.u.role)) throw new ChError('CH004', 'forbidden'); }
   social() { return new DemoSocialStaff(this.s, this.u.role); }
+
+  /** Come staff_guests() in 0009: solo ospiti con soggiorno in corso, mai chat o contatti. */
+  async guests(): Promise<StaffGuest[]> {
+    this.need(FLOOR);
+    const now = this.s.now();
+    return [...this.s.guests.values()]
+      .filter((g) => this.s.stays.some((st) => st.id === g.stayId && st.status === 'active' && st.expiresAt > now))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((g) => {
+        const stay = this.s.stays.find((st) => st.id === g.stayId)!;
+        const b = this.s.ledger.bonusOf(g.id);
+        return {
+          id: g.id, name: g.name, locale: g.locale, arrivedAt: stay.startedAt.toISOString(), expiresAt: g.expiresAt.toISOString(),
+          lastSeenAt: g.lastSeenAt?.toISOString() ?? null,
+          bookings: this.s.book.bookings.filter((x) => x.guestId === g.id && (x.status === 'confirmed' || x.status === 'attended'))
+            .map((x) => ({ x, slot: this.s.book.slots.get(x.slotId)! }))
+            .sort((p, q) => p.slot.startsAt.getTime() - q.slot.startsAt.getTime())
+            .map(({ x, slot }) => ({ id: x.id, slotId: x.slotId, facility: this.s.facilities.find((f) => f.id === slot.facilityId)?.name ?? {},
+              startsAt: slot.startsAt.toISOString(), party: x.partySize, status: x.status as 'confirmed' | 'attended' })),
+          events: this.s.attendance.filter((a) => a.guestId === g.id && (a.status === 'going' || a.status === 'attended'))
+            .map((a) => this.s.events.find((e) => e.id === a.eventId)!).filter(Boolean)
+            .sort((p, q) => p.startsAt.getTime() - q.startsAt.getTime())
+            .map((e) => ({ id: e.id, title: e.title, startsAt: e.startsAt.toISOString() })),
+          bonus: b ? { status: b.status, redeemedAt: b.redeemedAt?.toISOString() ?? null } : null,
+        };
+      });
+  }
 
   async redeem(token: string): Promise<RedeemResult> {
     const canRedeem = BAR.includes(this.u.role);
