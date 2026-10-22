@@ -23,7 +23,8 @@ import { isLocale, type AdminEvent, type AdminFacility, type AdminNotification, 
   type GenerateSlotsInput, type GuestView, type HandoffConversation, type Kpis, type Locale, type NotificationView,
   type Period, type PublicHotel, type PublishNotificationInput, type RedeemResult, type SaveEventInput,
   type SaveKnowledgeInput, type StaffInfo, type StaffRole, type StartStayInput, type StartStayResult, type StartStayBonus,
-  type I18nText } from '../types';
+  type I18nText, type AdminGame, type GameView, type SaveGameInput } from '../types';
+import { cleanGameInput, GAME_LIMITS } from '../rules/games';
 import type { GuestApi, StaffApi, Store } from './types';
 import { SbSocialGuest, SbSocialStaff } from './supabase-social';
 import type { RateBackend } from '../ratelimit';
@@ -259,6 +260,11 @@ class SbGuestApi implements GuestApi {
     return facs.map((f) => ({ id: f.id, kind: f.kind, name: f.name, description: f.description, imageUrl: f.image_url ?? null,
       slots: slots.filter((s) => s.facility_id === f.id).map((s) => ({ id: s.id, startsAt: iso(s.starts_at)!, endsAt: iso(s.ends_at)!, capacity: s.capacity, booked: s.booked_count })) }));
   }
+  async games(): Promise<GameView[]> {
+    // RLS: solo i giochi attivi dell'hotel dell'ospite (0008)
+    const rows = ok(await this.db.from('games').select('id, name, description, location').order('sort_order').order('created_at')) as any[];
+    return rows.map((g) => ({ id: g.id, name: g.name, description: g.description ?? null, location: g.location ?? null }));
+  }
   async myBookings(): Promise<BookingView[]> {
     const rows = ok(await this.db.from('bookings').select('id, slot_id, party_size, status, slots(starts_at, ends_at, facility_id)')
       .in('status', ['confirmed', 'attended'])) as any[];
@@ -417,6 +423,26 @@ class SbStaffApi implements StaffApi {
     this.need(['hotel_admin', 'reception']);
     touched(await this.db.from('slots').update(patch).eq('id', i.id).eq('hotel_id', this.hid).select('id'));
   }
+
+  // ---- giochi (per le sfide; 0008)
+  async games(): Promise<AdminGame[]> {
+    this.need(['hotel_admin', 'reception']);
+    const rows = ok(await this.db.from('games').select('id, name, description, location, active, sort_order').eq('hotel_id', this.hid)
+      .order('sort_order').order('created_at')) as any[];
+    return rows.map((g) => ({ id: g.id, name: g.name, description: g.description ?? null, location: g.location ?? null, active: !!g.active, sortOrder: g.sort_order }));
+  }
+  async saveGame(i: SaveGameInput) {
+    this.need(['hotel_admin', 'reception']);
+    const v = cleanGameInput(i);
+    if (i.id) touched(await this.db.from('games').update(v).eq('id', i.id).eq('hotel_id', this.hid).select('id'));
+    else {
+      const all = await this.games();
+      if (all.length >= GAME_LIMITS.perHotel) throw new ChError('CH003', 'invalid_game');
+      const r = await this.db.from('games').insert({ ...v, hotel_id: this.hid, sort_order: all.length });
+      if (r.error) raise(r.error);
+    }
+  }
+  async deleteGame(id: string) { this.need(['hotel_admin', 'reception']); touched(await this.db.from('games').delete().eq('id', id).eq('hotel_id', this.hid).select('id')); }
 
   // ---- base di conoscenza
   async knowledge() {

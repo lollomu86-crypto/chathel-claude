@@ -219,6 +219,8 @@ export async function guestAction(ctx: Ctx, action: string, raw: unknown): Promi
         await g.book(b.slotId, b.partySize);
         return ok();
       }
+      case 'games':
+        return ok({ games: await g.games() });
       case 'cancel-booking': {
         if (get) return fail(405, 'method_not_allowed');
         await g.cancelBooking(z.object({ bookingId: idSchema }).parse(raw).bookingId);
@@ -428,6 +430,17 @@ export async function staffAction(ctx: Ctx, action: string, raw: unknown): Promi
         await s.updateSlot(b);
         return ok();
       }
+      case 'game-save': {
+        if (!post) return fail(405, 'method_not_allowed');
+        const t4 = z.object({ it: z.string().max(300).optional(), en: z.string().max(300).optional(), de: z.string().max(300).optional(), ru: z.string().max(300).optional() });
+        const b = z.object({ id: idSchema.optional(), name: t4, description: t4.nullish(), location: z.string().max(120).nullish(), active: z.boolean() }).parse(raw);
+        await s.saveGame(b);
+        return ok();
+      }
+      case 'game-delete':
+        if (!post) return fail(405, 'method_not_allowed');
+        await s.deleteGame(z.object({ id: idSchema }).parse(raw).id);
+        return ok();
       case 'kb-save': {
         if (!post) return fail(405, 'method_not_allowed');
         const b = z.object({ id: idSchema.optional(), category: z.string().max(20), title: z.string().max(160), content: z.string().max(4000),

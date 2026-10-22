@@ -400,6 +400,42 @@ export interface ThreadDetail extends ThreadSummary {
 }
 export interface CouponQrView { token: string; expiresAt: string; kind: CouponKind }
 
+// ---------------------------------------------------------------- giochi e sfide
+// I giochi (ping pong, calcio balilla...) li gestisce l'hotel dal pannello e non si prenotano.
+// Una sfida e' una proposta di partita: in privato (dentro una conversazione accettata) o aperta nella chat pubblica,
+// dove la accetta il primo che vuole. La posta e' solo tra quelle fisse: niente testo libero, niente denaro.
+
+export type ChallengeStake = 'coffee' | 'aperitif' | 'fun';
+export const CHALLENGE_STAKES: readonly ChallengeStake[] = ['coffee', 'aperitif', 'fun'];
+/** 'expired' = nessuno l'ha accettata prima dell'orario */
+export type ChallengeStatus = 'open' | 'accepted' | 'declined' | 'cancelled' | 'expired';
+
+export interface GameView { id: string; name: I18nText; description: I18nText | null; location: string | null }
+export interface AdminGame extends GameView { active: boolean; sortOrder: number }
+export interface SaveGameInput { id?: string; name: I18nText; description?: I18nText | null; location?: string | null; active: boolean }
+
+export interface ChallengeView {
+  id: string;
+  /** nome del gioco al momento della sfida (resta anche se il gioco viene tolto) */
+  game: I18nText;
+  startsAt: string;
+  stake: ChallengeStake;
+  status: ChallengeStatus;
+  scope: 'public' | 'private';
+  threadId: string | null;
+  challenger: { id: string; nickname: string };
+  opponent: { id: string; nickname: string } | null;
+  /** l'ho lanciata io */
+  mine: boolean;
+  /** l'avversario sono io (sfida privata ricevuta o sfida pubblica che ho accettato) */
+  meOpponent: boolean;
+  canAccept: boolean;
+  canDecline: boolean;
+  canCancel: boolean;
+  createdAt: string;
+}
+export interface CreateChallengeInput { gameId: string; startsAt: string; stake: ChallengeStake; threadId?: string | null }
+
 export type ReportStatus = 'open' | 'actioned' | 'dismissed' | 'subject_left';
 export interface SocialReportView {
   id: string;

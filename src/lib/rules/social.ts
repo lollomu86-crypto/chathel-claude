@@ -14,7 +14,8 @@ import { randomUUID } from 'node:crypto';
 import { ChError } from '../errors';
 import { addDaysKey, localDayKey, zonedTime } from '../time';
 import {
-  COUPON_KINDS, REPORT_REASONS,
+  CHALLENGE_STAKES, COUPON_KINDS, REPORT_REASONS,
+  type ChallengeStake, type ChallengeStatus, type ChallengeView, type I18nText,
   type CouponKind, type CouponView, type GuestListItem, type Locale, type Period, type PrivateMessageView,
   type PublicMessageView, type ReportReason, type ReportStatus, type SocialReportView, type SocialStats,
   type SocialSettings, type ThreadDetail, type ThreadStatus, type ThreadSummary, type PublicModerationMessage,
@@ -32,6 +33,13 @@ export const SOCIAL_LIMITS = {
   reportsPerDay: 10,
   couponsPerDay: 3,
   couponsActivePerSender: 5,
+  challengesPerDay: 5,
+  challengesOpenPerChallenger: 3,
+  /** la partita parte tra 5 minuti e 12 ore (l'interfaccia propone 15, 30, 60, 120 minuti) */
+  challengeMinLeadMs: 5 * 60_000,
+  challengeMaxLeadMs: 12 * 3_600_000,
+  /** una sfida resta visibile nella chat pubblica fino a 2 ore dopo l'orario */
+  challengeShowAfterMs: 2 * 3_600_000,
   nicknameMin: 2,
   nicknameMax: 20,
   publicFeedSize: 100,
@@ -112,6 +120,11 @@ interface Report {
   snapshot: { nickname: string; text: string; at: Date }[];
   closedAt?: Date;
 }
+interface Challenge {
+  id: string; hotelId: string; gameId: string | null; game: I18nText;
+  challengerId: string; opponentId: string | null; threadId: string | null;
+  startsAt: Date; stake: ChallengeStake; status: Exclude<ChallengeStatus, 'expired'>; createdAt: Date; respondedAt?: Date;
+}
 type TallyType = 'public_message' | 'private_request' | 'private_accepted' | 'private_declined' | 'private_message';
 
 export interface SocialConfig {
@@ -131,6 +144,7 @@ export class SocialHub {
   /** coppie (blocca -> bloccato) per socialId */
   blocks: { by: string; target: string }[] = [];
   reports: Report[] = [];
+  challenges: Challenge[] = [];
   readonly coupons: CouponLedger;
   /** Contatori anonimi (nessun id di persona): sopravvivono al check-out e alimentano il pannello hotel. */
   private tally: { type: TallyType; at: Date }[] = [];
@@ -269,6 +283,11 @@ export class SocialHub {
       if ((th.initiatorId === me.id && th.recipientId === t.id) || (th.initiatorId === t.id && th.recipientId === me.id)) th.blockedBy ??= me.id;
     }
     this.coupons.voidBetween(me.id, t.id);
+    // sfide ancora in piedi tra le due parti: annullate
+    for (const c of this.challenges) {
+      const between = (c.challengerId === me.id && c.opponentId === t.id) || (c.challengerId === t.id && c.opponentId === me.id);
+      if (between && (c.status === 'open' || c.status === 'accepted')) c.status = 'cancelled';
+    }
   }
   unblock(guestId: string, targetId: string) {
     const me = this.me(guestId);
@@ -531,6 +550,124 @@ export class SocialHub {
     return this.coupons.cancel(me.id, couponId, now);
   }
 
+  // ------------------------------------------------------------------------- sfide
+  //
+  // Una sfida propone una partita a un gioco dell'hotel a un orario vicino, con una posta fissa ("chi perde offre il caffe'").
+  // In privato vale tra due persone con una conversazione accettata (stesse regole dei messaggi); nella chat pubblica e'
+  // aperta e la accetta il primo che vuole. Scade da sola se nessuno la accetta prima dell'orario. Niente risultato.
+
+  private challengeStatus(c: Challenge, now: Date): ChallengeStatus {
+    return c.status === 'open' && c.startsAt <= now ? 'expired' : c.status;
+  }
+
+  private challengeView(c: Challenge, me: Profile, now: Date): ChallengeView {
+    const status = this.challengeStatus(c, now);
+    const ch = this.byId(c.challengerId);
+    const op = c.opponentId ? this.byId(c.opponentId) : undefined;
+    const mine = c.challengerId === me.id;
+    const open = status === 'open';
+    return {
+      id: c.id, game: c.game, startsAt: c.startsAt.toISOString(), stake: c.stake, status, scope: c.threadId ? 'private' : 'public',
+      threadId: c.threadId, challenger: { id: c.challengerId, nickname: ch?.nickname ?? '' },
+      opponent: op ? { id: op.id, nickname: op.nickname } : null, mine, meOpponent: c.opponentId === me.id,
+      canAccept: open && !mine && (!c.threadId || c.opponentId === me.id),
+      canDecline: open && !!c.threadId && c.opponentId === me.id,
+      canCancel: mine && (open || (status === 'accepted' && c.startsAt > now)),
+      createdAt: c.createdAt.toISOString(),
+    };
+  }
+
+  /** `game` lo verifica lo store (gioco attivo dello stesso hotel): qui arriva gia' risolto. */
+  createChallenge(guestId: string, input: { game: { id: string; name: I18nText }; startsAt: Date; stake: ChallengeStake; threadId?: string | null }, now: Date): ChallengeView {
+    const me = this.requireWriter(guestId, now);
+    if (!CHALLENGE_STAKES.includes(input.stake)) throw new ChError('CH003', 'invalid_stake');
+    const lead = input.startsAt.getTime() - now.getTime();
+    if (!Number.isFinite(lead) || lead < SOCIAL_LIMITS.challengeMinLeadMs || lead > SOCIAL_LIMITS.challengeMaxLeadMs || input.startsAt >= me.stayExpiresAt) {
+      throw new ChError('CH003', 'invalid_time');
+    }
+    const start = this.dayStart(now);
+    const mineAll = this.challenges.filter((c) => c.challengerId === me.id);
+    if (mineAll.filter((c) => c.createdAt >= start).length >= SOCIAL_LIMITS.challengesPerDay) throw new ChError('CH007', 'challenge_daily_limit');
+    if (mineAll.filter((c) => this.challengeStatus(c, now) === 'open').length >= SOCIAL_LIMITS.challengesOpenPerChallenger) {
+      throw new ChError('CH007', 'challenge_active_limit');
+    }
+    let opponentId: string | null = null;
+    let th: Thread | null = null;
+    if (input.threadId) {
+      th = this.threadOf(me, input.threadId);
+      opponentId = this.assertOpenBetween(me, th).id;
+      this.hit(this.privTimes, me.id, SOCIAL_LIMITS.privatePerWindow, SOCIAL_LIMITS.privateWindowMs, now);
+    } else {
+      this.hit(this.pubTimes, me.id, SOCIAL_LIMITS.publicPerWindow, SOCIAL_LIMITS.publicWindowMs, now);
+    }
+    const c: Challenge = { id: this.newId(), hotelId: me.hotelId, gameId: input.game.id, game: input.game.name, challengerId: me.id,
+      opponentId, threadId: th?.id ?? null, startsAt: input.startsAt, stake: input.stake, status: 'open', createdAt: now };
+    this.challenges.push(c);
+    if (th) th.lastAt = now;
+    return this.challengeView(c, me, now);
+  }
+
+  private challengeOf(me: Profile, id: string): Challenge {
+    const c = this.challenges.find((x) => x.id === id && x.hotelId === me.hotelId);
+    if (!c) throw new ChError('CH003', 'invalid_challenge');
+    // privata: solo le due parti; pubblica: chi non e' bloccato con chi l'ha lanciata
+    if (c.threadId ? c.challengerId !== me.id && c.opponentId !== me.id : this.isBlockedEitherWay(me.id, c.challengerId)) {
+      throw new ChError('CH003', 'invalid_challenge');
+    }
+    return c;
+  }
+
+  /** Accetta (o, in privato, rifiuta). Nella chat pubblica vince il primo che accetta. */
+  respondChallenge(guestId: string, id: string, accept: boolean, now: Date): ChallengeView {
+    const me = this.requireWriter(guestId, now);
+    const c = this.challengeOf(me, id);
+    if (this.challengeStatus(c, now) !== 'open') throw new ChError('CH005', 'challenge_closed');
+    if (c.challengerId === me.id) throw new ChError('CH004', 'forbidden');
+    if (c.threadId) {
+      if (c.opponentId !== me.id) throw new ChError('CH004', 'forbidden');
+      this.assertOpenBetween(me, this.threadOf(me, c.threadId));
+      c.status = accept ? 'accepted' : 'declined';
+    } else {
+      if (!accept) throw new ChError('CH004', 'forbidden');
+      const ch = this.byId(c.challengerId);
+      if (!this.isEligible(ch)) throw new ChError('CH004', 'recipient_unavailable');
+      c.opponentId = me.id;
+      c.status = 'accepted';
+    }
+    c.respondedAt = now;
+    return this.challengeView(c, me, now);
+  }
+
+  /** Solo chi l'ha lanciata, finche' e' aperta o accettata e la partita non e' iniziata. */
+  cancelChallenge(guestId: string, id: string, now: Date) {
+    const me = this.requireMember(guestId);
+    const c = this.challengeOf(me, id);
+    if (c.challengerId !== me.id) throw new ChError('CH004', 'forbidden');
+    const st = this.challengeStatus(c, now);
+    if (!(st === 'open' || (st === 'accepted' && c.startsAt > now))) throw new ChError('CH005', 'challenge_closed');
+    c.status = 'cancelled';
+  }
+
+  /**
+   * Sfide della chat pubblica (threadId assente) o di una conversazione. Pubbliche: solo quelle di persone non bloccate,
+   * senza le annullate, fino a 2 ore dopo l'orario. In una conversazione: tutte, come i messaggi.
+   */
+  challengesFor(guestId: string, threadId: string | null, now: Date): ChallengeView[] {
+    const me = this.requireMember(guestId);
+    let list: Challenge[];
+    if (threadId) {
+      const th = this.threadOf(me, threadId);
+      if (th.blockedBy === me.id) throw new ChError('CH003', 'invalid_thread');
+      list = this.challenges.filter((c) => c.threadId === th.id);
+    } else {
+      const since = now.getTime() - SOCIAL_LIMITS.challengeShowAfterMs;
+      list = this.challenges.filter((c) => c.hotelId === me.hotelId && !c.threadId && c.status !== 'cancelled' && c.startsAt.getTime() > since
+        && !this.isBlockedEitherWay(me.id, c.challengerId) && !(c.opponentId && this.isBlockedEitherWay(me.id, c.opponentId))
+        && this.byId(c.challengerId));
+    }
+    return list.sort(sortByTime).map((c) => this.challengeView(c, me, now));
+  }
+
   // ------------------------------------------------------------------------- moderazione hotel
 
   /** Tutti i messaggi pubblici dell'hotel, compresi quelli nascosti, per il pannello. */
@@ -633,6 +770,7 @@ export class SocialHub {
     this.privMsgs = this.privMsgs.filter((m) => !myThreads.has(m.threadId));
     this.threads = this.threads.filter((t) => !myThreads.has(t.id));
     this.publicMsgs = this.publicMsgs.filter((m) => m.authorId !== p.id);
+    this.challenges = this.challenges.filter((c) => c.challengerId !== p.id && c.opponentId !== p.id && !(c.threadId && myThreads.has(c.threadId)));
     this.blocks = this.blocks.filter((b) => b.by !== p.id && b.target !== p.id);
     for (const r of this.reports) {
       if (r.reporterId === p.id || r.reportedId === p.id) {

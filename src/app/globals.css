@@ -764,6 +764,28 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 }
 @media (prefers-reduced-motion: reduce) { .card-link { transition: none; } .card-link:hover { transform: none; } }
 
+/* ---- Giochi e sfide (nessun colore nuovo) ----
+   .game-card: card di un gioco nella pagina Prenota. .challenge: sfida dentro una chat, allineata come i messaggi
+   (mia a destra, degli altri a sinistra); finita (rifiutata, annullata, scaduta) in tono spento. */
+.games { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); }
+.game-icon, .challenge-icon { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--primary-soft); color: var(--on-primary-soft); }
+.game-icon svg, .challenge-icon svg { width: 22px; height: 22px; }
+.challenge { display: flex; flex-direction: column; gap: var(--space-2); width: min(100%, 340px); max-width: 92%; padding: var(--space-3); border-radius: var(--radius-lg);
+  background: var(--primary-soft); color: var(--text); border: var(--bw) solid var(--ticket-line); }
+.challenge-mine { align-self: flex-end; }
+.challenge-theirs { align-self: flex-start; }
+.challenge-done { background: var(--surface-2); border-color: var(--border); }
+.challenge-done .challenge-icon { background: var(--surface); color: var(--text-muted); }
+.challenge-head { display: flex; align-items: center; gap: var(--space-3); }
+.challenge-title { margin: 0; font-family: var(--font-display); font-weight: var(--fw-bold); line-height: var(--lh-tight); overflow-wrap: break-word; }
+.challenge-meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin: 0; font-size: var(--fs-sm); color: var(--text-muted); }
+.challenge-meta > span { display: inline-flex; align-items: center; gap: var(--space-1); }
+.challenge-meta svg { width: 16px; height: 16px; }
+.challenge-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.challenge .badge-info { background: var(--surface); }   /* sullo sfondo della card il badge "Aperta" deve staccarsi */
+.composer-extra { flex: none; }
+.composer-text::placeholder { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
 /* ---- Immagini di eventi e servizi (nessun colore nuovo) ---- */
 .card.has-photo { overflow: hidden; }
 .card-photo { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; background: var(--surface-2); }

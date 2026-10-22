@@ -25,6 +25,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     { href: '/admin/social', label: t('admin.nav.social'), badge: 'social' as const },
     { href: '/admin/events', label: t('admin.nav.events') },
     { href: '/admin/services', label: t('admin.nav.services') },
+    { href: '/admin/games', label: t('admin.nav.games') },
     { href: '/admin/ai', label: t('admin.nav.ai') },
     { href: '/admin/notifications', label: t('admin.nav.notifications') },
     ...(admin ? [{ href: '/admin/settings', label: t('admin.nav.settings') }] : []),

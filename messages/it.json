@@ -193,7 +193,11 @@
     "partyLess": "Una persona in meno",
     "partyMore": "Una persona in più",
     "confirmButton": "Conferma prenotazione",
-    "noBookingsHint": "Scegli un servizio e un orario qui sopra."
+    "noBookingsHint": "Scegli un servizio e un orario qui sopra.",
+    "services": "Servizi",
+    "open": "Prenota",
+    "close": "Chiudi",
+    "noFreeSlots": "Nessun posto libero nei prossimi giorni"
   },
   "reception": {
     "title": "Reception",
@@ -298,7 +302,8 @@
       "settings": "Impostazioni",
       "social": "Social",
       "label": "Sezioni del pannello",
-      "toHandle": "{n} da gestire"
+      "toHandle": "{n} da gestire",
+      "games": "Giochi"
     },
     "dashboard": {
       "title": "Numeri chiave",
@@ -587,6 +592,33 @@
       "urgent": "{n} emergenze aperte",
       "urgentHint": "Un ospite ha segnalato un'emergenza: rispondi subito.",
       "open": "Apri avvisi"
+    },
+    "games": {
+      "title": "Giochi",
+      "intro": "I giochi non si prenotano: gli ospiti li usano per lanciarsi sfide (es. \"ping pong tra 15 minuti, chi perde offre il caffè\").",
+      "new": "Nuovo gioco",
+      "edit": "Modifica gioco",
+      "name_it": "Nome (italiano)",
+      "name_en": "Nome (inglese)",
+      "name_de": "Nome (tedesco)",
+      "name_ru": "Nome (russo)",
+      "desc_it": "Descrizione (italiano)",
+      "desc_en": "Descrizione (inglese)",
+      "desc_de": "Descrizione (tedesco)",
+      "desc_ru": "Descrizione (russo)",
+      "location": "Dove si trova",
+      "locationHint": "Es. Sala giochi",
+      "active": "Visibile agli ospiti",
+      "on": "Visibile",
+      "off": "Nascosto",
+      "turnOn": "Mostra",
+      "turnOff": "Nascondi",
+      "deleteConfirm": "Eliminare il gioco \"{name}\"? Le sfide già lanciate restano.",
+      "emptyTitle": "Nessun gioco",
+      "empty": "Aggiungi i giochi della struttura (ping pong, calcio balilla, biliardo...).",
+      "errors": {
+        "invalid_game": "Gioco non valido: serve almeno il nome in italiano (massimo 60 caratteri)."
+      }
     }
   },
   "privacy": {
@@ -854,6 +886,67 @@
       "reception": "Risposte della reception",
       "private": "Messaggi privati",
       "public": "Chat pubblica (al massimo una notifica ogni 10 minuti)"
+    }
+  },
+  "games": {
+    "title": "Giochi",
+    "hint": "Non si prenotano: lancia una sfida e trova con chi giocare.",
+    "challenge": "Lancia una sfida"
+  },
+  "challenge": {
+    "title": "Lancia una sfida",
+    "button": "Sfida",
+    "game": "Gioco",
+    "when": "Quando",
+    "in15": "Tra 15 min",
+    "in30": "Tra 30 min",
+    "in60": "Tra 1 ora",
+    "in120": "Tra 2 ore",
+    "stake": "Posta in gioco",
+    "stakes": {
+      "coffee": "Chi perde offre il caffè",
+      "aperitif": "Chi perde offre l'aperitivo",
+      "fun": "Solo per divertimento"
+    },
+    "where": "A chi",
+    "wherePublic": "A tutti, nella chat dell'hotel",
+    "wherePrivate": "A {name}, in privato",
+    "whereHint": "Per sfidare una persona in privato serve una chat privata già accettata.",
+    "send": "Manda la sfida",
+    "sentPublic": "Sfida pubblicata nella chat dell'hotel.",
+    "sentPrivate": "Sfida inviata in privato.",
+    "needSocial": "Per lanciare sfide attiva il tuo profilo in Ospiti e accetta le regole della chat.",
+    "goSocial": "Vai a Ospiti",
+    "noGames": "L'hotel non ha ancora indicato giochi.",
+    "titleMinePrivate": "Hai sfidato {name} a {game}",
+    "titleMinePublic": "Hai sfidato tutti a {game}",
+    "titleTheirsPrivate": "{name} ti sfida a {game}",
+    "titleTheirsPublic": "{name} sfida tutti a {game}",
+    "versus": "{a} contro {b} a {game}",
+    "you": "te",
+    "youShort": "Tu",
+    "at": "Alle {time}",
+    "status": {
+      "open": "Aperta",
+      "accepted": "Accettata",
+      "declined": "Rifiutata",
+      "cancelled": "Annullata",
+      "expired": "Scaduta"
+    },
+    "accept": "Accetto",
+    "decline": "No, grazie",
+    "cancel": "Annulla sfida",
+    "cancelConfirm": "Annullare la sfida?",
+    "errors": {
+      "invalid_time": "Scegli un orario tra 5 minuti e 12 ore, prima del check-out.",
+      "invalid_stake": "Posta non valida.",
+      "invalid_game": "Gioco non disponibile.",
+      "challenge_closed": "Questa sfida non è più aperta.",
+      "invalid_challenge": "Sfida non disponibile.",
+      "challenge_daily_limit": "Hai già lanciato 5 sfide oggi.",
+      "challenge_active_limit": "Hai già 3 sfide aperte: aspetta una risposta o annullane una.",
+      "thread_not_open": "La conversazione non è ancora stata accettata.",
+      "recipient_unavailable": "Questa persona non è disponibile."
     }
   }
 }

@@ -4,6 +4,11 @@
 // UI e handler API parlano solo con queste interfacce.
 
 import type {
+  AdminGame,
+  ChallengeView,
+  CreateChallengeInput,
+  GameView,
+  SaveGameInput,
   AdminEvent,
   AdminFacility,
   AdminNotification,
@@ -68,6 +73,12 @@ export interface SocialGuestApi {
   sendCoupon(threadId: string, kind: CouponKind): Promise<CouponView>;
   couponQr(couponId: string): Promise<CouponQrView>;
   cancelCoupon(couponId: string): Promise<void>;
+  /** Sfide della chat pubblica (threadId assente) o di una conversazione. */
+  challenges(threadId?: string | null): Promise<ChallengeView[]>;
+  createChallenge(input: CreateChallengeInput): Promise<ChallengeView>;
+  /** Accetta o (solo in privato) rifiuta. */
+  respondChallenge(id: string, accept: boolean): Promise<void>;
+  cancelChallenge(id: string): Promise<void>;
 }
 
 /** Moderazione e numeri aggregati per il pannello hotel (reception e direttore). Nessun accesso alle chat private. */
@@ -96,6 +107,8 @@ export interface GuestApi {
   events(): Promise<EventView[]>;
   rsvp(eventId: string, going: boolean): Promise<void>;
   facilities(): Promise<FacilityView[]>;
+  /** Giochi attivi dell'hotel (non prenotabili: servono per le sfide). */
+  games(): Promise<GameView[]>;
   myBookings(): Promise<BookingView[]>;
   book(slotId: string, partySize: number): Promise<void>;
   cancelBooking(bookingId: string): Promise<void>;
@@ -125,6 +138,10 @@ export interface StaffApi {
   facilities(): Promise<AdminFacility[]>;
   generateSlots(input: GenerateSlotsInput): Promise<number>;
   updateSlot(input: { id: string; capacity?: number; status?: 'open' | 'closed' }): Promise<void>;
+  /** Giochi dell'hotel (direttore e reception), anche quelli spenti. */
+  games(): Promise<AdminGame[]>;
+  saveGame(input: SaveGameInput): Promise<void>;
+  deleteGame(id: string): Promise<void>;
   knowledge(): Promise<(AiKnowledgeEntry & { active: boolean })[]>;
   saveKnowledge(input: SaveKnowledgeInput): Promise<void>;
   deleteKnowledge(id: string): Promise<void>;
