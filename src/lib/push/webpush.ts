@@ -9,6 +9,22 @@ export type SendResult = 'ok' | 'gone' | 'error';
 const b64u = (b: Buffer | Uint8Array) => Buffer.from(b).toString('base64url');
 const fromB64u = (s: string) => Buffer.from(s, 'base64url');
 
+// Servizi push dei browser: Chrome/Android/Opera/Samsung (FCM), Firefox (Mozilla), Safari (Apple), Edge (WNS).
+// Il server manda richieste solo a questi host: un indirizzo scelto dal client non puo' far chiamare altro (SSRF).
+const PUSH_HOSTS = ['fcm.googleapis.com'];
+const PUSH_HOST_SUFFIXES = ['.push.services.mozilla.com', '.push.apple.com', '.notify.windows.com'];
+
+export function isPushEndpoint(endpoint: string): boolean {
+  try {
+    const u = new URL(endpoint);
+    if (u.protocol !== 'https:' || u.port !== '' || u.username || u.password) return false;
+    const host = u.hostname.toLowerCase();
+    return PUSH_HOSTS.includes(host) || PUSH_HOST_SUFFIXES.some((s) => host.endsWith(s));
+  } catch {
+    return false;
+  }
+}
+
 export function vapidFromEnv(env: Record<string, string | undefined> = process.env): VapidConfig | null {
   const publicKey = env.VAPID_PUBLIC_KEY?.trim(), privateKey = env.VAPID_PRIVATE_KEY?.trim(), subject = env.VAPID_SUBJECT?.trim();
   if (!publicKey || !privateKey || !subject) return null;
@@ -51,6 +67,8 @@ export function vapidAuthHeader(endpoint: string, v: VapidConfig, nowSec = Math.
 }
 
 export async function sendPush(sub: PushSub, payload: object, v: VapidConfig, opts: { ttl?: number; urgency?: 'normal' | 'high' } = {}): Promise<SendResult> {
+  // iscrizione verso un host non riconosciuto (salvata prima del controllo): non si chiama, e si cancella
+  if (!isPushEndpoint(sub.endpoint)) return 'gone';
   try {
     const res = await fetch(sub.endpoint, {
       method: 'POST',
