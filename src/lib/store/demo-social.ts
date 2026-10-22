@@ -5,7 +5,7 @@
 import { ChError } from '../errors';
 import type { SocialHub } from '../rules/social';
 import { isCouponToken } from '../rules/coupons';
-import type { CouponKind, CouponQrView, CouponView, Period, PrivateMessageView, PublicMessageView, ReportReason, SocialSettings, StaffRole } from '../types';
+import type { ChallengeView, CouponKind, CouponQrView, CouponView, CreateChallengeInput, Period, PrivateMessageView, PublicMessageView, ReportReason, SocialSettings, StaffRole } from '../types';
 import type { SocialGuestApi, SocialStaffApi } from './types';
 import type { DemoStore } from './demo';
 
@@ -50,6 +50,18 @@ export class DemoSocialGuest implements SocialGuestApi {
   async cancelCoupon(couponId: string) {
     this.hub.cancelCoupon(this.gid, couponId, this.now());
   }
+  async challenges(threadId?: string | null) { return this.hub.challengesFor(this.gid, threadId ?? null, this.now()); }
+  async createChallenge(i: CreateChallengeInput): Promise<ChallengeView> {
+    const game = this.s.activeGame(i.gameId);
+    const r = this.hub.createChallenge(this.gid, { game, startsAt: new Date(i.startsAt), stake: i.stake, threadId: i.threadId ?? null }, this.now());
+    this.s.markAction(this.gid);
+    return r;
+  }
+  async respondChallenge(id: string, accept: boolean) {
+    this.hub.respondChallenge(this.gid, id, accept, this.now());
+    this.s.markAction(this.gid);
+  }
+  async cancelChallenge(id: string) { this.hub.cancelChallenge(this.gid, id, this.now()); }
 }
 
 const MODERATORS: StaffRole[] = ['hotel_admin', 'reception'];

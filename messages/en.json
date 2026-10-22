@@ -193,7 +193,11 @@
     "partyLess": "One person fewer",
     "partyMore": "One person more",
     "confirmButton": "Confirm booking",
-    "noBookingsHint": "Pick a service and a time above."
+    "noBookingsHint": "Pick a service and a time above.",
+    "services": "Services",
+    "open": "Book",
+    "close": "Close",
+    "noFreeSlots": "No free places in the next few days"
   },
   "reception": {
     "title": "Reception",
@@ -298,7 +302,8 @@
       "settings": "Settings",
       "social": "Social",
       "label": "Panel sections",
-      "toHandle": "{n} to handle"
+      "toHandle": "{n} to handle",
+      "games": "Games"
     },
     "dashboard": {
       "title": "Key numbers",
@@ -587,6 +592,33 @@
       "urgent": "{n} open emergencies",
       "urgentHint": "A guest reported an emergency: reply right away.",
       "open": "Open alerts"
+    },
+    "games": {
+      "title": "Games",
+      "intro": "Games are not booked: guests use them to challenge each other (e.g. \"table tennis in 15 minutes, loser buys the coffee\").",
+      "new": "New game",
+      "edit": "Edit game",
+      "name_it": "Name (Italian)",
+      "name_en": "Name (English)",
+      "name_de": "Name (German)",
+      "name_ru": "Name (Russian)",
+      "desc_it": "Description (Italian)",
+      "desc_en": "Description (English)",
+      "desc_de": "Description (German)",
+      "desc_ru": "Description (Russian)",
+      "location": "Where it is",
+      "locationHint": "E.g. Games room",
+      "active": "Visible to guests",
+      "on": "Visible",
+      "off": "Hidden",
+      "turnOn": "Show",
+      "turnOff": "Hide",
+      "deleteConfirm": "Delete the game \"{name}\"? Challenges already sent remain.",
+      "emptyTitle": "No games",
+      "empty": "Add the games available at the property (table tennis, table football, billiards...).",
+      "errors": {
+        "invalid_game": "Invalid game: at least the Italian name is required (max 60 characters)."
+      }
     }
   },
   "privacy": {
@@ -854,6 +886,67 @@
       "reception": "Front desk replies",
       "private": "Private messages",
       "public": "Public chat (at most one notification every 10 minutes)"
+    }
+  },
+  "games": {
+    "title": "Games",
+    "hint": "No booking needed: send a challenge and find someone to play with.",
+    "challenge": "Send a challenge"
+  },
+  "challenge": {
+    "title": "Send a challenge",
+    "button": "Challenge",
+    "game": "Game",
+    "when": "When",
+    "in15": "In 15 min",
+    "in30": "In 30 min",
+    "in60": "In 1 hour",
+    "in120": "In 2 hours",
+    "stake": "Stake",
+    "stakes": {
+      "coffee": "Loser buys the coffee",
+      "aperitif": "Loser buys the aperitif",
+      "fun": "Just for fun"
+    },
+    "where": "Who to challenge",
+    "wherePublic": "Everyone, in the hotel chat",
+    "wherePrivate": "{name}, privately",
+    "whereHint": "To challenge someone privately you need an accepted private chat.",
+    "send": "Send challenge",
+    "sentPublic": "Challenge posted in the hotel chat.",
+    "sentPrivate": "Challenge sent privately.",
+    "needSocial": "To send challenges, turn on your profile in Guests and accept the chat rules.",
+    "goSocial": "Go to Guests",
+    "noGames": "The hotel has not added any games yet.",
+    "titleMinePrivate": "You challenged {name} to {game}",
+    "titleMinePublic": "You challenged everyone to {game}",
+    "titleTheirsPrivate": "{name} challenges you to {game}",
+    "titleTheirsPublic": "{name} challenges everyone to {game}",
+    "versus": "{a} vs {b} at {game}",
+    "you": "you",
+    "youShort": "You",
+    "at": "At {time}",
+    "status": {
+      "open": "Open",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "accept": "I'm in",
+    "decline": "No, thanks",
+    "cancel": "Cancel challenge",
+    "cancelConfirm": "Cancel this challenge?",
+    "errors": {
+      "invalid_time": "Choose a time between 5 minutes and 12 hours from now, before check-out.",
+      "invalid_stake": "Invalid stake.",
+      "invalid_game": "Game not available.",
+      "challenge_closed": "This challenge is no longer open.",
+      "invalid_challenge": "Challenge not available.",
+      "challenge_daily_limit": "You have already sent 5 challenges today.",
+      "challenge_active_limit": "You already have 3 open challenges: wait for a reply or cancel one.",
+      "thread_not_open": "The conversation has not been accepted yet.",
+      "recipient_unavailable": "This person is not available."
     }
   }
 }

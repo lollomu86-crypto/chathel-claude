@@ -16,13 +16,14 @@
 
 ## Infrastruttura
 - App: **chathel.com** (+ www) su **Vercel** (progetto `chathel-app`, team `chat-hel`, piano Hobby). Repo GitHub **lollomu86-crypto/chathel-claude**, collegata: push su `main` = deploy produzione. Il sito per i direttori **chathel.it** è un progetto separato (repo `chathel-sito`, vuoto).
-- Database/Auth: **Supabase** (progetto ChatHel, piano Free, UE). Migrazioni in `supabase/migrations` (0001–0007 applicate). Login Google attivo (Google Cloud progetto ChatHel, client "ChatHel Web"; Site URL https://chathel.com; redirect https://chathel.com/**).
-- Hotel di prova: slug `hotel-prova`, codice 967991, admin su chathel.com/admin/login. Dati demo: `supabase/seed/demo-hotel-prova.sql` (atteso `6 | 5 | 123 | 9`). Immagini di esempio in `public/demo/*.svg`.
+- Database/Auth: **Supabase** (progetto ChatHel, piano Free, UE). Migrazioni in `supabase/migrations` (0001–0007 applicate; **0008 giochi e sfide da applicare prima del merge della sua PR**). Login Google attivo (Google Cloud progetto ChatHel, client "ChatHel Web"; Site URL https://chathel.com; redirect https://chathel.com/**).
+- Hotel di prova: slug `hotel-prova`, codice 967991, admin su chathel.com/admin/login. Dati demo: `supabase/seed/demo-hotel-prova.sql` (dopo la 0008: 6 eventi, 4 servizi, 3 giochi, 10 voci reception; i posti dipendono dall'ora). Immagini di esempio in `public/demo/*.svg`.
 - Variabili Vercel (solo i nomi): SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, IDENTITY_PEPPER, TRUSTED_IP_HEADER, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY. Previste: ANTHROPIC_API_KEY (+ANTHROPIC_MODEL, AI_HOTEL_DAILY_CAP), EMERGENCY_WEBHOOK_URL, VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT (push).
 - Il connettore Vercel MCP dà 403 sullo scope chat-hel: le azioni sul dashboard le fa Lorenzo (Deployments → Create Deployment se serve).
 
 ## Stack e test
 Next.js 15.5 (App Router) + Supabase, niente librerie push: Web Push scritto con `node:crypto` (`src/lib/push/`). Test: `npm test` (150 passano; con `NODE_PATH=/opt/npm-tools/node_modules` nel container cloud). `npm run i18n` controlla le traduzioni it/en/de/ru. `tsc` ha solo errori d'ambiente (mancano @types/node ecc.) nel container cloud: su una macchina con `npm install` deve essere pulito. Leggere anche `NOTE-SVILUPPO.md`.
+Giochi e sfide (0008): la sala giochi non si prenota piu'; i giochi (`games`, gestiti da direttore e reception in /admin/games) servono alle sfide tra ospiti (`social_challenges`, regole in `rules/social.ts` e nelle RPC `social_challenge_*`): pubbliche nella chat dell'hotel (accetta il primo) o private in una conversazione accettata; posta solo fissa (caffe', aperitivo, per divertimento), nessun risultato registrato; 5 al giorno, 3 aperte, orario tra 5 min e 12 h.
 Fatti importanti: dopo il login Google il browser NON deve chiamare `signOut` (revoca la sessione sul server; vedi `src/lib/auth/google-client.ts`). Eventi/servizi usano jsonb `{it,en,de}`; gli slot sono unici per (servizio, orario).
 
 ## Notifiche push (stato: ATTIVE in produzione dal 22/10/2026)

@@ -8,7 +8,7 @@ do $seed$
 declare
   h uuid;
   today date := (now() at time zone 'Europe/Rome')::date;
-  f_spa uuid; f_mas uuid; f_pool uuid; f_game uuid; f_rest uuid;
+  f_spa uuid; f_mas uuid; f_pool uuid; f_rest uuid;
 begin
   select id into h from public.hotels where slug = 'hotel-prova';
   if h is null then raise exception 'Hotel Prova non trovato (slug hotel-prova)'; end if;
@@ -26,6 +26,7 @@ begin
   -- pulizia dei dati demo precedenti
   delete from public.events        where hotel_id = h;
   delete from public.facilities    where hotel_id = h;   -- cancella a cascata slot e prenotazioni
+  delete from public.games         where hotel_id = h;   -- le sfide gia' lanciate restano (game_id diventa null)
   delete from public.ai_knowledge  where hotel_id = h;
   delete from public.notifications where hotel_id = h and guest_id is null and kind = 'announcement';
 
@@ -61,9 +62,6 @@ begin
     values (h, 'pool', '{"it":"Lettini in piscina","en":"Pool sunbeds","de":"Liegen am Pool"}',
             '{"it":"Due lettini con ombrellone vicino alla piscina, mezza giornata.","en":"Two sunbeds with a parasol by the pool, half a day.","de":"Zwei Liegen mit Sonnenschirm am Pool, einen halben Tag."}', 6, '/demo/piscina-lettini.svg') returning id into f_pool;
   insert into public.facilities(hotel_id, kind, name, description, default_capacity, image_url)
-    values (h, 'gamesroom', '{"it":"Sala giochi","en":"Games room","de":"Spielzimmer"}',
-            '{"it":"Ping pong e calcio balilla, un''ora a tavolo.","en":"Table tennis and table football, one hour per table.","de":"Tischtennis und Tischfußball, eine Stunde pro Tisch."}', 4, '/demo/sala-giochi.svg') returning id into f_game;
-  insert into public.facilities(hotel_id, kind, name, description, default_capacity, image_url)
     values (h, 'other', '{"it":"Cena al ristorante","en":"Dinner at the restaurant","de":"Abendessen im Restaurant"}',
             '{"it":"Prenota il tuo tavolo per la cena.","en":"Book your table for dinner.","de":"Reservieren Sie Ihren Tisch für das Abendessen."}', 20, '/demo/ristorante-tavolo.svg') returning id into f_rest;
 
@@ -74,7 +72,6 @@ begin
       (f_spa,  interval '60 minutes', 4, array[time '10:00', time '11:30', time '16:00', time '17:30']),
       (f_mas,  interval '50 minutes', 1, array[time '10:00', time '11:00', time '15:30', time '16:30', time '17:30']),
       (f_pool, interval '5 hours',    6, array[time '09:00', time '14:00']),
-      (f_game, interval '60 minutes', 4, array[time '16:00', time '17:00', time '21:00']),
       (f_rest, interval '90 minutes', 20, array[time '19:30', time '20:30'])
   ) as f(id, dur, cap, hrs)
   cross join lateral (
@@ -82,6 +79,13 @@ begin
     from generate_series(0, 7) as d, unnest(f.hrs) as t
   ) s
   where s.st > now();
+
+  -- giochi (migrazione 0008): non si prenotano, servono alle sfide tra ospiti
+  insert into public.games(hotel_id, name, description, location, sort_order) values
+  (h, '{"it":"Ping pong","en":"Table tennis","de":"Tischtennis","ru":"Настольный теннис"}',
+      '{"it":"Racchette e palline alla reception.","en":"Bats and balls at the front desk.","de":"Schläger und Bälle an der Rezeption.","ru":"Ракетки и мячи на ресепшене."}', 'Sala giochi', 1),
+  (h, '{"it":"Calcio balilla","en":"Table football","de":"Tischfußball","ru":"Настольный футбол"}', null, 'Sala giochi', 2),
+  (h, '{"it":"Biliardo","en":"Billiards","de":"Billard","ru":"Бильярд"}', null, 'Bar della piazzetta', 3);
 
   -- informazioni per la reception (l'assistente risponde SOLO da qui)
   insert into public.ai_knowledge(hotel_id, category, title, content, locale, sort_order) values
@@ -93,7 +97,8 @@ begin
   (h, 'rules',     'Check-out', 'Il check-out e'' entro le 11:00. Per lasciare i bagagli dopo il check-out, rivolgersi alla reception.', 'it', 60),
   (h, 'rules',     'Animali', 'Gli animali di piccola taglia sono ammessi nelle camere ma non al ristorante ne'' in piscina.', 'it', 70),
   (h, 'contacts',  'Contatti utili', 'Reception: numero interno 9. Medico di guardia turistica: chiedere alla reception. Per ogni emergenza chiamare il 112.', 'it', 80),
-  (h, 'events',    'Animazione', 'Il programma della settimana e'' nella sezione Eventi dell''app. L''animazione e'' sempre in piazzetta.', 'it', 90);
+  (h, 'events',    'Animazione', 'Il programma della settimana e'' nella sezione Eventi dell''app. L''animazione e'' sempre in piazzetta.', 'it', 90),
+  (h, 'general',   'Sala giochi', 'La sala giochi ha ping pong e calcio balilla, il biliardo e'' al bar della piazzetta. Non serve prenotare: dall''app si puo'' lanciare una sfida agli altri ospiti. Racchette e palline alla reception.', 'it', 100);
 
   -- avviso di benvenuto per tutti gli ospiti
   insert into public.notifications(hotel_id, kind, title, body, url)
@@ -109,4 +114,5 @@ select
   (select count(*) from public.events        where hotel_id = (select id from public.hotels where slug='hotel-prova')) as eventi,
   (select count(*) from public.facilities    where hotel_id = (select id from public.hotels where slug='hotel-prova')) as servizi,
   (select count(*) from public.slots         where hotel_id = (select id from public.hotels where slug='hotel-prova')) as posti_prenotabili,
+  (select count(*) from public.games         where hotel_id = (select id from public.hotels where slug='hotel-prova')) as giochi,
   (select count(*) from public.ai_knowledge  where hotel_id = (select id from public.hotels where slug='hotel-prova')) as info_reception;

@@ -13,6 +13,7 @@ import { BonusLedger, type HotelBonusConfig } from '../rules/bonus';
 import { SlotBook, type BookingPolicy } from '../rules/slots';
 import { SocialHub, sanitizeNickname } from '../rules/social';
 import { isCouponToken } from '../rules/coupons';
+import { cleanGameInput, GAME_LIMITS } from '../rules/games';
 import { DemoSocialGuest, DemoSocialStaff } from './demo-social';
 import { addDaysKey, isDayKey, localDayKey, zonedTime } from '../time';
 import { DEFAULT_LOCALE, isLocale, type AdminEvent, type AdminFacility, type AdminNotification, type AiContext,
@@ -21,9 +22,9 @@ import { DEFAULT_LOCALE, isLocale, type AdminEvent, type AdminFacility, type Adm
   type HandoffConversation, type HandoffPriority, type HandoffReason, type I18nText, type Kpis, type Locale, type NotificationView,
   type Period, type PublicHotel, type PublishNotificationInput, type RedeemResult, type SaveEventInput,
   type SaveKnowledgeInput, type StaffInfo, type StaffRole, type StartStayInput, type StartStayResult,
-  type StartStayBonus } from '../types';
+  type StartStayBonus, type AdminGame, type GameView, type SaveGameInput } from '../types';
 import type { GuestApi, StaffApi, Store } from './types';
-import { DEMO_EVENTS, DEMO_FACILITIES, DEMO_KB, DEMO_STAFF } from './demo-data';
+import { DEMO_EVENTS, DEMO_FACILITIES, DEMO_GAMES, DEMO_KB, DEMO_STAFF } from './demo-data';
 
 const HOTEL_ID = 'hotel-demo';
 // costanti condivise: definite in ../limits (modulo neutro); riesportate qui per compatibilita'
@@ -81,6 +82,7 @@ export class DemoStore implements Store {
   events: Ev[] = [];
   attendance: Att[] = [];
   facilities: Fac[] = [];
+  games: AdminGame[] = [];
   notifs: Notif[] = [];
   convs: Conv[] = [];
   msgs: Msg[] = [];
@@ -110,7 +112,14 @@ export class DemoStore implements Store {
     if (opts.seed !== false) this.seed(now);
   }
 
-  private id(prefix: string) { return `${prefix}${++this.seq}`; }
+  id(prefix: string) { return `${prefix}${++this.seq}`; }
+
+  /** Gioco attivo dell'hotel, per le sfide (come social_challenge_create in SQL). */
+  activeGame(id: string): GameView {
+    const g = this.games.find((x) => x.id === id && x.active);
+    if (!g) throw new ChError('CH003', 'invalid_game');
+    return { id: g.id, name: g.name, description: g.description, location: g.location };
+  }
   private seed(now: Date) {
     const tz = this.hotel.timezone;
     const today = localDayKey(now, tz);
@@ -129,6 +138,7 @@ export class DemoStore implements Store {
       this.facilities.push(fac);
       this.makeSlots(fac, today, addDaysKey(today, 7), f.start, f.end, f.minutes, f.capacity);
     }
+    DEMO_GAMES.forEach((g, i) => this.games.push({ id: this.id('game'), name: g.name, description: g.description, location: g.location, active: true, sortOrder: i }));
     DEMO_KB.forEach((k, i) => this.knowledge.push({ ...k, id: this.id('kb'), active: true, sortOrder: i }));
   }
 
@@ -365,6 +375,10 @@ class DemoGuestApi implements GuestApi {
         .map((x) => ({ id: x.id, startsAt: x.startsAt.toISOString(), endsAt: x.endsAt.toISOString(), capacity: x.capacity, booked: x.booked })),
     }));
   }
+  async games(): Promise<GameView[]> {
+    return this.s.games.filter((g) => g.active).sort((a, b) => a.sortOrder - b.sortOrder)
+      .map((g) => ({ id: g.id, name: g.name, description: g.description, location: g.location }));
+  }
   async myBookings(): Promise<BookingView[]> {
     const now = this.s.now();
     return this.s.book.bookings
@@ -566,6 +580,30 @@ class DemoStaffApi implements StaffApi {
     this.need(FLOOR);
     if (i.capacity !== undefined) this.s.book.setCapacity(i.id, i.capacity);
     if (i.status) this.s.book.setStatus(i.id, i.status);
+  }
+
+  // ---- giochi (per le sfide)
+  async games(): Promise<AdminGame[]> {
+    this.need(FLOOR);
+    return [...this.s.games].sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+  async saveGame(i: SaveGameInput) {
+    this.need(FLOOR);
+    const v = cleanGameInput(i);
+    if (i.id) {
+      const g = this.s.games.find((x) => x.id === i.id);
+      if (!g) throw new ChError('CH003', 'invalid_game');
+      Object.assign(g, v);
+    } else {
+      if (this.s.games.length >= GAME_LIMITS.perHotel) throw new ChError('CH003', 'invalid_game');
+      this.s.games.push({ id: this.s.id('game'), ...v, sortOrder: this.s.games.length });
+    }
+  }
+  async deleteGame(id: string) {
+    this.need(FLOOR);
+    const n = this.s.games.length;
+    this.s.games = this.s.games.filter((g) => g.id !== id);
+    if (this.s.games.length === n) throw new ChError('CH003', 'invalid_game');
   }
 
   // ---- base di conoscenza

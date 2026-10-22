@@ -2,6 +2,7 @@ import { requireGuest } from '@/lib/server';
 import { formatDateTime, formatTime, pick } from '@/lib/format';
 import { addDaysKey, localDayKey, zonedTime } from '@/lib/time';
 import { BookClient, type BookDay } from '@/components/BookClient';
+import { dateChip } from '@/components/format-ui';
 import { titleFor } from '@/components/page-meta';
 
 export const dynamic = 'force-dynamic';
@@ -10,7 +11,7 @@ export const generateMetadata = titleFor('book.title');
 export default async function BookPage() {
   const { api, view, locale, t } = await requireGuest();
   const tz = view.hotel.timezone;
-  const [facilities, bookings] = await Promise.all([api.facilities(), api.myBookings()]);
+  const [facilities, bookings, games] = await Promise.all([api.facilities(), api.myBookings(), api.games()]);
   const today = localDayKey(new Date(), tz);
   const days: BookDay[] = Array.from({ length: 7 }, (_, i) => {
     const key = addDaysKey(today, i);
@@ -33,9 +34,11 @@ export default async function BookPage() {
         id: b.id,
         facility: pick(b.facilityName, locale, 'it'),
         when: formatDateTime(b.startsAt, locale, tz),
+        chip: dateChip(b.startsAt, locale, tz),
         party: b.partySize,
         canCancel: b.canCancel,
       }))}
+      games={games.map((g) => ({ id: g.id, name: pick(g.name, locale, 'it'), description: pick(g.description, locale, 'it'), location: g.location ?? '' }))}
     />
   );
 }

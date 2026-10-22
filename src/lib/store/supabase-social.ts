@@ -8,6 +8,7 @@
 import { ChError } from '../errors';
 import { SOCIAL_LIMITS } from '../rules/social';
 import type {
+  ChallengeView, CreateChallengeInput,
   CouponKind, CouponQrView, CouponView, GuestListItem, Locale, Period, PrivateMessageView, PublicMessageView,
   PublicModerationMessage, ReportReason, SocialReportView, SocialSettings, SocialStats, StaffRole, ThreadDetail, ThreadSummary,
 } from '../types';
@@ -109,6 +110,28 @@ export class SbSocialGuest implements SocialGuestApi {
     return { token: d.token, expiresAt: iso(d.expires_at)!, kind: d.kind };
   }
   async cancelCoupon(couponId: string) { await rpc(this.db, 'social_cancel_coupon', { p_coupon: couponId }); }
+
+  // ---- sfide (0008)
+  async challenges(threadId?: string | null): Promise<ChallengeView[]> {
+    return rows(await rpc(this.db, 'social_challenges', { p_thread: threadId ?? null })).map(challengeFrom);
+  }
+  async createChallenge(i: CreateChallengeInput): Promise<ChallengeView> {
+    const id = await rpc<string>(this.db, 'social_challenge_create', { p_game: i.gameId, p_starts_at: i.startsAt, p_stake: i.stake, p_thread: i.threadId ?? null });
+    const c = (await this.challenges(i.threadId ?? null)).find((x) => x.id === id);
+    if (!c) throw new ChError('CH003', 'invalid_challenge');
+    return c;
+  }
+  async respondChallenge(id: string, accept: boolean) { await rpc(this.db, 'social_challenge_respond', { p_challenge: id, p_accept: accept }); }
+  async cancelChallenge(id: string) { await rpc(this.db, 'social_challenge_cancel', { p_challenge: id }); }
+}
+
+function challengeFrom(c: any): ChallengeView {
+  return {
+    id: c.id, game: c.game ?? {}, startsAt: iso(c.starts_at)!, stake: c.stake, status: c.status, scope: c.thread_id ? 'private' : 'public',
+    threadId: c.thread_id ?? null, challenger: { id: c.challenger_id, nickname: c.challenger_nickname ?? '' },
+    opponent: c.opponent_id ? { id: c.opponent_id, nickname: c.opponent_nickname ?? '' } : null, mine: !!c.mine, meOpponent: !!c.me_opponent,
+    canAccept: !!c.can_accept, canDecline: !!c.can_decline, canCancel: !!c.can_cancel, createdAt: iso(c.created_at)!,
+  };
 }
 
 const MODERATORS: StaffRole[] = ['hotel_admin', 'reception'];

@@ -6,9 +6,9 @@ import { z } from 'zod';
 import { allow, hashKey, hit } from '../ratelimit';
 import { logEvent } from '../log';
 import type { GuestApi, StaffApi } from '../store/types';
-import { COUPON_KINDS, REPORT_REASONS, type CouponKind, type ReportReason } from '../types';
+import { CHALLENGE_STAKES, COUPON_KINDS, REPORT_REASONS, type ChallengeStake, type CouponKind, type ReportReason } from '../types';
 import type { Ctx, Res } from './handlers';
-import { defer, pushPrivate, pushPublic } from '../push/notify';
+import { defer, pushChallenge, pushPrivate, pushPublic } from '../push/notify';
 
 const ok = (body: Record<string, unknown> = {}): Res => ({ status: 200, body: { ok: true, ...body } });
 const fail = (status: number, error: string): Res => ({ status, body: { ok: false, error } });
@@ -17,6 +17,7 @@ const id = z.string().min(1).max(80);
 const text = z.string().max(2000); // il limite vero (280 caratteri) lo applica il dominio
 const reason = z.enum(REPORT_REASONS as unknown as [ReportReason, ...ReportReason[]]);
 const kind = z.enum(COUPON_KINDS as unknown as [CouponKind, ...CouponKind[]]);
+const stake = z.enum(CHALLENGE_STAKES as unknown as [ChallengeStake, ...ChallengeStake[]]);
 
 export async function socialGuestAction(ctx: Ctx, g: GuestApi, action: string, raw: unknown): Promise<Res | null> {
   if (!action.startsWith('social-')) return null;
@@ -119,6 +120,41 @@ export async function socialGuestAction(ctx: Ctx, g: GuestApi, action: string, r
     case 'social-coupon-cancel': {
       if (!post) return fail(405, 'method_not_allowed');
       await s.cancelCoupon(z.object({ couponId: id }).parse(raw).couponId);
+      return ok();
+    }
+    // ---- sfide
+    case 'social-challenges': {
+      const thread = q.thread === undefined || q.thread === '' ? null : id.parse(q.thread);
+      return ok({ challenges: await s.challenges(thread) });
+    }
+    case 'social-challenge-create': {
+      if (!post) return fail(405, 'method_not_allowed');
+      const b = z.object({ gameId: id, startsAt: z.string().datetime({ offset: true }), stake, threadId: id.nullish() }).parse(raw);
+      const c = await s.createChallenge({ gameId: b.gameId, startsAt: b.startsAt, stake: b.stake, threadId: b.threadId ?? null });
+      if (c.threadId && c.opponent) {
+        const to = c.opponent.id, url = `/stay/social/${encodeURIComponent(c.threadId)}`;
+        notifySocial(ctx, g, (db, ids) => pushChallenge(db, ids.hotelId, ids.guestId, to, 'received', url));
+      } else notifySocial(ctx, g, (db, ids) => pushPublic(db, ids.hotelId, ids.guestId));
+      logEvent('social.challenge', { status: c.scope });
+      return ok({ challenge: c });
+    }
+    case 'social-challenge-respond': {
+      if (!post) return fail(405, 'method_not_allowed');
+      const b = z.object({ challengeId: id, accept: z.boolean(), threadId: id.nullish() }).parse(raw);
+      await s.respondChallenge(b.challengeId, b.accept);
+      if (b.accept) {
+        const c = (await s.challenges(b.threadId ?? null)).find((x) => x.id === b.challengeId);
+        if (c) {
+          const to = c.challenger.id, url = c.threadId ? `/stay/social/${encodeURIComponent(c.threadId)}` : '/stay/social?tab=chat';
+          notifySocial(ctx, g, (db, ids) => pushChallenge(db, ids.hotelId, ids.guestId, to, 'accepted', url));
+        }
+      }
+      logEvent('social.challenge_respond', { status: b.accept ? 'accepted' : 'declined' });
+      return ok();
+    }
+    case 'social-challenge-cancel': {
+      if (!post) return fail(405, 'method_not_allowed');
+      await s.cancelChallenge(z.object({ challengeId: id }).parse(raw).challengeId);
       return ok();
     }
     default:

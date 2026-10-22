@@ -55,15 +55,16 @@ export const DEMO_FACILITIES: DemoFacilitySeed[] = [
     end: '19:00',
     minutes: 120,
   },
-  {
-    kind: 'gamesroom',
-    name: { it: 'Sala giochi', en: 'Games room', de: 'Spielzimmer' },
-    description: { it: 'Calcio balilla, ping pong, console.', en: 'Table football, ping pong, consoles.', de: 'Tischfußball, Tischtennis, Konsolen.' },
-    capacity: 6,
-    start: '15:00',
-    end: '23:00',
-    minutes: 60,
-  },
+];
+
+/** Giochi della sala giochi: non si prenotano, si usano per le sfide tra ospiti. */
+export interface DemoGameSeed { name: I18nText; description: I18nText | null; location: string }
+export const DEMO_GAMES: DemoGameSeed[] = [
+  { name: { it: 'Ping pong', en: 'Table tennis', de: 'Tischtennis', ru: 'Настольный теннис' },
+    description: { it: 'Racchette e palline alla reception.', en: 'Bats and balls at the front desk.', de: 'Schläger und Bälle an der Rezeption.', ru: 'Ракетки и мячи на ресепшене.' },
+    location: 'Sala giochi' },
+  { name: { it: 'Calcio balilla', en: 'Table football', de: 'Tischfußball', ru: 'Настольный футбол' }, description: null, location: 'Sala giochi' },
+  { name: { it: 'Biliardo', en: 'Billiards', de: 'Billard', ru: 'Бильярд' }, description: null, location: 'Bar Terrazza' },
 ];
 
 export interface DemoEventSeed {

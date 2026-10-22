@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { PublicMessageView, ReportReason, SocialSettings } from '@/lib/types';
+import type { ChallengeView, PublicMessageView, ReportReason, SocialSettings } from '@/lib/types';
+import { ChallengeCard, ChallengeDialog } from './Challenge';
 import { call } from './client-api';
 import { dayKeyOf, dayLabel, chatTime } from './format-ui';
 import { nearBottom, scrollToBottom, usePolling } from './hooks';
@@ -16,6 +17,8 @@ export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: {
   const errText = useErrorText();
   const ask = useConfirm();
   const [msgs, setMsgs] = useState<PublicMessageView[] | null>(null);
+  const [chs, setChs] = useState<ChallengeView[]>([]);
+  const [challenging, setChallenging] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -30,8 +33,12 @@ export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: {
   const canWrite = settings.rulesAccepted && !settings.muted;
 
   const load = useCallback(async () => {
-    const r = await call('/api/guest/social-feed');
-    if (r.ok) { stick.current = nearBottom(); setMsgs(r.messages as PublicMessageView[]); setLoadError(null); } else setLoadError(r.error ?? 'network');
+    const [r, c] = await Promise.all([call('/api/guest/social-feed'), call('/api/guest/social-challenges')]);
+    if (r.ok) {
+      stick.current = nearBottom();
+      if (c.ok) setChs(c.challenges as ChallengeView[]);
+      setMsgs(r.messages as PublicMessageView[]); setLoadError(null);
+    } else setLoadError(r.error ?? 'network');
     return r.ok;
   }, []);
   usePolling(load, 6000); // nessun realtime nel P0 demo
@@ -75,11 +82,22 @@ export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: {
   };
 
   const rows: React.ReactNode[] = [];
-  (msgs ?? []).forEach((m, i, all) => {
-    const prev = all[i - 1];
-    const newDay = !prev || dayKeyOf(prev.createdAt, timezone) !== dayKeyOf(m.createdAt, timezone);
-    const grouped = !newDay && prev.authorId === m.authorId && new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime() < 5 * 60_000;
-    if (newDay) rows.push(<div key={`d-${m.id}`} className="date-sep">{dayLabel(m.createdAt, locale, timezone)}</div>);
+  // messaggi e sfide in un'unica sequenza per tempo: separatore del giorno per entrambi, raggruppamento solo tra messaggi
+  const timeline = [
+    ...(msgs ?? []).map((m) => ({ at: m.createdAt, m, c: null as ChallengeView | null })),
+    ...chs.map((c) => ({ at: c.createdAt, m: null as PublicMessageView | null, c })),
+  ].sort((a, b) => a.at.localeCompare(b.at));
+  timeline.forEach((it, i) => {
+    const before = timeline[i - 1];
+    const newDay = !before || dayKeyOf(before.at, timezone) !== dayKeyOf(it.at, timezone);
+    if (newDay) rows.push(<div key={`d-${it.m?.id ?? it.c!.id}`} className="date-sep">{dayLabel(it.at, locale, timezone)}</div>);
+    if (it.c) {
+      rows.push(<ChallengeCard key={`c-${it.c.id}`} c={it.c} timezone={timezone} onChanged={() => { stick.current = true; void load(); }} />);
+      return;
+    }
+    const m = it.m!;
+    const prev = before?.m;
+    const grouped = !newDay && !!prev && prev.authorId === m.authorId && new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime() < 5 * 60_000;
     if (m.mine) {
       rows.push(<div key={m.id} className={`bubble bubble-me${grouped ? ' bubble-cont' : ''}`}>{m.text}<span className="time">{chatTime(m.createdAt, locale, timezone)}</span></div>);
     } else {
@@ -114,18 +132,25 @@ export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: {
       )}
       {loadError && <ErrorState text={errText(loadError)} onRetry={() => void load()} />}
       {!msgs && !loadError && <div className="stack" aria-busy="true"><span className="skeleton sk-48" /><span className="skeleton sk-48" /></div>}
-      {msgs && msgs.length === 0 && <EmptyState icon="chat" title={t('social.chat.emptyTitle')} text={t('social.chat.empty')} />}
-      {msgs && msgs.length > 0 && <div className="chat" role="log" aria-label={t('social.chat.title', { hotel: hotelName })}>{rows}<div ref={end} /></div>}
+      {msgs && msgs.length === 0 && chs.length === 0 && <EmptyState icon="chat" title={t('social.chat.emptyTitle')} text={t('social.chat.empty')} />}
+      {msgs && (msgs.length > 0 || chs.length > 0) && <div className="chat" role="log" aria-label={t('social.chat.title', { hotel: hotelName })}>{rows}<div ref={end} /></div>}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announce}</div>
       {info && <p className="notice notice-ok" role="status"><Icon name="check" />{info}</p>}
       {error && <p className="error-text" role="alert"><Icon name="alert" />{error}</p>}
       <form className="composer" onSubmit={(e) => { e.preventDefault(); void send(); }}>
+        {canWrite && (
+          <button type="button" className="icon-btn icon-btn-plain composer-extra" aria-label={t('challenge.title')} title={t('challenge.title')} onClick={() => setChallenging(true)}>
+            <Icon name="trophy" />
+          </button>
+        )}
         <label htmlFor="pub" className="sr-only">{t('social.chat.placeholder')}</label>
         <textarea id="pub" className="composer-text" rows={1} maxLength={max} placeholder={t('social.chat.placeholder')} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} autoComplete="off" disabled={!canWrite} />
         <button type="submit" className="btn btn-primary" disabled={busy || !text.trim() || !canWrite} aria-busy={busy}>{t('common.send')}</button>
       </form>
       <p className="muted small">{t('social.chat.charsLeft', { n: max - [...text].length })}</p>
       <ReportDialog open={reporting !== null} onClose={() => setReporting(null)} onSend={report} />
+      <ChallengeDialog open={challenging} publicOnly onClose={() => setChallenging(false)}
+        onSent={() => { setChallenging(false); stick.current = true; void load(); }} />
     </section>
   );
 }

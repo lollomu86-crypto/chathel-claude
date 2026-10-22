@@ -134,6 +134,42 @@ export async function pushPrivate(db: any, hotelId: string, fromGuestId: string,
   await pushGuests(db, hotelId, (ps ?? []).map((p: any) => p.guest_id).filter((g: string) => g && g !== fromGuestId));
 }
 
+const CHALLENGE_TEXT: Record<'received' | 'accepted', Record<Locale4, { title: string; body: string }>> = {
+  received: {
+    it: { title: 'Nuova sfida', body: 'Qualcuno ti ha sfidato. Apri la chat per rispondere.' },
+    en: { title: 'New challenge', body: 'Someone has challenged you. Open the chat to reply.' },
+    de: { title: 'Neue Herausforderung', body: 'Jemand hat dich herausgefordert. Öffne den Chat, um zu antworten.' },
+    ru: { title: 'Новый вызов', body: 'Вас вызвали на игру. Откройте чат, чтобы ответить.' },
+  },
+  accepted: {
+    it: { title: 'Sfida accettata', body: 'La tua sfida è stata accettata.' },
+    en: { title: 'Challenge accepted', body: 'Your challenge has been accepted.' },
+    de: { title: 'Herausforderung angenommen', body: 'Deine Herausforderung wurde angenommen.' },
+    ru: { title: 'Вызов принят', body: 'Ваш вызов приняли.' },
+  },
+};
+
+/**
+ * Sfida: avvisa l'altra persona (sfida privata ricevuta, oppure sfida accettata per chi l'ha lanciata).
+ * Testo generico (mai gioco, posta o nickname); segue la preferenza dei messaggi privati.
+ */
+export async function pushChallenge(db: any, hotelId: string, fromGuestId: string, toProfileId: string, what: 'received' | 'accepted', url: string): Promise<void> {
+  if (!vapidFromEnv()) return;
+  const { data: p } = await db.from('social_profiles').select('guest_id').eq('hotel_id', hotelId).eq('id', toProfileId).maybeSingle();
+  if (!p?.guest_id || p.guest_id === fromGuestId) return;
+  const { data } = await db.from('push_subscriptions').select(cols).eq('hotel_id', hotelId).eq('guest_id', p.guest_id).filter(wants('private'), 'eq', 'true');
+  const rows = await activeOnly(db, hotelId, data ?? []);
+  const v = vapidFromEnv();
+  if (!v || !rows.length) return;
+  const gone: string[] = [];
+  await Promise.allSettled(rows.map(async (r) => {
+    const m = CHALLENGE_TEXT[what][loc(r.locale)];
+    const res = await sendPush({ endpoint: r.endpoint, p256dh: r.p256dh, auth: r.auth }, { title: m.title, body: m.body, url: /^\/[^/]/.test(url) ? url : '/stay/social', tag: pushTag('private') }, v, { ttl: 3600, urgency: 'high' });
+    if (res === 'gone') gone.push(r.id);
+  }));
+  if (gone.length) await db.from('push_subscriptions').delete().in('id', gone);
+}
+
 /** Messaggio nella chat pubblica: solo a chi l'ha scelto, al massimo uno ogni 10 minuti, mai a chi scrive. */
 export async function pushPublic(db: any, hotelId: string, fromGuestId: string): Promise<void> {
   if (!vapidFromEnv()) return;

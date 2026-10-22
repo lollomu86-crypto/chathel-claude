@@ -2,7 +2,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { COUPON_KINDS, type CouponKind, type CouponView, type ReportReason, type ThreadDetail } from '@/lib/types';
+import { COUPON_KINDS, type ChallengeView, type CouponKind, type CouponView, type ReportReason, type ThreadDetail } from '@/lib/types';
+import { ChallengeCard, ChallengeDialog } from './Challenge';
 import { formatDateTime } from '@/lib/format';
 import { call } from './client-api';
 import { CouponQr } from './CouponQr';
@@ -22,6 +23,8 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
   const router = useRouter();
   const badge = useSocialBadge();
   const [th, setTh] = useState<ThreadDetail>(initial);
+  const [chs, setChs] = useState<ChallengeView[]>([]);
+  const [challenging, setChallenging] = useState(false);
   const [left, setLeft] = useState(couponsLeft);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -39,8 +42,8 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
   const peerId = initial.id;
 
   const reload = useCallback(async () => {
-    const r = await call(`/api/guest/social-thread?id=${encodeURIComponent(peerId)}`);
-    if (r.ok) { stick.current = nearBottom(); setTh(r.thread as ThreadDetail); }
+    const [r, c] = await Promise.all([call(`/api/guest/social-thread?id=${encodeURIComponent(peerId)}`), call(`/api/guest/social-challenges?thread=${encodeURIComponent(peerId)}`)]);
+    if (r.ok) { stick.current = nearBottom(); if (c.ok) setChs(c.challenges as ChallengeView[]); setTh(r.thread as ThreadDetail); }
     else if (r.status === 400 || r.status === 403) router.replace('/stay/social?tab=private');
     return r.ok;
   }, [peerId, router]);
@@ -94,11 +97,22 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
   };
 
   const rows: React.ReactNode[] = [];
-  th.messages.forEach((m, i, all) => {
-    const prev = all[i - 1];
-    const newDay = !prev || dayKeyOf(prev.createdAt, timezone) !== dayKeyOf(m.createdAt, timezone);
-    const grouped = !newDay && prev.kind === 'text' && m.kind === 'text' && prev.mine === m.mine && new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime() < 5 * 60_000;
-    if (newDay) rows.push(<div key={`d-${m.id}`} className="date-sep">{dayLabel(m.createdAt, locale, timezone)}</div>);
+  // messaggi e sfide in un'unica sequenza per tempo: separatore del giorno per entrambi, raggruppamento solo tra messaggi
+  const timeline = [
+    ...th.messages.map((m) => ({ at: m.createdAt, m, c: null as ChallengeView | null })),
+    ...chs.map((c) => ({ at: c.createdAt, m: null as ThreadDetail['messages'][number] | null, c })),
+  ].sort((a, b) => a.at.localeCompare(b.at));
+  timeline.forEach((it, i) => {
+    const before = timeline[i - 1];
+    const newDay = !before || dayKeyOf(before.at, timezone) !== dayKeyOf(it.at, timezone);
+    if (newDay) rows.push(<div key={`d-${it.m?.id ?? it.c!.id}`} className="date-sep">{dayLabel(it.at, locale, timezone)}</div>);
+    if (it.c) {
+      rows.push(<ChallengeCard key={`c-${it.c.id}`} c={it.c} timezone={timezone} onChanged={() => { stick.current = true; void reload(); }} />);
+      return;
+    }
+    const m = it.m!;
+    const prev = before?.m;
+    const grouped = !newDay && !!prev && prev.kind === 'text' && m.kind === 'text' && prev.mine === m.mine && new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime() < 5 * 60_000;
     if (m.kind === 'coupon' && m.coupon) {
       const c = m.coupon;
       const sent = c.direction === 'sent';
@@ -174,9 +188,14 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
 
       {th.canSendCoupon && (
         <section className="stack-sm" aria-label={t('social.thread.couponsTitle')}>
-          <button type="button" className="btn btn-secondary btn-small" aria-expanded={couponOpen} aria-controls="cp-panel" onClick={() => setCouponOpen((o) => !o)}>
-            <Icon name="ticket" />{t('social.thread.couponsTitle')}
-          </button>
+          <div className="btn-group">
+            <button type="button" className="btn btn-secondary btn-small" aria-expanded={couponOpen} aria-controls="cp-panel" onClick={() => setCouponOpen((o) => !o)}>
+              <Icon name="ticket" />{t('social.thread.couponsTitle')}
+            </button>
+            <button type="button" className="btn btn-secondary btn-small" onClick={() => setChallenging(true)}>
+              <Icon name="trophy" />{t('challenge.button')}
+            </button>
+          </div>
           {couponOpen && (
             <div className="card stack" id="cp-panel">
               <p className="hint">{t('social.thread.couponsNote')}</p>
@@ -200,6 +219,8 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
         </form>
       )}
       <ReportDialog open={reporting !== null} onClose={() => setReporting(null)} onSend={report} defaultReason="harassment" />
+      <ChallengeDialog open={challenging} threadId={th.id} onClose={() => setChallenging(false)}
+        onSent={() => { setChallenging(false); stick.current = true; void reload(); }} />
     </>
   );
 }

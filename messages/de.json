@@ -193,7 +193,11 @@
     "partyLess": "Eine Person weniger",
     "partyMore": "Eine Person mehr",
     "confirmButton": "Buchung bestätigen",
-    "noBookingsHint": "Wählen Sie oben einen Service und eine Zeit."
+    "noBookingsHint": "Wählen Sie oben einen Service und eine Zeit.",
+    "services": "Angebote",
+    "open": "Buchen",
+    "close": "Schließen",
+    "noFreeSlots": "In den nächsten Tagen keine freien Plätze"
   },
   "reception": {
     "title": "Rezeption",
@@ -298,7 +302,8 @@
       "settings": "Einstellungen",
       "social": "Social",
       "label": "Bereiche des Panels",
-      "toHandle": "{n} offen"
+      "toHandle": "{n} offen",
+      "games": "Spiele"
     },
     "dashboard": {
       "title": "Kennzahlen",
@@ -587,6 +592,33 @@
       "urgent": "{n} offene Notfälle",
       "urgentHint": "Ein Gast hat einen Notfall gemeldet: antworten Sie sofort.",
       "open": "Hinweise öffnen"
+    },
+    "games": {
+      "title": "Spiele",
+      "intro": "Spiele werden nicht gebucht: Gäste fordern sich damit gegenseitig heraus (z. B. „Tischtennis in 15 Minuten, wer verliert, zahlt den Kaffee“).",
+      "new": "Neues Spiel",
+      "edit": "Spiel bearbeiten",
+      "name_it": "Name (Italienisch)",
+      "name_en": "Name (Englisch)",
+      "name_de": "Name (Deutsch)",
+      "name_ru": "Name (Russisch)",
+      "desc_it": "Beschreibung (Italienisch)",
+      "desc_en": "Beschreibung (Englisch)",
+      "desc_de": "Beschreibung (Deutsch)",
+      "desc_ru": "Beschreibung (Russisch)",
+      "location": "Wo es steht",
+      "locationHint": "Z. B. Spielzimmer",
+      "active": "Für Gäste sichtbar",
+      "on": "Sichtbar",
+      "off": "Ausgeblendet",
+      "turnOn": "Anzeigen",
+      "turnOff": "Ausblenden",
+      "deleteConfirm": "Das Spiel „{name}“ löschen? Bereits gesendete Herausforderungen bleiben.",
+      "emptyTitle": "Keine Spiele",
+      "empty": "Füge die Spiele der Unterkunft hinzu (Tischtennis, Tischfußball, Billard...).",
+      "errors": {
+        "invalid_game": "Ungültiges Spiel: mindestens der italienische Name ist nötig (max. 60 Zeichen)."
+      }
     }
   },
   "privacy": {
@@ -854,6 +886,67 @@
       "reception": "Antworten der Rezeption",
       "private": "Private Nachrichten",
       "public": "Öffentlicher Chat (höchstens eine Meldung alle 10 Minuten)"
+    }
+  },
+  "games": {
+    "title": "Spiele",
+    "hint": "Keine Buchung nötig: fordere jemanden heraus und finde Mitspieler.",
+    "challenge": "Herausfordern"
+  },
+  "challenge": {
+    "title": "Herausforderung senden",
+    "button": "Herausfordern",
+    "game": "Spiel",
+    "when": "Wann",
+    "in15": "In 15 Min.",
+    "in30": "In 30 Min.",
+    "in60": "In 1 Stunde",
+    "in120": "In 2 Stunden",
+    "stake": "Einsatz",
+    "stakes": {
+      "coffee": "Wer verliert, zahlt den Kaffee",
+      "aperitif": "Wer verliert, zahlt den Aperitif",
+      "fun": "Nur zum Spaß"
+    },
+    "where": "Wen herausfordern",
+    "wherePublic": "Alle, im Hotel-Chat",
+    "wherePrivate": "{name}, privat",
+    "whereHint": "Für eine private Herausforderung brauchst du einen angenommenen privaten Chat.",
+    "send": "Herausforderung senden",
+    "sentPublic": "Herausforderung im Hotel-Chat veröffentlicht.",
+    "sentPrivate": "Herausforderung privat gesendet.",
+    "needSocial": "Um andere herauszufordern, aktiviere dein Profil unter Gäste und akzeptiere die Chat-Regeln.",
+    "goSocial": "Zu Gäste",
+    "noGames": "Das Hotel hat noch keine Spiele eingetragen.",
+    "titleMinePrivate": "Du hast {name} zu {game} herausgefordert",
+    "titleMinePublic": "Du hast alle zu {game} herausgefordert",
+    "titleTheirsPrivate": "{name} fordert dich zu {game} heraus",
+    "titleTheirsPublic": "{name} fordert alle zu {game} heraus",
+    "versus": "{a} gegen {b} beim {game}",
+    "you": "dich",
+    "youShort": "Du",
+    "at": "Um {time}",
+    "status": {
+      "open": "Offen",
+      "accepted": "Angenommen",
+      "declined": "Abgelehnt",
+      "cancelled": "Abgesagt",
+      "expired": "Abgelaufen"
+    },
+    "accept": "Ich bin dabei",
+    "decline": "Nein, danke",
+    "cancel": "Herausforderung absagen",
+    "cancelConfirm": "Diese Herausforderung absagen?",
+    "errors": {
+      "invalid_time": "Wähle eine Uhrzeit zwischen 5 Minuten und 12 Stunden ab jetzt, vor der Abreise.",
+      "invalid_stake": "Ungültiger Einsatz.",
+      "invalid_game": "Spiel nicht verfügbar.",
+      "challenge_closed": "Diese Herausforderung ist nicht mehr offen.",
+      "invalid_challenge": "Herausforderung nicht verfügbar.",
+      "challenge_daily_limit": "Du hast heute schon 5 Herausforderungen gesendet.",
+      "challenge_active_limit": "Du hast schon 3 offene Herausforderungen: warte auf eine Antwort oder sage eine ab.",
+      "thread_not_open": "Das Gespräch wurde noch nicht angenommen.",
+      "recipient_unavailable": "Diese Person ist nicht verfügbar."
     }
   }
 }
