@@ -95,12 +95,11 @@ test('admin: KPI coerenti con i dati (attivati, emessi, riscattati)', async () =
   assert.ok(k.i1.activated >= 2);
 });
 
-test('admin: limite di 2 avvisi al giorno', async () => {
+test('admin: limite di 10 avvisi al giorno', async () => {
   const { store } = makeStore();
   const a = await admin(store);
   const n = { title: { it: 'Avviso' } };
-  await a.publishNotification(n);
-  await a.publishNotification(n);
+  for (let i = 0; i < 10; i++) await a.publishNotification(n);
   await assert.rejects(() => a.publishNotification(n));
   assert.equal(await a.notificationsLeftToday(), 0);
 });

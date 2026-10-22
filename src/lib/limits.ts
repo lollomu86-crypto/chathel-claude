@@ -2,7 +2,7 @@
 // cosi' le password e i dati di esempio non finiscono nel bundle di produzione.
 
 export const KB_MAX_TOTAL = 25_000;
-export const NOTIFICATIONS_PER_DAY = 2;
+export const NOTIFICATIONS_PER_DAY = 10;
 export const GUEST_MESSAGES_PER_DAY = 30;
 export const GUEST_MESSAGES_PER_MINUTE = 12;
 export const GUEST_MESSAGE_MAX_CHARS = 1000;

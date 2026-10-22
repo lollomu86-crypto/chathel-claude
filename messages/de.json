@@ -454,7 +454,7 @@
       "deLabel": "Deutsch",
       "publish": "Hinweis an Gäste senden",
       "remaining": "Du kannst heute noch {n} Hinweise senden (maximal 2 pro Tag).",
-      "limitReached": "Du hast das Limit von 2 Hinweisen für heute erreicht.",
+      "limitReached": "Du hast das Limit von 10 Hinweisen für heute erreicht.",
       "history": "Gesendete Hinweise",
       "empty": "Keine Hinweise gesendet.",
       "note": "Hinweise erscheinen immer in der App. Push-Benachrichtigungen (nur bei installierter PWA) sind in dieser Version nicht aktiv.",

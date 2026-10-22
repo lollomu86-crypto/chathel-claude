@@ -454,7 +454,7 @@
       "deLabel": "German",
       "publish": "Send notice to guests",
       "remaining": "You can still send {n} notices today (maximum 2 per day).",
-      "limitReached": "You have reached the limit of 2 notices today.",
+      "limitReached": "You have reached the limit of 10 notices today.",
       "history": "Notices sent",
       "empty": "No notices sent.",
       "note": "Notices always appear in the app. Push notifications (only if the PWA is installed) are not active in this version.",

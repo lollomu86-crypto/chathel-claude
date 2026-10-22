@@ -454,7 +454,7 @@
       "deLabel": "Tedesco",
       "publish": "Invia avviso agli ospiti",
       "remaining": "Oggi puoi inviare ancora {n} avvisi (massimo 2 al giorno).",
-      "limitReached": "Hai raggiunto il limite di 2 avvisi oggi.",
+      "limitReached": "Hai raggiunto il limite di 10 avvisi oggi.",
       "history": "Avvisi inviati",
       "empty": "Nessun avviso inviato.",
       "note": "Gli avvisi compaiono sempre nell'app. Le notifiche push (solo se la PWA è installata) non sono ancora attive in questa versione.",
