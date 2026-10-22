@@ -16,7 +16,7 @@
 
 ## Infrastruttura
 - App: **chathel.com** (+ www) su **Vercel** (progetto `chathel-app`, team `chat-hel`, piano Hobby). Repo GitHub **lollomu86-crypto/chathel-claude**, collegata: push su `main` = deploy produzione. Il sito per i direttori **chathel.it** è un progetto separato (repo `chathel-sito`, vuoto).
-- Database/Auth: **Supabase** (progetto ChatHel, piano Free, UE). Migrazioni in `supabase/migrations` (0001–0006 applicate; **0007_push.sql da applicare**). Login Google attivo (Google Cloud progetto ChatHel, client "ChatHel Web"; Site URL https://chathel.com; redirect https://chathel.com/**).
+- Database/Auth: **Supabase** (progetto ChatHel, piano Free, UE). Migrazioni in `supabase/migrations` (0001–0007 applicate). Login Google attivo (Google Cloud progetto ChatHel, client "ChatHel Web"; Site URL https://chathel.com; redirect https://chathel.com/**).
 - Hotel di prova: slug `hotel-prova`, codice 967991, admin su chathel.com/admin/login. Dati demo: `supabase/seed/demo-hotel-prova.sql` (atteso `6 | 5 | 123 | 9`). Immagini di esempio in `public/demo/*.svg`.
 - Variabili Vercel (solo i nomi): SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, IDENTITY_PEPPER, TRUSTED_IP_HEADER, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY. Previste: ANTHROPIC_API_KEY (+ANTHROPIC_MODEL, AI_HOTEL_DAILY_CAP), EMERGENCY_WEBHOOK_URL, VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT (push).
 - Il connettore Vercel MCP dà 403 sullo scope chat-hel: le azioni sul dashboard le fa Lorenzo (Deployments → Create Deployment se serve).
@@ -25,13 +25,13 @@
 Next.js 15.5 (App Router) + Supabase, niente librerie push: Web Push scritto con `node:crypto` (`src/lib/push/`). Test: `npm test` (150 passano; con `NODE_PATH=/opt/npm-tools/node_modules` nel container cloud). `npm run i18n` controlla le traduzioni it/en/de/ru. `tsc` ha solo errori d'ambiente (mancano @types/node ecc.) nel container cloud: su una macchina con `npm install` deve essere pulito. Leggere anche `NOTE-SVILUPPO.md`.
 Fatti importanti: dopo il login Google il browser NON deve chiamare `signOut` (revoca la sessione sul server; vedi `src/lib/auth/google-client.ts`). Eventi/servizi usano jsonb `{it,en,de}`; gli slot sono unici per (servizio, orario).
 
-## Notifiche push (stato)
-Codice scritto e testato in locale, commit `0b8ced8`, **spinto sul branch `push-notifiche`** (NON su main: non è in produzione). Tipi scelti da Lorenzo: avvisi dell'hotel, risposte della reception, messaggi privati, chat pubblica (per ospite, spenta di default, max 1 ogni 10 minuti). Testi generici, mai contenuti dei messaggi né nickname (tranne gli avvisi, scritti dall'hotel). Disattivate finché mancano le variabili VAPID.
-Per attivarle, in ordine: (1) Lorenzo esegue `supabase/migrations/0007_push.sql` in Supabase; (2) genera le chiavi VAPID nella console del proprio browser (snippet WebCrypto: `generateKey ECDSA P-256`, pubblica = export `raw` base64url, privata = campo `d` del JWK) o con `node scripts/gen-vapid.mjs`; (3) crea le 3 variabili in Vercel (privata = Sensitive; SUBJECT = `mailto:<email>`); (4) si fa merge di `push-notifiche` in `main`; (5) prova sul telefono (iPhone: serve app aggiunta alla Home, iOS ≥16.4). L'invio reale verso un telefono NON è ancora stato provato.
-Privacy: l'iscrizione è dato personale, si cancella con l'ospite; paragrafo già aggiunto in `messages/*.json` (privacy.push).
+## Notifiche push (stato: ATTIVE in produzione dal 22/10/2026)
+Provate da Lorenzo su telefono Android: gli avvisi dell'hotel arrivano (anche con app chiusa). Tipi: avvisi hotel, risposte reception, messaggi privati, chat pubblica (per ospite, spenta di default, max 1 ogni 10 min). Testi generici, mai contenuti dei messaggi né nickname; l'avviso mostra come titolo il nome dell'hotel e sotto titolo e testo scritti dall'hotel. Migrazione 0007 applicata; variabili VAPID_* create in Vercel. Limite avvisi hotel: 10 al giorno (`src/lib/limits.ts`). Icone dell'app/notifica: solo H con C (`scripts/gen-icons.py`, sorgente JPG a bassa risoluzione: serve il vettoriale); iconcina monocroma `public/icons/badge-96.png`.
+Da provare ancora: iPhone (serve app aggiunta alla Home, iOS >=16.4), notifiche di reception/privati/chat pubblica, ritardo di consegna (uno degli avvisi è arrivato in ritardo: forse risparmio batteria del telefono). Ogni avviso ha lo stesso `tag` per categoria e quindi sostituisce il precedente sul telefono: valutare tag unici per avviso.
+Privacy: l'iscrizione è dato personale, si cancella con l'ospite; paragrafo in `messages/*.json` (privacy.push).
 
 ## Da fare (in ordine di priorità)
-1. Chiudere le push (sopra) e provarle su telefono.
+1. Completare le prove delle push (iPhone, reception, privati, chat pubblica).
 2. Provare il percorso demo con Jacopo (copione); inserire email e telefono nella scheda hotel; Jacopo rivede il copione.
 3. Reception AI: decidere budget e inserire ANTHROPIC_API_KEY.
 4. Prima del lancio: Vercel Pro e Supabase Pro (Free va in pausa e non ha backup), MFA staff, osservabilità (Sentry/uptime), CSP, prova di carico, test dell'avviso di emergenza (webhook), verifica del job di cancellazione al check-out (pg_cron), strumento per creare hotel senza SQL, caricamento foto dal pannello (oggi `image_url` solo da Supabase).
