@@ -32,6 +32,9 @@ _rows = [_dark.crop((0, y, _dark.width, y + 1)).getbbox() is not None for y in r
 _top = next(y for y, r in enumerate(_rows) if r)
 _gap = next(y for y in range(_top, len(_rows)) if not _rows[y])
 symbol = content.crop((0, 0, content.width, _gap))
+# stringere ai soli pixel del simbolo (la scritta e' piu' larga e lasciava bianco ai lati)
+_sb = symbol.convert("L").point(lambda v: 255 if v < 200 else 0).getbbox()
+symbol = symbol.crop(_sb)
 print("simbolo", symbol.size)
 
 
@@ -49,7 +52,7 @@ def icon(name, size, fraction, src=None):
     print("scritto icons/" + name, size)
 
 
-icon("icon-192.png", 192, 0.66)
-icon("icon-512.png", 512, 0.66)
-icon("icon-maskable-512.png", 512, 0.46)  # dentro la zona sicura (cerchio del 80%) delle maschere Android
-icon("apple-touch-icon.png", 180, 0.60)   # iOS arrotonda da solo; nessuna trasparenza
+icon("icon-192.png", 192, 0.80)
+icon("icon-512.png", 512, 0.80)
+icon("icon-maskable-512.png", 512, 0.60)  # dentro la zona sicura (cerchio del 80%) delle maschere Android
+icon("apple-touch-icon.png", 180, 0.74)   # iOS arrotonda da solo; nessuna trasparenza
