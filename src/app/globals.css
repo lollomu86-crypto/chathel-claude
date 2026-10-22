@@ -249,10 +249,20 @@ hr, .divider { border: 0; border-top: var(--bw) solid var(--border); margin: var
    le icone) + saluto sotto. Il nome sta in .app-head-name. */
 .app-head-title { flex: 1; min-width: 0; margin: 0; display: flex; flex-direction: column; justify-content: center; min-height: var(--tap);
   font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-lg); line-height: var(--lh-tight); color: var(--on-header); text-decoration: none; }
-.app-head-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.app-head-name { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; overflow-wrap: break-word; hyphens: auto; }
 .app-head-actions { display: flex; gap: var(--space-1); align-items: center; flex: none; }
 .app-head a { color: var(--on-header); }
-.app-head-sub { display: block; font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--on-header); font-family: var(--font-body); }
+.app-head-sub { display: block; font-size: var(--fs-xs); font-weight: var(--fw-medium); color: var(--on-header); font-family: var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Telefoni stretti o testo ingrandito: piu' spazio al nome dell'hotel. Le icone restano da 44 px.
+   Sotto i 340 px la tessera ChatHel sparisce dalla testata: nell'app ospite il protagonista e' l'hotel (BRAND.md, Logo). */
+@media (max-width: 400px) {
+  .app-head-in { gap: var(--space-2); padding-left: var(--space-3); padding-right: var(--space-3); }
+  .app-head .logo-tile img { height: 36px; }
+  .app-head-actions { gap: 0; }
+}
+@media (max-width: 340px) {
+  .app-head .logo-tile { display: none; }
+}
 /* variante "pagina d'ingresso": tessera grande al centro */
 .entry-head { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); text-align: center; padding: var(--space-8) var(--space-4) var(--space-6); background: var(--header-bg); color: var(--on-header); }
 .entry-head h1 { color: var(--on-header); margin: 0; }
@@ -416,7 +426,12 @@ input:disabled, select:disabled, textarea:disabled { background: var(--surface-2
    ===================================================================== */
 .tabbar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: min(100%, var(--shell-max)); display: grid; grid-template-columns: repeat(5, 1fr);
   background: var(--surface); border-top: var(--bw) solid var(--border); padding-bottom: env(safe-area-inset-bottom); z-index: 10; }
-.tabbar a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: var(--tabbar-h); padding: var(--space-2) 2px; text-decoration: none; color: var(--text-muted); font-size: var(--fs-xs); font-weight: var(--fw-semibold); text-align: center; line-height: 1.15; overflow-wrap: anywhere; }
+/* Etichette su una riga, mai spezzate a meta' parola ("Prenot-a"): sugli schermi stretti il corpo scende fino a 10 px
+   (min fisso: con il testo ingrandito non c'e' altro modo di far stare "Rezeption" o "Ресепшн"), poi i puntini.
+   Il nome completo resta per i lettori di schermo nel testo del link. */
+.tabbar a { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: var(--tabbar-h); padding: var(--space-2) 2px; text-decoration: none; color: var(--text-muted);
+  font-size: clamp(10px, 3.3vw, var(--fs-xs)); font-weight: var(--fw-semibold); text-align: center; line-height: 1.15; white-space: nowrap; }
+.tabbar-label { position: relative; z-index: 1; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .tabbar a svg { position: relative; z-index: 1; width: 24px; height: 24px; }
 .tabbar a:hover { color: var(--text); }
 .tabbar a[aria-current="page"] { color: var(--on-primary-soft); font-weight: var(--fw-bold); }
@@ -741,6 +756,8 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 @media (max-width: 899px) {
   .tabbar { bottom: calc(var(--space-2) + env(safe-area-inset-bottom)); width: min(calc(100% - var(--space-4)), calc(var(--shell-max) - var(--space-4))); border: var(--bw) solid var(--border); border-radius: var(--radius-pill); padding-bottom: 0; box-shadow: var(--shadow-float); overflow: hidden; }
   .tabbar a[aria-current="page"]::before { border-radius: var(--radius-pill); }
+  /* sui telefoni stretti la barra perde i margini laterali: 8 px in piu' per ogni etichetta */
+  @media (max-width: 400px) { .tabbar { width: calc(100% - var(--space-2)); } .tabbar a[aria-current="page"]::before { width: 48px; margin-left: -24px; } }
   .shell { padding-bottom: calc(var(--tabbar-h) + var(--space-8) + env(safe-area-inset-bottom)); }
   .confirm-bar, .composer { bottom: calc(var(--tabbar-h) + var(--space-4) + env(safe-area-inset-bottom)); }
   .toast { bottom: calc(var(--tabbar-h) + var(--space-6) + env(safe-area-inset-bottom)); }

@@ -25,7 +25,7 @@ export function TabBar() {
         return (
           <Link key={x.href} href={x.href} aria-current={active ? 'page' : undefined} aria-label={n ? `${t(`nav.${x.key}`)}, ${t('social.unreadCount', { n })}` : undefined}>
             <Icon name={x.icon} />
-            {t(`nav.${x.key}`)}
+            <span className="tabbar-label">{t(`nav.${x.key}`)}</span>
             {n > 0 && <span className="count" aria-hidden="true">{n}</span>}
           </Link>
         );
