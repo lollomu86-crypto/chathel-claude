@@ -41,14 +41,14 @@ export function SocialThreads({ timezone, onGoPeople }: { timezone: string; onGo
       <article key={th.id} className="card thread stack-sm">
         <Link className="thread-main" href={`/stay/social/${encodeURIComponent(th.id)}`} aria-label={`${th.peer.nickname}${unread ? `, ${t('social.private.unread')}` : ''}`}>
           <span className="avatar" aria-hidden="true">{[...th.peer.nickname][0] ?? '?'}</span>
-          <span className="grow">
-            <strong className="truncate block">{th.peer.nickname}</strong>
-            {status && <span className="badge badge-warn">{status}</span>}
+          <span className="grow thread-text">
+            <span className="thread-top">
+              <strong className="truncate">{th.peer.nickname}</strong>
+              <span className="muted xs thread-when">{when(th.lastAt)}</span>
+              {unread && <span className="dot" aria-hidden="true" />}
+            </span>
+            {status && <span className="badge badge-warn thread-status">{status}</span>}
             {preview && <span className="muted small truncate block">{preview}</span>}
-          </span>
-          <span className="thread-side">
-            <span className="muted xs">{when(th.lastAt)}</span>
-            {unread && <span className="dot" aria-hidden="true" />}
           </span>
         </Link>
         {th.status === 'pending' && th.incoming && (
