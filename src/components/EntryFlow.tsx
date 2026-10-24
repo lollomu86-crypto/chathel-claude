@@ -124,7 +124,8 @@ export function EntryFlow({ slug, token, hotelName }: { slug: string; token: str
       const b = a.ok ? await call('/api/guest/social-settings-update', { visible: true }) : a;
       if (!b.ok) failed = true;
     }
-    if (wantList && consents.chat) {
+    // con i privati consentiti l'ingresso registra gia' le regole (start_stay): la chiamata serve solo negli altri casi
+    if (wantList && !wantDm && consents.chat) {
       const c = await call('/api/guest/social-rules', {});
       if (!c.ok) failed = true;
     }
