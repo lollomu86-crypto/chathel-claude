@@ -39,6 +39,9 @@ export interface SupabaseDeps { createClient: CreateClient }
 const opts = { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } } as const;
 /** Bucket di Storage delle immagini dell'hotel (migrazione 0010). */
 export const MEDIA_BUCKET = 'hotel-media';
+/** Ultima chiamata a touch_guest per ospite su questa istanza del server. */
+const lastTouch = new Map<string, number>();
+const TOUCH_EVERY_MS = 10 * 60_000;
 
 /** Converte un errore PostgREST in ChError (SQLSTATE CHxxx) oppure in errore generico. */
 export function raise(error: { code?: string; message?: string } | null): never {
@@ -146,14 +149,19 @@ export class SupabaseStore implements Store {
     const who = await db.rpc('current_guest_id');
     if (who.error || !who.data) return null; // token scaduto/non valido (il middleware prova il refresh prima) o soggiorno scaduto
     const { data: g, error } = await db.from('guests')
-      .select('id, hotel_id, display_name, locale, is_adult, last_seen_at, hotels(slug, name, timezone, default_locale, bonus_label, bonus_enabled, bonus_season_cap, booking_cancel_cutoff_minutes, max_bookings_per_guest_day, reception_phone, logo_url, cover_url, welcome, features)')
+      .select('id, hotel_id, display_name, locale, is_adult, hotels(slug, name, timezone, default_locale, bonus_label, bonus_enabled, bonus_season_cap, booking_cancel_cutoff_minutes, max_bookings_per_guest_day, reception_phone, logo_url, cover_url, welcome, features)')
       .eq('id', who.data).maybeSingle();
     if (error || !g) return null;
     const { data: stay } = await db.from('stays').select('expires_at, status').eq('guest_id', g.id).eq('status', 'active')
       .gt('expires_at', new Date().toISOString()).limit(1).maybeSingle();
     if (!stay) return null; // soggiorno scaduto: l'accesso e' gia' chiuso anche dalle policy
-    // ultimo accesso (0009): si scrive solo se e' vecchio di 10 minuti, cosi' quasi tutte le pagine non fanno richieste in piu'
-    if (!g.last_seen_at || Date.now() - new Date(g.last_seen_at).getTime() >= 10 * 60_000) {
+    // ultimo accesso (0009). La colonna last_seen_at NON e' leggibile dai client (permessi per colonna di 0004: leggerla qui
+    // faceva fallire la select e l'ospite risultava non autenticato). touch_guest scrive al massimo ogni 10 minuti; il ricordo
+    // locale evita una chiamata a ogni pagina sulla stessa istanza.
+    const gid = String(g.id), now = Date.now();
+    if (now - (lastTouch.get(gid) ?? 0) >= TOUCH_EVERY_MS) {
+      lastTouch.set(gid, now);
+      if (lastTouch.size > 5000) lastTouch.clear();
       try { await db.rpc('touch_guest'); } catch { /* non blocca la pagina */ }
     }
     return new SbGuestApi(this, db, g, stay.expires_at);

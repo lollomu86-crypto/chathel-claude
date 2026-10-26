@@ -175,3 +175,21 @@ test('0010 personalizzazione: solo il direttore; interruttori con le chiavi del 
   assert.equal(await code(rec.uploadMedia('cover', new Uint8Array([0xff, 0xd8, 0xff]), 'image/jpeg')), 'CH004:forbidden');
   assert.equal(db.table('hotels').find((h) => h.id === 'h2')!.features, undefined);
 });
+test('ospite: la sessione si apre senza leggere colonne non concesse (0004) e l\'ultimo accesso passa da touch_guest', async () => {
+  const db = new FakeSupabase();
+  // colonne di guests NON concesse ai client (0004 + 0009): leggerne una fa fallire la select con 42501
+  db.deniedColumns.guests = ['auth_user_id', 'identity_id', 'push_subscription', 'last_seen_at'];
+  db.seed('guests', [{ id: 'g1', hotel_id: 'h1', display_name: 'Lorenzo', locale: 'it', is_adult: true, auth_user_id: 'ug1', last_seen_at: null }]);
+  db.seed('stays', [{ guest_id: 'g1', status: 'active', expires_at: '2999-01-01T00:00:00.000Z' }]);
+  db.joins['guests.hotels'] = () => ({ ...H1, bonus_enabled: true, booking_cancel_cutoff_minutes: 60, max_bookings_per_guest_day: 2, features: {}, welcome: {} });
+  db.tokens.set('tok-g1', 'ug1');
+  db.rpcs.current_guest_id = (_a, who) => ({ data: who.uid === 'ug1' ? 'g1' : null });
+  db.rpcs.touch_guest = () => ({ data: null });
+  const store = new SupabaseStore({ createClient: db.createClient });
+  const g = await store.guest(sess('tok-g1'));
+  assert.ok(g, 'l\'ospite viene riconosciuto');
+  assert.equal((await g!.view()).name, 'Lorenzo');
+  assert.equal(db.calls.filter((c) => c.name === 'touch_guest').length, 1);
+  await store.guest(sess('tok-g1'));
+  assert.equal(db.calls.filter((c) => c.name === 'touch_guest').length, 1, 'entro 10 minuti nessuna nuova scrittura');
+});
