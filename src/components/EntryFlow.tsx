@@ -119,10 +119,16 @@ export function EntryFlow({ slug, token, hotelName }: { slug: string; token: str
       return;
     }
     let failed = false;
-    if (wantList && !wantDm) {
-      const a = await call('/api/guest/social-settings-update', { acceptsPrivate: false });
+    // chi rientra con lo stesso account (altro telefono o browser) ritrova il soggiorno ancora aperto: il database non
+    // riapplica le scelte, quindi valgono quelle appena fatte e si salvano qui
+    const existing = r.existing === true;
+    if (wantList && (!wantDm || existing)) {
+      const a = await call('/api/guest/social-settings-update', { acceptsPrivate: wantDm });
       const b = a.ok ? await call('/api/guest/social-settings-update', { visible: true }) : a;
       if (!b.ok) failed = true;
+    } else if (existing && !wantList) {
+      // ha tolto la spunta dell'elenco: si esce dall'elenco (scelta piu' riservata)
+      await call('/api/guest/social-settings-update', { visible: false });
     }
     if (wantList && consents.chat) {
       const c = await call('/api/guest/social-rules', {});
