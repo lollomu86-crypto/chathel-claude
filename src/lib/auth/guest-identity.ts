@@ -47,6 +47,8 @@ export interface GuestIdentityProvider {
   loginDemo?(id: string): Promise<{ credential: string; identity: GuestIdentity } | null>;
   /** Solo Supabase: dopo l'OAuth lato client, verifica i token e ritorna il valore del cookie. */
   exchangeSession?(tokens: { accessToken: string; refreshToken: string }): Promise<{ credential: string; identity: GuestIdentity } | null>;
+  /** Solo Supabase: (ri)registra l'identita' (RPC identity_register, idempotente). false se non riesce. */
+  register?(v: VerifiedIdentity): Promise<boolean>;
 }
 
 // ----------------------------------------------------------------------------- chiave anti-doppione
@@ -164,6 +166,23 @@ export class SupabaseIdentityProvider implements GuestIdentityProvider {
     }
   }
 
+  /**
+   * Registra l'identita' (solo provider_subject e nome di battesimo) per il legame con il soggiorno. Si richiama anche a ogni
+   * ingresso: al check-out il registro si cancella, ma l'utente auth di chi e' anche staff resta e il suo accesso Google resta
+   * valido, quindi senza ri-registrazione start_stay risponderebbe identity_required e l'ospite tornerebbe al login a vuoto.
+   */
+  async register(v: VerifiedIdentity): Promise<boolean> {
+    if (!v.authUserId) return false;
+    try {
+      const r = await this.deps.service().rpc?.('identity_register', {
+        p_auth_user: v.authUserId, p_provider: v.identity.provider, p_subject: v.identity.subject, p_given_name: v.identity.givenName,
+      });
+      return !!r && !r.error;
+    } catch {
+      return false;
+    }
+  }
+
   async exchangeSession(tokens: { accessToken: string; refreshToken: string }) {
     let v: VerifiedIdentity | null = null;
     try {
@@ -172,12 +191,7 @@ export class SupabaseIdentityProvider implements GuestIdentityProvider {
       return null;
     }
     if (!v?.authUserId) return null;
-    // registra l'identita' (solo provider_subject e nome di battesimo) per il legame con il soggiorno
-    const svc = this.deps.service();
-    const r = await svc.rpc?.('identity_register', {
-      p_auth_user: v.authUserId, p_provider: v.identity.provider, p_subject: v.identity.subject, p_given_name: v.identity.givenName,
-    });
-    if (!r || r.error) return null;
+    if (!(await this.register(v))) return null;
     return { credential: encodeSession({ a: tokens.accessToken, r: tokens.refreshToken }), identity: v.identity };
   }
 }

@@ -808,7 +808,8 @@
     "invalid_image": "Ungültiges Bild: Verwende eine JPG-, PNG- oder WebP-Datei.",
     "image_too_large": "Bild zu groß (maximal 2 MB).",
     "welcome_too_long": "Die Nachricht ist länger als 500 Zeichen.",
-    "unsupported_media_type": "Format nicht unterstützt: Verwende JPG, PNG oder WebP."
+    "unsupported_media_type": "Format nicht unterstützt: Verwende JPG, PNG oder WebP.",
+    "identity_required": "Melde dich erneut mit Google an, um fortzufahren."
   },
   "ai": {
     "notKnown": "Diese Information habe ich nicht. Ich verbinde dich mit der Rezeption: Das Personal antwortet so bald wie möglich.",

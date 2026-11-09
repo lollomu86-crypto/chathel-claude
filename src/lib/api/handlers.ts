@@ -151,6 +151,8 @@ export async function onboarding(ctx: Ctx, raw: unknown): Promise<Res> {
       return fail(429, 'rate_limited');
     }
     if (b.consent !== true) return fail(400, 'consent_required');
+    // registro dell'identita' sempre presente prima del soggiorno (vedi SupabaseIdentityProvider.register)
+    if (ctx.store.mode === 'supabase') await ctx.identityProvider?.register?.(verified);
 
     try {
       const r = await ctx.store.startStay({
