@@ -3,7 +3,7 @@
 // Una funzione spenta si nasconde nell'app, le API rispondono 403 e le scritture vengono rifiutate. Non si cancella nulla.
 
 import { ChError } from '../errors';
-import { FEATURE_KEYS, LOCALES, type FeatureKey, type HotelFeatures, type HotelMediaKind, type I18nText, type Locale } from '../types';
+import { FEATURE_KEYS, CONTENT_LOCALES, type FeatureKey, type HotelFeatures, type HotelMediaKind, type I18nText, type Locale } from '../types';
 
 const DB_KEY: Record<FeatureKey, string> = {
   social: 'social', publicChat: 'public_chat', challenges: 'challenges', coupons: 'coupons', bookings: 'bookings', reception: 'reception',
@@ -40,7 +40,7 @@ export const WELCOME_MAX_CHARS = 500;
 /** Testo ripulito: spazi tolti, lingue vuote eliminate, al massimo 500 caratteri per lingua. */
 export function cleanWelcome(w: I18nText): I18nText {
   const out: I18nText = {};
-  for (const l of LOCALES) {
+  for (const l of CONTENT_LOCALES) {
     const v = (w[l] ?? '').trim();
     if (!v) continue;
     if (v.length > WELCOME_MAX_CHARS) throw new ChError('CH003', 'welcome_too_long');
@@ -49,9 +49,10 @@ export function cleanWelcome(w: I18nText): I18nText {
   return out;
 }
 
-/** Benvenuto nella lingua dell'ospite, altrimenti in quella predefinita dell'hotel; '' se manca. */
+/** Benvenuto nella lingua dell'ospite; per le lingue che l'hotel non scrive prima l'inglese; poi la lingua dell'hotel. */
 export function welcomeFor(w: I18nText | null | undefined, locale: Locale, hotelDefault: Locale): string {
-  return (w?.[locale] || w?.[hotelDefault] || '').trim();
+  const writes = (CONTENT_LOCALES as readonly string[]).includes(locale);
+  return (w?.[locale] || (!writes ? w?.en : '') || w?.[hotelDefault] || '').trim();
 }
 
 // ---------------------------------------------------------------- immagini

@@ -1,10 +1,16 @@
 // Tipi condivisi (DTO) tra store (demo / Supabase), handler API e UI.
 // Nessun tipo contiene camera o cognome: il modello dati non li prevede (regola privacy).
 
-export const LOCALES = ['it', 'en', 'de', 'ru'] as const;
+/** Lingue dell'interfaccia (migrazione 0011 per le 8 dopo il russo). */
+export const LOCALES = ['it', 'en', 'de', 'ru', 'fr', 'es', 'nl', 'pl', 'sv', 'pt', 'cs', 'zh'] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'it';
-export const LOCALE_NAMES: Record<Locale, string> = { it: 'Italiano', en: 'English', de: 'Deutsch', ru: 'Русский' };
+export const LOCALE_NAMES: Record<Locale, string> = {
+  it: 'Italiano', en: 'English', de: 'Deutsch', ru: 'Русский', fr: 'Français', es: 'Español',
+  nl: 'Nederlands', pl: 'Polski', sv: 'Svenska', pt: 'Português', cs: 'Čeština', zh: '中文',
+};
+/** Lingue in cui l'hotel scrive i propri testi (giochi, benvenuto): per le altre l'app ripiega sull'inglese. */
+export const CONTENT_LOCALES = ['it', 'en', 'de', 'ru'] as const satisfies readonly Locale[];
 
 export function isLocale(x: unknown): x is Locale {
   return typeof x === 'string' && (LOCALES as readonly string[]).includes(x);

@@ -850,3 +850,19 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 .media-preview-logo img { max-height: 112px; width: auto; }
 .media-preview-cover img { width: 100%; aspect-ratio: 16 / 7; object-fit: cover; }
 .setting-sub { padding-left: var(--space-5); }
+
+/* =====================================================================
+   SELETTORE LINGUA A 12 LINGUE: una barra con la lingua scelta che apre l'elenco (scorrevole). Nessun colore nuovo.
+   ===================================================================== */
+.lang-bar-wrap { position: relative; }
+.lang-bar { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: var(--tap); padding: var(--space-2) var(--space-3);
+  border: var(--bw-strong) solid var(--border-strong); border-radius: var(--radius-field); background: var(--surface); color: var(--text);
+  font: inherit; font-size: var(--fs-md); font-weight: var(--fw-medium); text-align: left; cursor: pointer; }
+.lang-bar:hover { background: var(--surface-2); }
+.lang-bar[aria-expanded="true"] { border-color: var(--primary); }
+.lang-bar-chev { width: 20px; height: 20px; flex: none; transition: transform var(--ease); }
+.lang-bar[aria-expanded="true"] .lang-bar-chev { transform: rotate(180deg); }
+.lang-menu { max-height: min(60vh, 420px); overflow-y: auto; overscroll-behavior: contain; }
+.lang-menu > button[aria-checked="true"] { background: var(--primary-soft); color: var(--on-primary-soft); font-weight: var(--fw-bold); }
+.lang-menu-wide { left: 0; right: 0; min-width: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px; }
+

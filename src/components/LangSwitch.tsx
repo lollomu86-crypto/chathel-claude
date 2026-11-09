@@ -7,10 +7,10 @@ import { useI18n } from './I18n';
 import { Flag } from './LangFlags';
 
 /**
- * Selettore lingua a bandiere (it, en, de, ru), ordine fisso. La bandiera e' decorativa: il nome della lingua,
- * nella lingua stessa, e' sempre il nome accessibile (testo visibile o aria-label).
- *  - variant "inline": gruppo di quattro pulsanti radio (ingresso, profilo);
- *  - variant "compact": un pulsante bandiera+codice con menu (testate).
+ * Selettore lingua (12 lingue, ordine fisso). La bandiera e' decorativa: il nome della lingua, nella lingua stessa,
+ * e' sempre il nome accessibile (testo visibile o aria-label). Le lingue non stanno tutte sullo schermo: si apre un elenco.
+ *  - variant "inline": barra larga con la lingua scelta che apre l'elenco (ingresso, profilo);
+ *  - variant "compact": un pulsante bandiera+codice con lo stesso elenco (testate).
  */
 export function LangSwitch({ variant = 'inline', saveToProfile = false }: { variant?: 'inline' | 'compact'; saveToProfile?: boolean }) {
   const { locale, t } = useI18n();
@@ -47,39 +47,43 @@ export function LangSwitch({ variant = 'inline', saveToProfile = false }: { vari
     if (activate) next?.click();
   };
 
+  const list = (
+    <div className={`menu lang-menu${variant === 'inline' ? ' lang-menu-wide' : ''}`} role="menu" aria-label={t('common.language')}>
+      {LOCALES.map((l) => (
+        <button key={l} type="button" role="menuitemradio" aria-checked={l === locale} lang={l} aria-label={LOCALE_NAMES[l]} onClick={() => choose(l)}>
+          <Flag locale={l} size="lg" />
+          <span>{LOCALE_NAMES[l]}</span>
+        </button>
+      ))}
+    </div>
+  );
+  const onKey = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Escape' && open) { setOpen(false); btn.current?.focus(); }
+    else if (open) moveFocus(e, '[role="menuitemradio"]', false);
+  };
+
   if (variant === 'compact') {
     return (
-      <div className="lang-compact" ref={wrap} onKeyDown={(e) => {
-        if (e.key === 'Escape' && open) { setOpen(false); btn.current?.focus(); }
-        else if (open) moveFocus(e, '[role="menuitemradio"]', false);
-      }}>
+      <div className="lang-compact" ref={wrap} onKeyDown={onKey}>
         <button ref={btn} type="button" className="lang-compact-btn" aria-haspopup="menu" aria-expanded={open}
           aria-label={`${t('common.language')}: ${LOCALE_NAMES[locale]}`} onClick={() => setOpen((o) => !o)}>
           <Flag locale={locale} />
           <span aria-hidden="true">{locale.toUpperCase()}</span>
         </button>
-        {open && (
-          <div className="menu lang-menu" role="menu" aria-label={t('common.language')}>
-            {LOCALES.map((l) => (
-              <button key={l} type="button" role="menuitemradio" aria-checked={l === locale} lang={l} aria-label={LOCALE_NAMES[l]} onClick={() => choose(l)}>
-                <Flag locale={l} size="lg" />
-                <span>{LOCALE_NAMES[l]}</span>
-              </button>
-            ))}
-          </div>
-        )}
+        {open && list}
       </div>
     );
   }
 
   return (
-    <div className="lang" role="radiogroup" aria-label={t('common.language')} ref={wrap} onKeyDown={(e) => moveFocus(e, '[role="radio"]', true)}>
-      {LOCALES.map((l) => (
-        <button key={l} type="button" role="radio" aria-checked={l === locale} tabIndex={l === locale ? 0 : -1} className="lang-opt" lang={l} aria-label={LOCALE_NAMES[l]} onClick={() => choose(l)}>
-          <Flag locale={l} size="lg" />
-          <span>{LOCALE_NAMES[l]}</span>
-        </button>
-      ))}
+    <div className="lang-bar-wrap" ref={wrap} onKeyDown={onKey}>
+      <button ref={btn} type="button" className="lang-bar" aria-haspopup="menu" aria-expanded={open}
+        aria-label={`${t('common.language')}: ${LOCALE_NAMES[locale]}`} onClick={() => setOpen((o) => !o)}>
+        <Flag locale={locale} size="lg" />
+        <span className="grow" lang={locale}>{LOCALE_NAMES[locale]}</span>
+        <svg className="lang-bar-chev" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      </button>
+      {open && list}
     </div>
   );
 }

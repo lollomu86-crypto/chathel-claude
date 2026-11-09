@@ -9,7 +9,8 @@ import { DEFAULT_LOCALE, isLocale, type I18nText, type Locale } from './types';
  */
 export function pick(text: I18nText | null | undefined, locale: Locale, hotelDefault: Locale = DEFAULT_LOCALE): string {
   if (!text) return '';
-  return text[locale] || text[hotelDefault] || text.it || text.en || text.de || '';
+  // un francese, uno spagnolo... legge meglio l'inglese che la lingua dell'hotel: l'hotel scrive in it/en/de(/ru)
+  return text[locale] || text[hotelDefault === 'it' && locale !== 'it' ? 'en' : hotelDefault] || text[hotelDefault] || text.it || text.en || text.de || '';
 }
 
 /** Dalla intestazione Accept-Language: prima lingua supportata, altrimenti ripiego en (QR-04). */

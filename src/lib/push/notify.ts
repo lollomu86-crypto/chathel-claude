@@ -2,9 +2,11 @@
 // tranne gli avvisi dell'hotel, che sono testo pubblico scritto dall'hotel. Errori e mancanza di configurazione: silenzio.
 import { randomBytes } from 'node:crypto';
 import { vapidFromEnv, sendPush, type PushSub } from './webpush';
+import { isLocale, type Locale } from '../types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type Locale4 = 'it' | 'en' | 'de' | 'ru';
+/** Tutte le lingue dell'app (12): i testi generici qui sotto esistono per ognuna. */
+export type Locale4 = Locale;
 export interface PushPrefs { announcements: boolean; reception: boolean; private: boolean; public: boolean }
 export const DEFAULT_PREFS: PushPrefs = { announcements: true, reception: true, private: true, public: false };
 export const MAX_RECIPIENTS = 300;
@@ -16,24 +18,48 @@ const TEXT: Record<'reception' | 'private' | 'public', Record<Locale4, { title: 
     en: { title: 'Reception', body: 'The front desk has replied to you.' },
     de: { title: 'Rezeption', body: 'Die Rezeption hat dir geantwortet.' },
     ru: { title: 'Ресепшн', body: 'Ресепшн ответил вам.' },
+    fr: { title: "Réception", body: "La réception vous a répondu." },
+    es: { title: "Recepción", body: "La recepción te ha respondido." },
+    nl: { title: "Receptie", body: "De receptie heeft je geantwoord." },
+    pl: { title: "Recepcja", body: "Recepcja odpowiedziała na Twoją wiadomość." },
+    sv: { title: "Reception", body: "Receptionen har svarat dig." },
+    pt: { title: "Receção", body: "A receção respondeu-lhe." },
+    cs: { title: "Recepce", body: "Recepce vám odpověděla." },
+    zh: { title: "前台", body: "前台已回复您。" },
   },
   private: {
     it: { title: 'Messaggio privato', body: 'Hai un nuovo messaggio privato.' },
     en: { title: 'Private message', body: 'You have a new private message.' },
     de: { title: 'Private Nachricht', body: 'Du hast eine neue private Nachricht.' },
     ru: { title: 'Личное сообщение', body: 'У вас новое личное сообщение.' },
+    fr: { title: "Message privé", body: "Vous avez un nouveau message privé." },
+    es: { title: "Mensaje privado", body: "Tienes un nuevo mensaje privado." },
+    nl: { title: "Privébericht", body: "Je hebt een nieuw privébericht." },
+    pl: { title: "Wiadomość prywatna", body: "Masz nową wiadomość prywatną." },
+    sv: { title: "Privat meddelande", body: "Du har ett nytt privat meddelande." },
+    pt: { title: "Mensagem privada", body: "Tem uma nova mensagem privada." },
+    cs: { title: "Soukromá zpráva", body: "Máte novou soukromou zprávu." },
+    zh: { title: "私信", body: "您有一条新的私信。" },
   },
   public: {
     it: { title: 'Chat dell\'hotel', body: 'Ci sono nuovi messaggi nella chat pubblica.' },
     en: { title: 'Hotel chat', body: 'There are new messages in the public chat.' },
     de: { title: 'Hotel-Chat', body: 'Es gibt neue Nachrichten im öffentlichen Chat.' },
     ru: { title: 'Чат отеля', body: 'В общем чате есть новые сообщения.' },
+    fr: { title: "Chat de l'hôtel", body: "Il y a de nouveaux messages dans le chat public." },
+    es: { title: "Chat del hotel", body: "Hay mensajes nuevos en el chat público." },
+    nl: { title: "Hotelchat", body: "Er zijn nieuwe berichten in de openbare chat." },
+    pl: { title: "Czat hotelu", body: "Na czacie publicznym są nowe wiadomości." },
+    sv: { title: "Hotellchatt", body: "Det finns nya meddelanden i den öppna chatten." },
+    pt: { title: "Chat do hotel", body: "Há novas mensagens no chat público." },
+    cs: { title: "Hotelový chat", body: "Ve veřejném chatu jsou nové zprávy." },
+    zh: { title: "酒店聊天", body: "公共聊天中有新消息。" },
   },
 };
 const URLS = { reception: '/stay/reception', private: '/stay/social?tab=private', public: '/stay/social', announcements: '/stay/inbox' } as const;
 
-const loc = (v: unknown): Locale4 => (v === 'en' || v === 'de' || v === 'ru' ? v : 'it');
-const pick = (o: any, l: Locale4): string => (o && typeof o === 'object' ? String(o[l] ?? o.it ?? o.en ?? Object.values(o)[0] ?? '') : '');
+const loc = (v: unknown): Locale4 => (isLocale(v) ? v : 'it');
+const pick = (o: any, l: Locale4): string => (o && typeof o === 'object' ? String(o[l] ?? (l === 'it' ? o.it : o.en ?? o.it) ?? o.it ?? Object.values(o)[0] ?? '') : '');
 
 export function cleanPrefs(v: unknown, base: PushPrefs = DEFAULT_PREFS): PushPrefs {
   const o = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>;
@@ -140,12 +166,28 @@ const CHALLENGE_TEXT: Record<'received' | 'accepted', Record<Locale4, { title: s
     en: { title: 'New challenge', body: 'Someone has challenged you. Open the chat to reply.' },
     de: { title: 'Neue Herausforderung', body: 'Jemand hat dich herausgefordert. Öffne den Chat, um zu antworten.' },
     ru: { title: 'Новый вызов', body: 'Вас вызвали на игру. Откройте чат, чтобы ответить.' },
+    fr: { title: "Nouveau défi", body: "Quelqu'un vous a lancé un défi. Ouvrez le chat pour répondre." },
+    es: { title: "Nuevo reto", body: "Alguien te ha retado. Abre el chat para responder." },
+    nl: { title: "Nieuwe uitdaging", body: "Iemand heeft je uitgedaagd. Open de chat om te antwoorden." },
+    pl: { title: "Nowe wyzwanie", body: "Ktoś rzucił Ci wyzwanie. Otwórz czat, aby odpowiedzieć." },
+    sv: { title: "Ny utmaning", body: "Någon har utmanat dig. Öppna chatten för att svara." },
+    pt: { title: "Novo desafio", body: "Alguém o desafiou. Abra o chat para responder." },
+    cs: { title: "Nová výzva", body: "Někdo vás vyzval. Otevřete chat a odpovězte." },
+    zh: { title: "新挑战", body: "有人向您发起了挑战。打开聊天进行回复。" },
   },
   accepted: {
     it: { title: 'Sfida accettata', body: 'La tua sfida è stata accettata.' },
     en: { title: 'Challenge accepted', body: 'Your challenge has been accepted.' },
     de: { title: 'Herausforderung angenommen', body: 'Deine Herausforderung wurde angenommen.' },
     ru: { title: 'Вызов принят', body: 'Ваш вызов приняли.' },
+    fr: { title: "Défi accepté", body: "Votre défi a été accepté." },
+    es: { title: "Reto aceptado", body: "Tu reto ha sido aceptado." },
+    nl: { title: "Uitdaging aangenomen", body: "Je uitdaging is aangenomen." },
+    pl: { title: "Wyzwanie przyjęte", body: "Twoje wyzwanie zostało przyjęte." },
+    sv: { title: "Utmaning antagen", body: "Din utmaning har antagits." },
+    pt: { title: "Desafio aceite", body: "O seu desafio foi aceite." },
+    cs: { title: "Výzva přijata", body: "Vaše výzva byla přijata." },
+    zh: { title: "挑战已接受", body: "您的挑战已被接受。" },
   },
 };
 

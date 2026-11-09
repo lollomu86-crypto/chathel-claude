@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { LOCALES, type FeatureKey, type HotelFeatures, type HotelMediaKind, type I18nText, type Locale } from '@/lib/types';
+import { CONTENT_LOCALES as LOCALES, type FeatureKey, type HotelFeatures, type HotelMediaKind, type I18nText, type Locale } from '@/lib/types';
 import { safeImage } from '@/lib/safe-image';
 import { call } from './client-api';
 import { useConfirm, useErrorText, useI18n } from './I18n';
@@ -44,7 +44,7 @@ export function AdminCustomization({ logoUrl, coverUrl, welcome, features, bonus
   const ask = useConfirm();
   const router = useRouter();
   const [media, setMedia] = useState<Record<HotelMediaKind, string | null>>({ logo: logoUrl, cover: coverUrl });
-  const [text, setText] = useState<Record<Locale, string>>(() => Object.fromEntries(LOCALES.map((l) => [l, welcome[l] ?? ''])) as Record<Locale, string>);
+  const [text, setText] = useState<Record<(typeof LOCALES)[number], string>>(() => Object.fromEntries(LOCALES.map((l) => [l, welcome[l] ?? ''])) as Record<(typeof LOCALES)[number], string>);
   const [feat, setFeat] = useState<HotelFeatures>(features);
   const [bonus, setBonus] = useState(bonusEnabled);
   const [busy, setBusy] = useState<string | null>(null);
