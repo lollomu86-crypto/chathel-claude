@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Willkommen, {name}",
+    "welcomeF": "Willkommen, {name}",
+    "welcomeM": "Willkommen, {name}",
     "validUntil": "Gültig bis zu deiner Abreise ({date})",
     "useBonus": "Dem Barkeeper zeigen",
     "bonusRedeemed": "Eingelöst am {date}",
@@ -124,6 +126,8 @@
     "installIos": "Auf dem iPhone: In Safari auf Teilen tippen (Quadrat mit Pfeil), dann „Zum Home-Bildschirm“, dann „Hinzufügen“.",
     "installNote": "Alles funktioniert auch ohne Installation; Push-Benachrichtigungen erfordern die Installation.",
     "welcomeNew": "Willkommen im {hotel}. Beginnen Sie mit dem Bonus unten.",
+    "welcomeNewF": "Willkommen im {hotel}. Beginnen Sie mit dem Bonus unten.",
+    "welcomeNewM": "Willkommen im {hotel}. Beginnen Sie mit dem Bonus unten.",
     "bonusBadge": "Bonus",
     "socialRequests": "Offene Chat-Anfragen: {n}",
     "socialNew": "Neue Nachrichten von anderen Gästen",

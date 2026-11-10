@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Ti diamo il benvenuto, {name}",
+    "welcomeF": "Benvenuta, {name}",
+    "welcomeM": "Benvenuto, {name}",
     "validUntil": "Valido fino al tuo check-out ({date})",
     "useBonus": "Mostra al barista",
     "bonusRedeemed": "Riscattato il {date}",
@@ -124,6 +126,8 @@
     "installIos": "Su iPhone: tocca Condividi (quadrato con freccia) in Safari, poi «Aggiungi alla schermata Home», poi «Aggiungi».",
     "installNote": "Puoi usare tutto anche senza installare; le notifiche push richiedono l'installazione.",
     "welcomeNew": "Ti diamo il benvenuto in {hotel}. Inizia dal bonus qui sotto.",
+    "welcomeNewF": "Benvenuta in {hotel}. Inizia dal bonus qui sotto.",
+    "welcomeNewM": "Benvenuto in {hotel}. Inizia dal bonus qui sotto.",
     "bonusBadge": "Bonus",
     "socialRequests": "Richieste di chat da gestire: {n}",
     "socialNew": "Ci sono nuovi messaggi dagli altri ospiti",

@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Damos-lhe as boas-vindas, {name}",
+    "welcomeF": "Bem-vinda, {name}",
+    "welcomeM": "Bem-vindo, {name}",
     "validUntil": "Válido até ao seu check-out ({date})",
     "useBonus": "Mostrar ao barman",
     "bonusRedeemed": "Utilizado em {date}",
@@ -124,6 +126,8 @@
     "installIos": "No iPhone: no Safari toque em Partilhar (quadrado com seta), depois em «Adicionar ao ecrã principal» e por fim em «Adicionar».",
     "installNote": "Tudo funciona sem instalar; as notificações push exigem a instalação.",
     "welcomeNew": "Damos-lhe as boas-vindas ao {hotel}. Comece pelo bónus aqui em baixo.",
+    "welcomeNewF": "Bem-vinda ao {hotel}. Comece pelo bónus aqui em baixo.",
+    "welcomeNewM": "Bem-vindo ao {hotel}. Comece pelo bónus aqui em baixo.",
     "bonusBadge": "Bónus",
     "socialRequests": "Pedidos de conversa pendentes: {n}",
     "socialNew": "Novas mensagens de outros hóspedes",

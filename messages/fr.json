@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Bienvenue, {name}",
+    "welcomeF": "Bienvenue, {name}",
+    "welcomeM": "Bienvenue, {name}",
     "validUntil": "Valable jusqu'à votre départ ({date})",
     "useBonus": "Montrer au barman",
     "bonusRedeemed": "Utilisé le {date}",
@@ -124,6 +126,8 @@
     "installIos": "Sur iPhone : dans Safari, touchez Partager (carré avec une flèche), puis « Sur l'écran d'accueil », puis « Ajouter ».",
     "installNote": "Tout fonctionne sans installation ; les notifications push nécessitent l'installation.",
     "welcomeNew": "Bienvenue à {hotel}. Commencez par le bonus ci-dessous.",
+    "welcomeNewF": "Bienvenue à {hotel}. Commencez par le bonus ci-dessous.",
+    "welcomeNewM": "Bienvenue à {hotel}. Commencez par le bonus ci-dessous.",
     "bonusBadge": "Bonus",
     "socialRequests": "Demandes de chat en attente : {n}",
     "socialNew": "Nouveaux messages d'autres clients",
