@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Welcome, {name}",
+    "welcomeF": "Welcome, {name}",
+    "welcomeM": "Welcome, {name}",
     "validUntil": "Valid until your check-out ({date})",
     "useBonus": "Show to the bartender",
     "bonusRedeemed": "Redeemed on {date}",
@@ -124,6 +126,8 @@
     "installIos": "On iPhone: tap Share (square with arrow) in Safari, then “Add to Home Screen”, then “Add”.",
     "installNote": "Everything works without installing; push notifications require installation.",
     "welcomeNew": "Welcome to {hotel}. Start with the bonus below.",
+    "welcomeNewF": "Welcome to {hotel}. Start with the bonus below.",
+    "welcomeNewM": "Welcome to {hotel}. Start with the bonus below.",
     "bonusBadge": "Bonus",
     "socialRequests": "Chat requests waiting: {n}",
     "socialNew": "New messages from other guests",

@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Welkom, {name}",
+    "welcomeF": "Welkom, {name}",
+    "welcomeM": "Welkom, {name}",
     "validUntil": "Geldig tot je vertrek ({date})",
     "useBonus": "Laat zien aan de barman",
     "bonusRedeemed": "Gebruikt op {date}",
@@ -124,6 +126,8 @@
     "installIos": "Op iPhone: tik in Safari op Deel (vierkant met pijl), dan op ‘Zet op beginscherm’ en daarna op ‘Voeg toe’.",
     "installNote": "Alles werkt zonder installatie; pushmeldingen vereisen de installatie.",
     "welcomeNew": "Welkom bij {hotel}. Begin met de bonus hieronder.",
+    "welcomeNewF": "Welkom bij {hotel}. Begin met de bonus hieronder.",
+    "welcomeNewM": "Welkom bij {hotel}. Begin met de bonus hieronder.",
     "bonusBadge": "Bonus",
     "socialRequests": "Chatverzoeken in afwachting: {n}",
     "socialNew": "Nieuwe berichten van andere gasten",

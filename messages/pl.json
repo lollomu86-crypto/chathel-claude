@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Witaj, {name}",
+    "welcomeF": "Witaj, {name}",
+    "welcomeM": "Witaj, {name}",
     "validUntil": "Ważny do Twojego wyjazdu ({date})",
     "useBonus": "Pokaż barmanowi",
     "bonusRedeemed": "Wykorzystano {date}",
@@ -124,6 +126,8 @@
     "installIos": "Na iPhonie: w Safari dotknij Udostępnij (kwadrat ze strzałką), potem „Do ekranu początkowego”, a następnie „Dodaj”.",
     "installNote": "Wszystko działa bez instalacji; powiadomienia push wymagają instalacji.",
     "welcomeNew": "Witaj w {hotel}. Zacznij od bonusu poniżej.",
+    "welcomeNewF": "Witaj w {hotel}. Zacznij od bonusu poniżej.",
+    "welcomeNewM": "Witaj w {hotel}. Zacznij od bonusu poniżej.",
     "bonusBadge": "Bonus",
     "socialRequests": "Oczekujące prośby o czat: {n}",
     "socialNew": "Nowe wiadomości od innych gości",

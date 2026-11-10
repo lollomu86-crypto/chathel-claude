@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "欢迎，{name}",
+    "welcomeF": "欢迎，{name}",
+    "welcomeM": "欢迎，{name}",
     "validUntil": "有效期至您离店（{date}）",
     "useBonus": "出示给调酒师",
     "bonusRedeemed": "已于 {date} 使用",
@@ -124,6 +126,8 @@
     "installIos": "iPhone：在 Safari 中点击“分享”（带箭头的方框），然后点“添加到主屏幕”，再点“添加”。",
     "installNote": "无需安装也能使用全部功能；推送通知需要安装后才能使用。",
     "welcomeNew": "欢迎来到 {hotel}。先从下方的福利开始吧。",
+    "welcomeNewF": "欢迎来到 {hotel}。先从下方的福利开始吧。",
+    "welcomeNewM": "欢迎来到 {hotel}。先从下方的福利开始吧。",
     "bonusBadge": "福利",
     "socialRequests": "待处理的聊天请求：{n}",
     "socialNew": "其他住客发来的新消息",

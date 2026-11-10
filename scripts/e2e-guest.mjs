@@ -35,7 +35,7 @@ try {
   await a.locator('label.check input[required]').check();
   await a.locator('form button[type=submit]').click();
   await a.waitForURL(/\/stay/); await a.locator('main#main').waitFor();
-  check(await a.getByRole('heading', { name: re(t('home.welcome', { name: 'Giulia' })) }).isVisible(), 'home con il nome');
+  check(await a.getByRole('heading', { name: re(t('home.welcomeF', { name: 'Giulia' })) }).isVisible(), 'home con il nome');
   await shot(a, 'g-02-home');
 
   console.log('\n# Bonus QR e conteggio richieste (F-01)');

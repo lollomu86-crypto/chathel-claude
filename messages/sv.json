@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Välkommen, {name}",
+    "welcomeF": "Välkommen, {name}",
+    "welcomeM": "Välkommen, {name}",
     "validUntil": "Gäller till din utcheckning ({date})",
     "useBonus": "Visa för bartendern",
     "bonusRedeemed": "Använd {date}",
@@ -124,6 +126,8 @@
     "installIos": "På iPhone: tryck på Dela (fyrkant med pil) i Safari, sedan på ”Lägg till på hemskärmen” och därefter ”Lägg till”.",
     "installNote": "Allt fungerar utan installation; pushnotiser kräver installation.",
     "welcomeNew": "Välkommen till {hotel}. Börja med bonusen här nedanför.",
+    "welcomeNewF": "Välkommen till {hotel}. Börja med bonusen här nedanför.",
+    "welcomeNewM": "Välkommen till {hotel}. Börja med bonusen här nedanför.",
     "bonusBadge": "Bonus",
     "socialRequests": "Väntande chattförfrågningar: {n}",
     "socialNew": "Nya meddelanden från andra gäster",

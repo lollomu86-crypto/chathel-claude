@@ -8,6 +8,7 @@ import { Icon } from '@/components/ui/Icon';
 import { titleFor } from '@/components/page-meta';
 import { safeImage } from '@/lib/safe-image';
 import { welcomeFor } from '@/lib/rules/features';
+import { greetingGender, greetingKey } from '@/lib/rules/greeting';
 
 export const dynamic = 'force-dynamic';
 export const generateMetadata = titleFor('nav.home');
@@ -25,6 +26,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
   const f = view.hotel.features;
   const cover = safeImage(view.hotel.coverUrl);
   const welcome = welcomeFor(view.hotel.welcome, locale, view.hotel.defaultLocale);
+  // "Benvenuta" / "Benvenuto" dal nome di battesimo; nome ambiguo o sconosciuto: forma neutra (vedi rules/greeting.ts)
+  const gender = greetingGender(view.name, locale);
   const sectionError = (
     <div className="notice notice-err" role="alert">
       <Icon name="alert" />
@@ -35,8 +38,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
   return (
     <>
       {cover && <img className="cover" src={cover} alt="" />}
-      <h1>{t('home.welcome', { name: view.name })}</h1>
-      {sp.welcome === '1' && <p className="notice notice-ok" role="status"><Icon name="check" />{t('home.welcomeNew', { hotel: view.hotel.name })}</p>}
+      <h1>{t(greetingKey('home.welcome', gender), { name: view.name })}</h1>
+      {sp.welcome === '1' && <p className="notice notice-ok" role="status"><Icon name="check" />{t(greetingKey('home.welcomeNew', gender), { hotel: view.hotel.name })}</p>}
       {welcome && (
         <section className="card stack-sm" aria-labelledby="hw">
           <h2 id="hw" className="t-sub">{t('home.hotelWelcome', { hotel: view.hotel.name })}</h2>

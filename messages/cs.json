@@ -108,6 +108,8 @@
   },
   "home": {
     "welcome": "Vítejte, {name}",
+    "welcomeF": "Vítejte, {name}",
+    "welcomeM": "Vítejte, {name}",
     "validUntil": "Platí do vašeho odjezdu ({date})",
     "useBonus": "Ukázat barmanovi",
     "bonusRedeemed": "Využito {date}",
@@ -124,6 +126,8 @@
     "installIos": "Na iPhonu: v Safari klepněte na Sdílet (čtverec se šipkou), pak na „Přidat na plochu“ a nakonec na „Přidat“.",
     "installNote": "Vše funguje i bez instalace; push oznámení vyžadují instalaci.",
     "welcomeNew": "Vítejte v hotelu {hotel}. Začněte bonusem níže.",
+    "welcomeNewF": "Vítejte v hotelu {hotel}. Začněte bonusem níže.",
+    "welcomeNewM": "Vítejte v hotelu {hotel}. Začněte bonusem níže.",
     "bonusBadge": "Bonus",
     "socialRequests": "Čekající žádosti o chat: {n}",
     "socialNew": "Nové zprávy od ostatních hostů",
