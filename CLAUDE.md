@@ -15,9 +15,12 @@
 6. Per il pilota resta la **web app/PWA**: niente App Store/Play Store per ora.
 
 ## Infrastruttura
-- App: **chathel.com** (+ www) su **Vercel** (progetto `chathel-app`, team `chat-hel`, piano Hobby). Repo GitHub **lollomu86-crypto/chathel-claude**, collegata: push su `main` = deploy produzione. Il sito per i direttori **chathel.it** è un progetto separato (repo `chathel-sito`, vuoto).
-- Database/Auth: **Supabase** (progetto ChatHel, piano Free, UE). Migrazioni in `supabase/migrations` (0001–0010 applicate; **0011 lingue da applicare prima del merge della sua PR**). Login Google attivo (Google Cloud progetto ChatHel, client "ChatHel Web"; Site URL https://chathel.com; redirect https://chathel.com/**).
-- Hotel di prova: slug `hotel-prova`, codice 967991, admin su chathel.com/admin/login. Dati demo: `supabase/seed/demo-hotel-prova.sql` (dopo la 0008: 6 eventi, 4 servizi, 3 giochi, 10 voci reception; i posti dipendono dall'ora). Immagini di esempio in `public/demo/*.svg`.
+- **Domini invertiti dal 10/11/2026** (scelta di Lorenzo: i biglietti da visita riportano chathel.com):
+  - App degli ospiti e pannello: **chathel.it** (+ www) su **Vercel** (progetto `chathel-app`, team `chat-hel`, piano Hobby). Repo GitHub **lollomu86-crypto/chathel-claude**, collegata: push su `main` = deploy produzione.
+  - Sito di presentazione per i direttori: **chathel.com** (+ www), progetto Vercel `chathel-sito`, repo **lollomu86-crypto/chathel-sito** (HTML/CSS statico; push su `main` = deploy). Tagline del sito: "Il tuo Hotel, in tasca".
+  - DNS di entrambi i domini su Register.it; la posta founders@chathel.com resta su Register.it (MX). Nel codice dell'app il dominio non è scritto: QR e link usano l'indirizzo da cui si apre la pagina.
+- Database/Auth: **Supabase** (progetto ChatHel, piano Free, UE). Migrazioni in `supabase/migrations` (0001–0010 applicate; **0011 lingue da applicare prima del merge della sua PR**). Login Google attivo (Google Cloud progetto ChatHel, client "ChatHel Web"; Site URL https://chathel.it; redirect https://chathel.it/**, aggiornati da Lorenzo il 10/11/2026).
+- Hotel di prova: slug `hotel-prova`, codice 967991, admin su chathel.it/admin/login. Dati demo: `supabase/seed/demo-hotel-prova.sql` (dopo la 0008: 6 eventi, 4 servizi, 3 giochi, 10 voci reception; i posti dipendono dall'ora). Immagini di esempio in `public/demo/*.svg`.
 - Variabili Vercel (solo i nomi): SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, IDENTITY_PEPPER, TRUSTED_IP_HEADER, NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY. Previste: ANTHROPIC_API_KEY (+ANTHROPIC_MODEL, AI_HOTEL_DAILY_CAP), EMERGENCY_WEBHOOK_URL, VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT (push).
 - Il connettore Vercel MCP dà 403 sullo scope chat-hel: le azioni sul dashboard le fa Lorenzo (Deployments → Create Deployment se serve).
 
@@ -27,6 +30,7 @@ Pannello hotel: pagina iniziale "Oggi" (/admin), menu a gruppi, Statistiche (/ad
 Personalizzazione (Impostazioni, solo direttore, 0010): logo e copertina caricati dal pannello (ridotti nel browser, JPG/PNG/WebP max 2 MB, tipo controllato dai primi byte; li scrive solo il server con il service role nel bucket `hotel-media`, `logo_url` non e' piu' modificabile dai client; in demo stanno in memoria e passano da /api/media/[id]), benvenuto in 4 lingue (max 500, ripiego sulla lingua dell'hotel), interruttori `hotels.features` (social generale + chat pubblica, sfide, coupon; prenotazioni; reception AI; il bonus usa `bonus_enabled`). Funzione spenta: nascosta nell'app, API 403 `feature_disabled`, trigger del database rifiutano le scritture; spegnere non cancella nulla. Regole in `src/lib/rules/features.ts`.
 Lingue (0011): l'app ospite e' in 12 lingue (selettore a tendina, non tutte a schermo). Le 8 nuove traducono solo l'app ospite: pannello, Bar e accesso staff ripiegano sull'inglese; i testi scritti dall'hotel restano in it/en/de/ru (`CONTENT_LOCALES`) e per le lingue nuove si mostra prima l'inglese. Messaggio di emergenza col 112 e parole d'emergenza/allergia in tutte le 12 (cinese per sottostringa). Traduzioni nuove e russo: da far rivedere a madrelingua prima del lancio. `start_stay` conosce solo it/en/de/ru: l'ingresso salva subito la lingua scelta.
 Giochi e sfide (0008): la sala giochi non si prenota piu'; i giochi (`games`, gestiti da direttore e reception in /admin/games) servono alle sfide tra ospiti (`social_challenges`, regole in `rules/social.ts` e nelle RPC `social_challenge_*`): pubbliche nella chat dell'hotel (accetta il primo) o private in una conversazione accettata; posta solo fissa (caffe', aperitivo, per divertimento), nessun risultato registrato; 5 al giorno, 3 aperte, orario tra 5 min e 12 h.
+Saluto della Home: "Benvenuta"/"Benvenuto" ricavato SOLO dal nome di battesimo con due elenchi (`src/lib/rules/greeting.ts`), forma neutra ("Ti diamo il benvenuto") se il nome è ambiguo o sconosciuto; Andrea, Simone, Nicola, Michele, Daniele, Gabriele, Rosario maschili solo in italiano; niente si salva (decisione del 10/11/2026).
 Fatti importanti: dopo il login Google il browser NON deve chiamare `signOut` (revoca la sessione sul server; vedi `src/lib/auth/google-client.ts`). Eventi/servizi usano jsonb `{it,en,de}`; gli slot sono unici per (servizio, orario).
 
 ## Notifiche push (stato: ATTIVE in produzione dal 22/10/2026)
@@ -35,6 +39,7 @@ Provato da Lorenzo il 22/10/2026 dopo la PR #1 (`Urgency: high` tranne la chat p
 Privacy: l'iscrizione è dato personale, si cancella con l'ospite; paragrafo in `messages/*.json` (privacy.push).
 
 ## Da fare (in ordine di priorità)
+0. Dopo l'inversione dei domini (10/11/2026): provare il login Google su chathel.it da telefono; riattivare le notifiche push su chathel.it (le iscrizioni sono legate al dominio: quelle fatte su chathel.com non valgono più); reinstallare sulla schermata Home l'app da chathel.it; rigenerare dal pannello e ristampare i QR fatti con chathel.com; aggiornare i documenti del Project (doc 13, 14, BRAND.md: domini e nuova tagline del sito).
 1. Completare le prove delle push (reception, privati, chat pubblica; avvisi hotel su Android e iPhone già verificati).
 2. Provare il percorso demo con Jacopo (copione); inserire email e telefono nella scheda hotel; Jacopo rivede il copione.
 3. Reception AI: decidere budget e inserire ANTHROPIC_API_KEY.
