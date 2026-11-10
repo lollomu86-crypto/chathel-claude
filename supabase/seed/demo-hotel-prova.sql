@@ -1,6 +1,6 @@
 -- Dati di esempio per Hotel Prova (SOLO per le demo ai direttori).
 -- Da incollare nell'editor SQL di Supabase. Si puo' rilanciare quando si vuole: ricrea eventi, servizi,
--- informazioni dell'hotel e avviso di benvenuto. ATTENZIONE: cancella anche le prenotazioni fatte sui
+-- informazioni dell'hotel e avviso di benvenuto. Eventi e posti coprono le 3 settimane successive. ATTENZIONE: cancella anche le prenotazioni fatte sui
 -- servizi di Hotel Prova (non tocca ospiti, soggiorni, bonus ne' chat).
 -- Le informazioni sono INVENTATE: nessun nome, orario o prezzo e' di una struttura vera.
 
@@ -9,6 +9,7 @@ declare
   h uuid;
   today date := (now() at time zone 'Europe/Rome')::date;
   f_spa uuid; f_mas uuid; f_pool uuid; f_rest uuid;
+  w int;
 begin
   select id into h from public.hotels where slug = 'hotel-prova';
   if h is null then raise exception 'Hotel Prova non trovato (slug hotel-prova)'; end if;
@@ -30,26 +31,28 @@ begin
   delete from public.ai_knowledge  where hotel_id = h;
   delete from public.notifications where hotel_id = h and guest_id is null and kind = 'announcement';
 
-  -- eventi (pubblicati) nei prossimi giorni, orari di Roma
+  -- eventi (pubblicati) per le prossime 3 settimane: lo stesso programma ogni settimana, orari di Roma
+  for w in 0..2 loop
   insert into public.events(hotel_id, title, description, location, starts_at, ends_at, capacity, published, image_url) values
   (h, '{"it":"Aperitivo di benvenuto","en":"Welcome aperitivo","de":"Willkommens-Aperitif"}',
       '{"it":"Un calice di benvenuto in terrazza per conoscere lo staff e scoprire il programma della settimana.","en":"A welcome drink on the terrace to meet the team and discover the week''s programme.","de":"Ein Willkommensgetränk auf der Terrasse, um das Team kennenzulernen und das Wochenprogramm zu entdecken."}',
-      'Terrazza', ((today + 1) + time '19:00') at time zone 'Europe/Rome', ((today + 1) + time '20:00') at time zone 'Europe/Rome', null, true, '/demo/aperitivo-benvenuto.svg'),
+      'Terrazza', ((today + 7 * w + 1) + time '19:00') at time zone 'Europe/Rome', ((today + 7 * w + 1) + time '20:00') at time zone 'Europe/Rome', null, true, '/demo/aperitivo-benvenuto.svg'),
   (h, '{"it":"Yoga all''alba","en":"Sunrise yoga","de":"Yoga bei Sonnenaufgang"}',
       '{"it":"Mezz''ora di yoga leggero sulla spiaggia, adatto a tutti. Porta un asciugamano.","en":"Half an hour of gentle yoga on the beach, suitable for everyone. Bring a towel.","de":"Eine halbe Stunde sanftes Yoga am Strand, für alle geeignet. Bitte ein Handtuch mitbringen."}',
-      'Spiaggia', ((today + 2) + time '07:30') at time zone 'Europe/Rome', ((today + 2) + time '08:15') at time zone 'Europe/Rome', 20, true, '/demo/yoga-alba.svg'),
+      'Spiaggia', ((today + 7 * w + 2) + time '07:30') at time zone 'Europe/Rome', ((today + 7 * w + 2) + time '08:15') at time zone 'Europe/Rome', 20, true, '/demo/yoga-alba.svg'),
   (h, '{"it":"Torneo di beach volley","en":"Beach volleyball tournament","de":"Beachvolleyball-Turnier"}',
       '{"it":"Squadre miste da quattro. Iscrizione libera fino a esaurimento posti, premio per i vincitori.","en":"Mixed teams of four. Open sign-up while places last, prize for the winners.","de":"Gemischte Vierer-Teams. Anmeldung solange Plätze frei sind, Preis für die Sieger."}',
-      'Campo da beach volley', ((today + 2) + time '17:00') at time zone 'Europe/Rome', ((today + 2) + time '19:00') at time zone 'Europe/Rome', 24, true, '/demo/beach-volley.svg'),
+      'Campo da beach volley', ((today + 7 * w + 2) + time '17:00') at time zone 'Europe/Rome', ((today + 7 * w + 2) + time '19:00') at time zone 'Europe/Rome', 24, true, '/demo/beach-volley.svg'),
   (h, '{"it":"Musica dal vivo in piazzetta","en":"Live music in the piazzetta","de":"Live-Musik auf der Piazzetta"}',
       '{"it":"Duo acustico dopo cena, con cocktail al bar della piazzetta.","en":"Acoustic duo after dinner, with cocktails at the piazzetta bar.","de":"Akustik-Duo nach dem Abendessen, mit Cocktails an der Piazzetta-Bar."}',
-      'Piazzetta', ((today + 3) + time '21:30') at time zone 'Europe/Rome', ((today + 3) + time '23:00') at time zone 'Europe/Rome', null, true, '/demo/musica-piazzetta.svg'),
+      'Piazzetta', ((today + 7 * w + 3) + time '21:30') at time zone 'Europe/Rome', ((today + 7 * w + 3) + time '23:00') at time zone 'Europe/Rome', null, true, '/demo/musica-piazzetta.svg'),
   (h, '{"it":"Caccia al tesoro per famiglie","en":"Family treasure hunt","de":"Schatzsuche für Familien"}',
       '{"it":"Un percorso a indizi in tutto il resort per grandi e piccoli, con merenda finale.","en":"A clue trail around the resort for young and old, with a snack at the end.","de":"Eine Schnitzeljagd durch das ganze Resort für Groß und Klein, mit Imbiss zum Abschluss."}',
-      'Ritrovo alla reception', ((today + 4) + time '10:30') at time zone 'Europe/Rome', ((today + 4) + time '12:00') at time zone 'Europe/Rome', 40, true, '/demo/caccia-al-tesoro.svg'),
+      'Ritrovo alla reception', ((today + 7 * w + 4) + time '10:30') at time zone 'Europe/Rome', ((today + 7 * w + 4) + time '12:00') at time zone 'Europe/Rome', 40, true, '/demo/caccia-al-tesoro.svg'),
   (h, '{"it":"Serata a tema: cena sarda","en":"Theme night: Sardinian dinner","de":"Themenabend: Sardisches Abendessen"}',
       '{"it":"Menu ispirato alla cucina sarda al ristorante, con un assaggio di prodotti del territorio.","en":"A menu inspired by Sardinian cuisine at the restaurant, with a taste of local products.","de":"Ein von der sardischen Küche inspiriertes Menü im Restaurant, mit lokalen Produkten zum Probieren."}',
-      'Ristorante', ((today + 5) + time '20:00') at time zone 'Europe/Rome', ((today + 5) + time '22:30') at time zone 'Europe/Rome', 80, true, '/demo/cena-sarda.svg');
+      'Ristorante', ((today + 7 * w + 5) + time '20:00') at time zone 'Europe/Rome', ((today + 7 * w + 5) + time '22:30') at time zone 'Europe/Rome', 80, true, '/demo/cena-sarda.svg');
+  end loop;
 
   -- servizi prenotabili
   insert into public.facilities(hotel_id, kind, name, description, default_capacity, image_url)
@@ -65,7 +68,7 @@ begin
     values (h, 'other', '{"it":"Cena al ristorante","en":"Dinner at the restaurant","de":"Abendessen im Restaurant"}',
             '{"it":"Prenota il tuo tavolo per la cena.","en":"Book your table for dinner.","de":"Reservieren Sie Ihren Tisch für das Abendessen."}', 20, '/demo/ristorante-tavolo.svg') returning id into f_rest;
 
-  -- posti prenotabili: da oggi ai prossimi 7 giorni (solo orari ancora futuri)
+  -- posti prenotabili: da oggi alle prossime 3 settimane (solo orari ancora futuri)
   insert into public.slots(hotel_id, facility_id, starts_at, ends_at, capacity)
   select h, f.id, s.st, s.st + f.dur, f.cap
   from (values
@@ -76,7 +79,7 @@ begin
   ) as f(id, dur, cap, hrs)
   cross join lateral (
     select ((today + d) + t) at time zone 'Europe/Rome' as st
-    from generate_series(0, 7) as d, unnest(f.hrs) as t
+    from generate_series(0, 20) as d, unnest(f.hrs) as t
   ) s
   where s.st > now();
 
