@@ -63,7 +63,7 @@
     "codeGo": "Entrar con el código"
   },
   "onboarding": {
-    "title": "Bienvenido a {hotel}",
+    "title": "Te damos la bienvenida a {hotel}",
     "chooseLanguage": "Elige tu idioma",
     "nameLabel": "Tu nombre o apodo",
     "nameHint": "Solo nombre o apodo (de 2 a 24 caracteres). Nunca pedimos apellido ni número de habitación.",
@@ -107,7 +107,7 @@
     "socialSetupGo": "Ir a Huéspedes"
   },
   "home": {
-    "welcome": "Bienvenido, {name}",
+    "welcome": "Te damos la bienvenida, {name}",
     "validUntil": "Válido hasta tu salida ({date})",
     "useBonus": "Enséñalo en la barra",
     "bonusRedeemed": "Usado el {date}",
@@ -123,7 +123,7 @@
     "installAndroid": "Instalar la app",
     "installIos": "En iPhone: en Safari toca Compartir (cuadrado con flecha), luego «Añadir a pantalla de inicio» y después «Añadir».",
     "installNote": "Todo funciona sin instalar; las notificaciones push requieren la instalación.",
-    "welcomeNew": "Bienvenido a {hotel}. Empieza por el bono de aquí abajo.",
+    "welcomeNew": "Te damos la bienvenida a {hotel}. Empieza por el bono de aquí abajo.",
     "bonusBadge": "Bono",
     "socialRequests": "Solicitudes de chat pendientes: {n}",
     "socialNew": "Mensajes nuevos de otros huéspedes",
