@@ -1,11 +1,11 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { LOCALES, type AdminGame, type Locale } from '@/lib/types';
+import { CONTENT_LOCALES as LOCALES, type AdminGame } from '@/lib/types';
 import { call } from './client-api';
 import { useConfirm, useErrorText, useI18n } from './I18n';
 
-type Names = Record<Locale, string>;
+type Names = Record<(typeof LOCALES)[number], string>;
 interface Form { id?: string; name: Names; desc: Names; location: string; active: boolean }
 const blank = (): Names => ({ it: '', en: '', de: '', ru: '' });
 

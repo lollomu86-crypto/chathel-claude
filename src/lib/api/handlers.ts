@@ -18,7 +18,7 @@ import { EMERGENCY_MAX_PER_MINUTE, GUEST_MESSAGES_PER_DAY, GUEST_MESSAGES_PER_MI
 import { logEvent } from '../log';
 import { hashKey, hit, ipKey, withLock } from '../ratelimit';
 import type { Store } from '../store/types';
-import { FEATURE_KEYS, isLocale, type FeatureKey, type Period, type SaveCustomizationInput } from '../types';
+import { FEATURE_KEYS, LOCALES, isLocale, type FeatureKey, type Period, type SaveCustomizationInput } from '../types';
 import { checkImage, requireFeature } from '../rules/features';
 import { preCheck } from '../ai/guardrails';
 import { makeT } from '../i18n';
@@ -161,6 +161,10 @@ export async function onboarding(ctx: Ctx, raw: unknown): Promise<Res> {
         locale: isLocale(b.locale) ? b.locale : 'it', checkout: b.checkout, isAdult: b.isAdult, socialOptIn: b.socialOptIn,
       });
       logEvent('stay.start', { hotel: b.slug, status: r.bonus });
+      // il database (start_stay) conosce solo it/en/de/ru e altrimenti mette la lingua dell'hotel: si salva quella scelta
+      if (isLocale(b.locale) && !['it', 'en', 'de', 'ru'].includes(b.locale)) {
+        try { await (await ctx.store.guest(r.session))?.setLocale(b.locale); } catch { /* resta la lingua dell'hotel */ }
+      }
       return { ...ok({ existing: r.bonus === 'existing', bonus: r.bonus }), guestCookie: r.session };
     } catch (e) {
       // QR-06: nessun dettaglio tecnico al client, evento registrato (senza il token)
@@ -249,7 +253,7 @@ export async function guestAction(ctx: Ctx, action: string, raw: unknown): Promi
       }
       case 'locale': {
         if (get) return fail(405, 'method_not_allowed');
-        await g.setLocale(z.object({ locale: z.enum(['it', 'en', 'de', 'ru']) }).parse(raw).locale);
+        await g.setLocale(z.object({ locale: z.enum(LOCALES) }).parse(raw).locale);
         return ok();
       }
       case 'delete-me': {
@@ -477,7 +481,7 @@ export async function staffAction(ctx: Ctx, action: string, raw: unknown): Promi
         return ok();
       case 'ai-test': {
         if (!post) return fail(405, 'method_not_allowed');
-        const b = z.object({ question: z.string().min(1).max(1000), locale: z.enum(['it', 'en', 'de', 'ru']).default('it') }).parse(raw);
+        const b = z.object({ question: z.string().min(1).max(1000), locale: z.enum(LOCALES).default('it') }).parse(raw);
         if (!(await hit(`aitest:${hashKey(ctx.staff ?? '')}`, 20, 60_000))) return fail(429, 'rate_limited');
         const r = await answerQuestion({ ctx: await s.aiTestContext(), history: [{ role: 'user', content: b.question }], question: b.question, locale: b.locale });
         return ok({ text: r.text, handoff: r.handoff ?? null, mode: aiMode(), source: r.source });

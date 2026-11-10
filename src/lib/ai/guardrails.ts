@@ -2,7 +2,7 @@
 // Servono dove un errore costa troppo: emergenze, salute/allergie, reclami, richiesta di una persona.
 // Sono in aggiunta (non al posto) delle regole del prompt. Vedi 04-privacy-qa.md, AI-23/24/35.
 //
-// Lingue: it, en, de, ru. Le parole si confrontano su parola intera (non per sottostringa): "questo male"
+// Lingue: it, en, de, ru, fr, es, nl, pl, sv, pt, cs, zh (il cinese non ha spazi: per lui si cerca la sottostringa, vedi CJK_*). Le parole si confrontano su parola intera (non per sottostringa): "questo male"
 // non e' "sto male", "humanity" non e' "human". Il testo viene normalizzato (minuscole, senza accenti, senza
 // punteggiatura): le liste qui sotto sono scritte in chiaro e normalizzate all'avvio.
 
@@ -60,14 +60,42 @@ const EMERGENCY_STRONG = compile([
   'пожар', 'горит', 'скорая', 'скорую', 'вызовите скорую', 'вызовите врача', 'нужен врач', 'нужна скорая', 'полиция', 'полицию',
   'не дышит', 'не могу дышать', 'без сознания', 'сердечный приступ', 'тону', 'тонет', 'кровь', 'кровотечение', 'истекает кровью',
   'мне плохо', 'ему плохо', 'ей плохо', 'экстренная ситуация', 'несчастный случай', 'на меня напали',
+  // fr
+  'urgence', 'crise cardiaque', 'incendie', 'au feu', 'inconscient', 'inconsciente', 'evanoui', 'evanouie', 'se noie', 'noyade',
+  'je ne peux pas respirer', 'ne respire pas', 'saigne', 'saignement', "j'etouffe", 'etouffe', 'je me sens mal', 'appelez un medecin',
+  "besoin d'un medecin", 'blesse', 'blessee', "on m'agresse", 'agression',
+  // es
+  'emergencia', 'ambulancia', 'ataque al corazon', 'policia', 'desmayado', 'desmayada', 'se ahoga', 'ahogando', 'no puedo respirar',
+  'no respira', 'sangrando', 'me ahogo', 'me encuentro mal', 'me siento mal', 'llamen a un medico', 'necesito un medico', 'herido', 'herida',
+  'me estan atacando',
+  // nl
+  'noodgeval', 'hartaanval', 'het brandt', 'politie', 'bewusteloos', 'flauwgevallen', 'verdrinkt', 'ik kan niet ademen', 'ademt niet',
+  'bloedt', 'bloeding', 'stikt', 'ik voel me niet goed', 'bel een dokter', 'ik heb een dokter nodig', 'gewond',
+  // pl
+  'nagly wypadek', 'nagły wypadek', 'karetka', 'karetke', 'karetkę', 'zawal', 'pozar', 'pali sie', 'policja', 'policje', 'nieprzytomny', 'nieprzytomna',
+  'zemdlal', 'zemdlała', 'zemdlał', 'tonie', 'nie moge oddychac', 'nie oddycha', 'krwawi', 'krwotok', 'dusi sie', 'zle sie czuje', 'źle się czuję',
+  'wezwijcie lekarza', 'potrzebuje lekarza', 'ranny', 'ranna',
+  // sv
+  'nodsituation', 'ambulans', 'hjartattack', 'det brinner', 'polis', 'medvetslos', 'svimmade', 'drunknar', 'jag kan inte andas',
+  'andas inte', 'bloder', 'kvavs', 'jag mar daligt', 'ring en lakare', 'behover en lakare', 'skadad',
+  // pt
+  'emergencia', 'ambulancia', 'ataque cardiaco', 'enfarte', 'inconsciente', 'desmaiou', 'a afogar', 'afogar-se', 'nao consigo respirar',
+  'nao respira', 'a sangrar', 'sinto-me mal', 'chamem um medico', 'preciso de um medico', 'ferido', 'ferida',
+  // cs
+  'nouze', 'nouzi', 'zachranka', 'zachranku', 'zachranky', 'sanitka', 'sanitku', 'infarkt', 'hori', 'policie', 'policii', 'bezvedomi',
+  'omdlel', 'omdlela', 'topi se', 'nemuzu dychat', 'nedycha', 'krvaci', 'dusi se', 'je mi zle', 'zavolejte doktora', 'zavolejte lekare',
+  'potrebuji doktora', 'zraneny', 'zranena',
 ]);
 /** Parole che da sole possono essere una richiesta qualunque ("help with wifi"): emergenza solo se il messaggio e' brevissimo o urgente. */
 const EMERGENCY_WEAK = compile([
   'aiuto', 'help', 'hilfe', 'fire', 'feuer', 'fuoco', 'brand', 'помогите', 'помощь', 'на помощь', 'sos',
+  'au secours', 'aidez-moi', 'feu', 'ayuda', 'socorro', 'fuego', 'hulp', 'pomocy', 'pomoc', 'ogien', 'ogień', 'hjalp', 'ajuda', 'fogo',
+  'pomozte', 'ohen',
 ]);
 const URGENCY = compile([
   'urgente', 'subito', 'presto', 'urgent', 'now', 'quick', 'quickly', 'asap', 'please help', 'schnell', 'dringend', 'sofort',
   'срочно', 'быстро', 'немедленно',
+  'vite', 'rapidement', 'rapido', 'snel', 'szybko', 'pilne', 'snabbt', 'fort', 'depressa', 'rychle', 'okamzite',
 ]);
 
 const ALLERGY = compile([
@@ -75,6 +103,8 @@ const ALLERGY = compile([
   'allergy', 'allergic', 'gluten', 'intolerance', 'celiac', 'coeliac',
   'allergisch', 'glutenfrei', 'unvertraglichkeit', 'zoliakie',
   'аллергия', 'аллергик', 'непереносимость', 'глютен',
+  'allergique', 'coeliaque', 'intolerance', 'alergia', 'alergico', 'alergica', 'intolerancia', 'glutenvrij', 'uczulenie', 'uczulony',
+  'uczulona', 'bezglutenowy', 'allergi', 'allergisk', 'glutenfri', 'alergie', 'alergicky', 'bezlepkovy',
 ]);
 const COMPLAINT = compile([
   'reclamo', 'lamentela', 'complaint', 'beschwerde', 'inaccettabile', 'unacceptable', 'unzumutbar', 'жалоба', 'жалоб', 'возмутительно',
@@ -93,10 +123,15 @@ const CALL_CONTEXT = compile([
   'вызовите', 'позвоните', 'позвонить', 'номер',
 ]);
 
+/** Cinese: niente spazi tra le parole, quindi si cerca la sottostringa (parole scelte per non comparire in frasi qualunque). */
+const CJK_EMERGENCY = ['紧急', '救护车', '急救', '着火', '火灾', '报警', '警察', '心脏病', '昏迷', '晕倒', '溺水', '不能呼吸', '无法呼吸', '喘不过气', '流血', '出血', '窒息', '受伤', '叫医生', '需要医生', '救命'];
+const CJK_ALLERGY = ['过敏', '麸质', '不耐受'];
+const hasAny = (t: string, words: string[]) => words.some((w) => t.includes(w));
+
 export function isEmergency(text: string): boolean {
   const n = normalize(text);
   if (!n) return false;
-  if (EMERGENCY_STRONG.test(n)) return true;
+  if (EMERGENCY_STRONG.test(n) || hasAny(n, CJK_EMERGENCY)) return true;
   if (EMERGENCY_NUMBER.test(n) && (n.split(' ').length <= 3 || CALL_CONTEXT.test(n))) return true;
   if (EMERGENCY_WEAK.test(n)) {
     const tokens = n.split(' ').length;
@@ -108,7 +143,7 @@ export function isEmergency(text: string): boolean {
 export function preCheck(text: string): PreCheck | null {
   const n = normalize(text);
   if (isEmergency(text)) return { kind: 'emergency', reason: 'safety', topic: 'emergenza', messageKey: 'emergency', priority: 'urgent' };
-  if (ALLERGY.test(n)) return { kind: 'allergy', reason: 'safety', topic: 'allergie e salute', messageKey: 'allergy', priority: 'normal' };
+  if (ALLERGY.test(n) || hasAny(n, CJK_ALLERGY)) return { kind: 'allergy', reason: 'safety', topic: 'allergie e salute', messageKey: 'allergy', priority: 'normal' };
   if (COMPLAINT.test(n)) return { kind: 'complaint', reason: 'complaint', topic: 'reclamo', messageKey: 'complaint', priority: 'normal' };
   if (OPERATOR.test(n)) {
     return { kind: 'operator', reason: 'guest_request', topic: 'richiesta operatore', messageKey: 'handoffRequested', priority: 'normal' };

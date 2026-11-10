@@ -7,7 +7,8 @@ export function dateChip(iso: string, locale: Locale, tz: string): { weekday: st
   const d = new Date(iso);
   return {
     weekday: new Intl.DateTimeFormat(locale, { timeZone: tz, weekday: 'short' }).format(d).replace('.', ''),
-    day: new Intl.DateTimeFormat(locale, { timeZone: tz, day: 'numeric' }).format(d),
+    // solo il numero: in cinese e giapponese Intl aggiunge il suffisso del giorno (10日) e il riquadro andrebbe a capo
+    day: new Intl.DateTimeFormat(locale, { timeZone: tz, day: 'numeric' }).formatToParts(d).find((p) => p.type === 'day')?.value ?? '',
   };
 }
 

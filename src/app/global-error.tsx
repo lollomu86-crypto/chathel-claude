@@ -6,17 +6,33 @@ import it from '../../messages/it.json';
 import en from '../../messages/en.json';
 import de from '../../messages/de.json';
 import ru from '../../messages/ru.json';
+import fr from '../../messages/fr.json';
+import es from '../../messages/es.json';
+import nl from '../../messages/nl.json';
+import pl from '../../messages/pl.json';
+import sv from '../../messages/sv.json';
+import pt from '../../messages/pt.json';
+import cs from '../../messages/cs.json';
+import zh from '../../messages/zh.json';
 
 const COPY: Record<string, { title: string; body: string; home: string; retry: string }> = {
   it: { ...it.errorPage, retry: it.common.retry },
   en: { ...en.errorPage, retry: en.common.retry },
   de: { ...de.errorPage, retry: de.common.retry },
   ru: { ...ru.errorPage, retry: ru.common.retry },
+  fr: { ...fr.errorPage, retry: fr.common.retry },
+  es: { ...es.errorPage, retry: es.common.retry },
+  nl: { ...nl.errorPage, retry: nl.common.retry },
+  pl: { ...pl.errorPage, retry: pl.common.retry },
+  sv: { ...sv.errorPage, retry: sv.common.retry },
+  pt: { ...pt.errorPage, retry: pt.common.retry },
+  cs: { ...cs.errorPage, retry: cs.common.retry },
+  zh: { ...zh.errorPage, retry: zh.common.retry },
 };
 
 function lang(): string {
   if (typeof document === 'undefined') return 'it';
-  const m = /(?:^|; )ch_lang=(it|en|de|ru)/.exec(document.cookie);
+  const m = /(?:^|; )ch_lang=(it|en|de|ru|fr|es|nl|pl|sv|pt|cs|zh)(?:;|$)/.exec(document.cookie);
   return m ? m[1] : 'it';
 }
 

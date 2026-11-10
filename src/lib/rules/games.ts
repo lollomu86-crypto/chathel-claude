@@ -2,13 +2,13 @@
 // Validazione condivisa da store demo e store Supabase.
 
 import { ChError } from '../errors';
-import { LOCALES, type I18nText, type SaveGameInput } from '../types';
+import { CONTENT_LOCALES, type I18nText, type SaveGameInput } from '../types';
 
 export const GAME_LIMITS = { nameMax: 60, descriptionMax: 300, locationMax: 120, perHotel: 30 } as const;
 
 function cleanText(t: I18nText | null | undefined, max: number): I18nText {
   const out: I18nText = {};
-  for (const l of LOCALES) {
+  for (const l of CONTENT_LOCALES) {
     const v = t?.[l]?.trim();
     if (!v) continue;
     if ([...v].length > max) throw new ChError('CH003', 'invalid_game');

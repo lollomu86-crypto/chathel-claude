@@ -1,11 +1,14 @@
-// Verifica i18n: (1) it/en/de/ru hanno le stesse chiavi; (2) ogni chiave usata nel codice esiste in tutte le lingue.
+// Verifica i18n: (1) le 12 lingue hanno le stesse chiavi (le 8 dopo il russo: tranne le sezioni del personale, in inglese); (2) ogni chiave usata nel codice esiste in tutte le lingue.
 // Uso: node scripts/check-i18n.mjs   (exit 1 se manca qualcosa)
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const LANGS = ['it', 'en', 'de', 'ru'];
+const LANGS = ['it', 'en', 'de', 'ru', 'fr', 'es', 'nl', 'pl', 'sv', 'pt', 'cs', 'zh'];
+// lingue che traducono solo l'app ospite: admin/staff/bar ripiegano sull'inglese (src/lib/i18n)
+const GUEST_ONLY = new Set(['fr', 'es', 'nl', 'pl', 'sv', 'pt', 'cs', 'zh']);
+const STAFF = /^(admin|staff|bar)./;
 const flat = (o, p = '', out = new Set()) => {
   for (const [k, v] of Object.entries(o)) {
     const key = p ? `${p}.${k}` : k;
@@ -18,7 +21,7 @@ for (const l of LANGS) sets[l] = flat(JSON.parse(readFileSync(join(root, 'messag
 let bad = 0;
 const all = new Set(LANGS.flatMap((l) => [...sets[l]]));
 for (const l of LANGS) {
-  const miss = [...all].filter((k) => !sets[l].has(k));
+  const miss = [...all].filter((k) => !sets[l].has(k) && !(GUEST_ONLY.has(l) && STAFF.test(k)));
   if (miss.length) { bad += miss.length; console.error(`[${l}] mancano ${miss.length} chiavi:\n  ${miss.slice(0, 40).join('\n  ')}${miss.length > 40 ? '\n  ...' : ''}`); }
 }
 // placeholder {x} coerenti tra lingue
