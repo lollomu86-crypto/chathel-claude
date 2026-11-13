@@ -26,7 +26,7 @@ export function ProfileClient({ expires }: { expires: string }) {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(readTheme);
-  const { social } = useFeatures();
+  const { social, requests } = useFeatures();
 
   const pickTheme = (v: Theme) => {
     setTheme(v);
@@ -63,6 +63,13 @@ export function ProfileClient({ expires }: { expires: string }) {
           ))}
         </div>
       </section>
+      {requests && (
+        <section className="card stack" aria-labelledby="prq">
+          <h2 id="prq" className="t-sub">{t('requests.title')}</h2>
+          <p className="muted">{t('requests.profileBody')}</p>
+          <Link className="btn btn-secondary" href="/stay/requests">{t('requests.open')}</Link>
+        </section>
+      )}
       {social && (
         <section className="card stack" aria-labelledby="ps">
           <h2 id="ps" className="t-sub">{t('profile.socialTitle')}</h2>

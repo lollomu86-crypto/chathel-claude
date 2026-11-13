@@ -2,12 +2,15 @@
 // Il contenuto della base di conoscenza riprende l'hotel di prova di docs/04-privacy-qa.md (6.5).
 // Nessun prezzo inventato: dove il documento non ne ha, la voce non ne ha (l'AI deve dire "non lo so").
 
-import type { AiKnowledgeEntry, FacilityKind, I18nText } from '../types';
+import type { AiKnowledgeEntry, Department, FacilityKind, I18nText, StaffRole } from '../types';
 
-export const DEMO_STAFF = [
-  { id: 'staff-admin', email: 'admin@demo.chathel.test', password: 'demo-admin', role: 'hotel_admin' as const, name: 'Marco (direttore)' },
-  { id: 'staff-reception', email: 'reception@demo.chathel.test', password: 'demo-reception', role: 'reception' as const, name: 'Marta (reception)' },
-  { id: 'staff-bar', email: 'bar@demo.chathel.test', password: 'demo-bar', role: 'bartender' as const, name: 'Luca (bar)' },
+/** Account dello staff della demo. `department` solo per il personale di reparto (ruolo team, 0012). */
+export interface DemoStaffUser { id: string; email: string; password: string; role: StaffRole; name: string; department: Department | null; active: boolean }
+export const DEMO_STAFF: DemoStaffUser[] = [
+  { id: 'staff-admin', email: 'admin@demo.chathel.test', password: 'demo-admin', role: 'hotel_admin', name: 'Marco (direttore)', department: null, active: true },
+  { id: 'staff-reception', email: 'reception@demo.chathel.test', password: 'demo-reception', role: 'reception', name: 'Marta (reception)', department: null, active: true },
+  { id: 'staff-bar', email: 'bar@demo.chathel.test', password: 'demo-bar', role: 'bartender', name: 'Luca (bar)', department: null, active: true },
+  { id: 'staff-team', email: 'pulizie@demo.chathel.test', password: 'demo-team', role: 'team', name: 'Gina (pulizie)', department: 'housekeeping', active: true },
 ];
 
 export const DEMO_KB: Omit<AiKnowledgeEntry, 'id'>[] = [

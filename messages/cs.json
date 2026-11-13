@@ -275,7 +275,9 @@
     "pushTitle": "Oznámení v telefonu",
     "push": "Pokud je zapnete v Profilu, uložíme technickou adresu vašeho zařízení, abychom vám mohli posílat oznámení přes službu vašeho prohlížeče (Google, Apple nebo Mozilla). Oznámení nikdy neobsahují vaše zprávy ani přezdívky. Můžete je kdykoli vypnout; smažou se také při vašem odjezdu.",
     "hotelTitle": "Co vidí hotel",
-    "hotel": "Personál hotelu (vedení a recepce) vidí vaše jméno, jazyk, termín pobytu, kdy jste naposledy použili aplikaci, vaše rezervace, akce, kterých se účastníte, a zda jste využili bonus. Nevidí soukromé chaty, s kým mluvíte, ani vaše údaje z Googlu (e-mail, fotku)."
+    "hotel": "Personál hotelu (vedení a recepce) vidí vaše jméno, jazyk, termín pobytu, kdy jste naposledy použili aplikaci, vaše rezervace, akce, kterých se účastníte, a zda jste využili bonus. Nevidí soukromé chaty, s kým mluvíte, ani vaše údaje z Googlu (e-mail, fotku).",
+    "requestsTitle": "Požadavky na personál",
+    "requests": "Když odešlete požadavek (úklid, porucha, věci na pokoj), personál oddělení vidí kategorii, podrobnosti, které napíšete, vaše křestní jméno a, pokud ho uvedete, místo (například pokoj). Místo je nepovinné; při odjezdu se podrobnosti a místo smažou a pro statistiky hotelu zůstanou jen anonymní údaje (kategorie, časy, hodnocení)."
   },
   "errors": {
     "invalid_input": "Neplatné údaje.",
@@ -591,6 +593,47 @@
       "challenge_active_limit": "Už máte 3 otevřené výzvy: počkejte na odpověď nebo jednu zrušte.",
       "thread_not_open": "Konverzace ještě nebyla přijata.",
       "recipient_unavailable": "Tato osoba není k dispozici."
+    }
+  },
+  "requests": {
+    "title": "Požadavky",
+    "short": "Požadavky",
+    "intro": "Potřebujete něco? Ručníky, poruchu, polštář navíc: napište to sem a dostane se to do správného oddělení.",
+    "new": "Nový požadavek",
+    "what": "Co potřebujete?",
+    "where": "Kde?",
+    "wherePlaceholder": "např. pokoj 214, slunečník 12",
+    "whereHint": "Vidí to jen personál, který požadavek vyřizuje; při odjezdu se to smaže.",
+    "note": "Podrobnosti",
+    "notePlaceholder": "např. dva velké ručníky",
+    "noteHint": "V nouzi volejte 112 nebo recepci.",
+    "send": "Odeslat požadavek",
+    "sent": "Požadavek odeslán. Dáme vám vědět, až se ho personál ujme.",
+    "mine": "Vaše požadavky",
+    "empty": "Zatím žádné požadavky.",
+    "cancel": "Zrušit požadavek",
+    "cancelConfirm": "Zrušit tento požadavek?",
+    "sentAt": "Odesláno {when}",
+    "doneAt": "vyřízeno {when}",
+    "howWasIt": "Jak to dopadlo?",
+    "rateUp": "Vše v pořádku",
+    "rateDown": "Nic moc",
+    "ratedUp": "Děkujeme za hodnocení 👍",
+    "ratedDown": "Děkujeme, předáme to personálu 👎",
+    "profileBody": "Požádejte o úklid, prádlo, opravu nebo věci na pokoj.",
+    "open": "Otevřít požadavky",
+    "status": {
+      "open": "Odesláno",
+      "taken": "Vyřizuje se",
+      "done": "Vyřízeno",
+      "cancelled": "Zrušeno"
+    },
+    "errors": {
+      "request_open_limit": "Už máte 3 otevřené požadavky: počkejte, až je personál vyřídí.",
+      "request_daily_limit": "Dosáhli jste dnešního limitu požadavků. S ostatním se obraťte na recepci.",
+      "invalid_category": "Tato kategorie už není k dispozici.",
+      "request_closed": "Tento požadavek je už uzavřený.",
+      "too_long": "Text je příliš dlouhý."
     }
   }
 }

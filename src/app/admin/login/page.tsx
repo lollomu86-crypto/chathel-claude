@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminLogin() {
   const staff = await getStaff();
-  if (staff) redirect(staff.info.role === 'bartender' ? '/bar' : '/admin');
+  if (staff) redirect(staff.info.role === 'bartender' ? '/bar' : staff.info.role === 'team' ? '/team' : '/admin');
   const t = makeT(await getLocale());
   return (
     <>

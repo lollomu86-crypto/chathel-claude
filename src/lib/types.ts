@@ -19,7 +19,8 @@ export function isLocale(x: unknown): x is Locale {
 /** Testo per lingua, come i campi jsonb di events/facilities/notifications. */
 export type I18nText = Partial<Record<Locale, string>>;
 
-export type StaffRole = 'hotel_admin' | 'reception' | 'bartender';
+/** 'team' = personale di reparto (0012): vede solo le richieste del suo reparto. */
+export type StaffRole = 'hotel_admin' | 'reception' | 'bartender' | 'team';
 export type ConversationStatus = 'ai' | 'handoff_pending' | 'operator' | 'closed';
 export type HandoffReason = 'kb_gap' | 'guest_request' | 'complaint' | 'safety' | 'other';
 /** 'urgent' = emergenza: in testa alla coda della reception. */
@@ -29,7 +30,7 @@ export type FacilityKind = 'spa' | 'pool' | 'gamesroom' | 'other';
 export type Period = 'today' | '7d' | 'season';
 
 /** Funzioni che il direttore accende e spegne (migrazione 0010). "social" e' l'interruttore generale del livello sociale. */
-export const FEATURE_KEYS = ['social', 'publicChat', 'challenges', 'coupons', 'bookings', 'reception'] as const;
+export const FEATURE_KEYS = ['social', 'publicChat', 'challenges', 'coupons', 'bookings', 'reception', 'requests'] as const;
 export type FeatureKey = (typeof FEATURE_KEYS)[number];
 export type HotelFeatures = Record<FeatureKey, boolean>;
 
@@ -218,6 +219,8 @@ export interface AssistantAppend {
 export interface StaffInfo {
   role: StaffRole;
   displayName: string;
+  /** solo ruolo team: il suo reparto */
+  department?: Department | null;
   hotel: {
     id: string;
     slug: string;
@@ -519,4 +522,91 @@ export interface SocialStats {
   couponsExpired: number;
   hiddenMessages: number;
   openReports: number;
+}
+
+// ---------------------------------------------------------------- richieste degli ospiti (0012)
+
+export const DEPARTMENTS = ['housekeeping', 'maintenance', 'roomservice', 'reception'] as const;
+export type Department = (typeof DEPARTMENTS)[number];
+export type RequestStatus = 'open' | 'taken' | 'done' | 'cancelled';
+export type RequestPriority = 'normal' | 'high';
+
+export interface RequestCategory {
+  id: string;
+  name: I18nText;
+  department: Department;
+  active: boolean;
+  sortOrder: number;
+}
+export interface SaveRequestCategoryInput {
+  id?: string;
+  name: I18nText;
+  department: Department;
+  active: boolean;
+}
+
+/** Richiesta vista dall'ospite che l'ha fatta. */
+export interface GuestRequestView {
+  id: string;
+  category: I18nText;
+  note: string | null;
+  place: string | null;
+  status: RequestStatus;
+  createdAt: string;
+  takenAt: string | null;
+  doneAt: string | null;
+  rating: 1 | -1 | null;
+}
+export interface CreateRequestInput {
+  categoryId: string;
+  note?: string | null;
+  place?: string | null;
+}
+
+/** Richiesta vista dallo staff: solo nome di battesimo dell'ospite (null dopo la partenza), nota e luogo. */
+export interface StaffRequest {
+  id: string;
+  guestName: string | null;
+  category: I18nText;
+  department: Department;
+  note: string | null;
+  place: string | null;
+  status: RequestStatus;
+  priority: RequestPriority;
+  createdAt: string;
+  takenAt: string | null;
+  doneAt: string | null;
+  takenBy: string | null;
+  rating: 1 | -1 | null;
+}
+export interface UpdateRequestInput {
+  id: string;
+  status?: 'taken' | 'done';
+  priority?: RequestPriority;
+  department?: Department;
+}
+
+export interface RequestStats {
+  total: number;
+  done: number;
+  open: number;
+  /** minuti medi alla presa in carico / alla chiusura (null = nessun dato) */
+  takeMinutes: number | null;
+  doneMinutes: number | null;
+  up: number;
+  down: number;
+  byCategory: { name: I18nText; total: number; doneMinutes: number | null }[];
+}
+
+/** Persona del personale di reparto (ruolo team). Mai la password: si vede una sola volta alla creazione. */
+export interface TeamMember {
+  id: string;
+  name: string;
+  department: Department;
+  active: boolean;
+}
+export interface CreateTeamMemberInput {
+  name: string;
+  email: string;
+  department: Department;
 }

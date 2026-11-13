@@ -105,7 +105,7 @@ export async function activeOnly(db: any, hotelId: string, rows: any[]): Promise
   return rows.filter((r) => active.has(r.guest_id));
 }
 
-async function deliver(db: any, rows: any[], kind: Kind, build: (l: Locale4) => { title: string; body: string }): Promise<void> {
+async function deliver(db: any, rows: any[], kind: Kind, build: (l: Locale4) => { title: string; body: string }, url?: string): Promise<void> {
   const v = vapidFromEnv();
   if (!v || !rows.length) return;
   const gone: string[] = [];
@@ -116,7 +116,7 @@ async function deliver(db: any, rows: any[], kind: Kind, build: (l: Locale4) => 
     const l = loc(r.locale);
     const m = build(l);
     const sub: PushSub = { endpoint: r.endpoint, p256dh: r.p256dh, auth: r.auth };
-    const res = await sendPush(sub, { title: m.title, body: m.body, url: URLS[kind], tag }, v, { ttl: kind === 'public' ? 600 : 3600, urgency });
+    const res = await sendPush(sub, { title: m.title, body: m.body, url: url ?? URLS[kind], tag }, v, { ttl: kind === 'public' ? 600 : 3600, urgency });
     if (res === 'gone') gone.push(r.id);
   }));
   if (gone.length) await db.from('push_subscriptions').delete().in('id', gone);
@@ -139,6 +139,46 @@ export async function pushReceptionReply(db: any, hotelId: string, conversationI
   if (!c?.guest_id) return;
   const { data } = await db.from('push_subscriptions').select(cols).eq('hotel_id', hotelId).eq('guest_id', c.guest_id).filter(wants('reception'), 'eq', 'true');
   await deliver(db, await activeOnly(db, hotelId, data ?? []), 'reception', (l) => TEXT.reception[l]);
+}
+
+const REQUEST_TEXT: Record<'taken' | 'done', Record<Locale4, { title: string; body: string }>> = {
+  taken: {
+    it: { title: "Richiesta presa in carico", body: "Lo staff si sta occupando della tua richiesta." },
+    en: { title: "Request in progress", body: "The staff are taking care of your request." },
+    de: { title: "Anfrage in Bearbeitung", body: "Das Personal kümmert sich um deine Anfrage." },
+    ru: { title: "Запрос принят", body: "Персонал занимается вашим запросом." },
+    fr: { title: "Demande prise en charge", body: "Le personnel s'occupe de votre demande." },
+    es: { title: "Solicitud en curso", body: "El personal se está ocupando de tu solicitud." },
+    nl: { title: "Verzoek in behandeling", body: "Het personeel is met je verzoek bezig." },
+    pl: { title: "Prośba przyjęta", body: "Personel zajmuje się Twoją prośbą." },
+    sv: { title: "Förfrågan tas om hand", body: "Personalen tar hand om din förfrågan." },
+    pt: { title: "Pedido em curso", body: "O pessoal está a tratar do seu pedido." },
+    cs: { title: "Požadavek převzat", body: "Personál se vaším požadavkem zabývá." },
+    zh: { title: "请求处理中", body: "工作人员正在处理您的请求。" },
+  },
+  done: {
+    it: { title: "Richiesta completata", body: "La tua richiesta è stata completata. Com'è andata?" },
+    en: { title: "Request completed", body: "Your request has been completed. How did it go?" },
+    de: { title: "Anfrage erledigt", body: "Deine Anfrage wurde erledigt. Wie war es?" },
+    ru: { title: "Запрос выполнен", body: "Ваш запрос выполнен. Всё в порядке?" },
+    fr: { title: "Demande terminée", body: "Votre demande a été traitée. Tout s'est bien passé ?" },
+    es: { title: "Solicitud completada", body: "Tu solicitud se ha completado. ¿Qué tal ha ido?" },
+    nl: { title: "Verzoek afgerond", body: "Je verzoek is afgerond. Hoe ging het?" },
+    pl: { title: "Prośba zrealizowana", body: "Twoja prośba została zrealizowana. Jak poszło?" },
+    sv: { title: "Förfrågan klar", body: "Din förfrågan är klar. Hur gick det?" },
+    pt: { title: "Pedido concluído", body: "O seu pedido foi concluído. Correu tudo bem?" },
+    cs: { title: "Požadavek vyřízen", body: "Váš požadavek byl vyřízen. Jak to dopadlo?" },
+    zh: { title: "请求已完成", body: "您的请求已完成。一切还好吗？" },
+  },
+};
+
+/** Richiesta dell'ospite presa in carico o completata (0012): avvisa l'ospite che l'ha fatta. Preferenza "risposte della reception". */
+export async function pushRequestStatus(db: any, hotelId: string, requestId: string, status: 'taken' | 'done'): Promise<void> {
+  if (!vapidFromEnv()) return;
+  const { data: r } = await db.from('guest_requests').select('guest_id').eq('id', requestId).eq('hotel_id', hotelId).maybeSingle();
+  if (!r?.guest_id) return;
+  const { data } = await db.from('push_subscriptions').select(cols).eq('hotel_id', hotelId).eq('guest_id', r.guest_id).filter(wants('reception'), 'eq', 'true');
+  await deliver(db, await activeOnly(db, hotelId, data ?? []), 'reception', (l) => REQUEST_TEXT[status][l], '/stay/requests');
 }
 
 async function pushGuests(db: any, hotelId: string, guestIds: string[]): Promise<void> {

@@ -17,7 +17,7 @@ export function StaffLogin({ next }: { next: string }) {
     setBusy(true); setError(null);
     const r = await call('/api/staff/login', { email, password });
     setBusy(false);
-    if (r.ok) { router.replace(r.role === 'bartender' ? '/bar' : next); router.refresh(); }
+    if (r.ok) { router.replace(r.role === 'bartender' ? '/bar' : r.role === 'team' ? '/team' : next); router.refresh(); }
     else setError(r.error === 'rate_limited' ? t('errors.rate_limited') : t('staff.invalid'));
   };
   return (

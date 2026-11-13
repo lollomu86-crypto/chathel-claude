@@ -275,7 +275,9 @@
     "pushTitle": "Notificaciones en el teléfono",
     "push": "Si las activas en el Perfil, guardamos la dirección técnica de tu dispositivo para enviarte notificaciones a través del servicio de tu navegador (Google, Apple o Mozilla). Las notificaciones nunca contienen tus mensajes ni apodos. Puedes desactivarlas cuando quieras; también se borran cuando te vas.",
     "hotelTitle": "Qué ve el hotel",
-    "hotel": "El personal del hotel (dirección y recepción) ve tu nombre, tu idioma, las fechas de tu estancia, cuándo usaste la app por última vez, tus reservas, los eventos a los que te apuntas y si has usado el bono. No ve los chats privados, con quién hablas ni tus datos de Google (correo, foto)."
+    "hotel": "El personal del hotel (dirección y recepción) ve tu nombre, tu idioma, las fechas de tu estancia, cuándo usaste la app por última vez, tus reservas, los eventos a los que te apuntas y si has usado el bono. No ve los chats privados, con quién hablas ni tus datos de Google (correo, foto).",
+    "requestsTitle": "Solicitudes al personal",
+    "requests": "Si haces una solicitud (limpieza, avería, objetos para la habitación), el personal del departamento ve la categoría, los detalles que escribes, tu nombre y, si lo indicas, el lugar (por ejemplo la habitación). El lugar es opcional; cuando te vas, los detalles y el lugar se borran y solo quedan datos anónimos (categoría, tiempos, valoración) para las estadísticas del hotel."
   },
   "errors": {
     "invalid_input": "Datos no válidos.",
@@ -591,6 +593,47 @@
       "challenge_active_limit": "Ya tienes 3 retos abiertos: espera una respuesta o anula uno.",
       "thread_not_open": "La conversación todavía no ha sido aceptada.",
       "recipient_unavailable": "Esta persona no está disponible."
+    }
+  },
+  "requests": {
+    "title": "Solicitudes",
+    "short": "Solicitudes",
+    "intro": "¿Necesitas algo? Toallas, una avería, una almohada más: escríbelo aquí y llega al departamento adecuado.",
+    "new": "Nueva solicitud",
+    "what": "¿Qué necesitas?",
+    "where": "¿Dónde?",
+    "wherePlaceholder": "p. ej. habitación 214, sombrilla 12",
+    "whereHint": "Solo lo ve el personal que atiende la solicitud y se borra cuando te vas.",
+    "note": "Detalles",
+    "notePlaceholder": "p. ej. dos toallas grandes",
+    "noteHint": "En caso de emergencia llama al 112 o a recepción.",
+    "send": "Enviar la solicitud",
+    "sent": "Solicitud enviada. Te avisaremos cuando el personal se haga cargo.",
+    "mine": "Tus solicitudes",
+    "empty": "Todavía no hay solicitudes.",
+    "cancel": "Cancelar la solicitud",
+    "cancelConfirm": "¿Cancelar esta solicitud?",
+    "sentAt": "Enviada {when}",
+    "doneAt": "completada {when}",
+    "howWasIt": "¿Qué tal ha ido?",
+    "rateUp": "Todo bien",
+    "rateDown": "No muy bien",
+    "ratedUp": "Gracias por tu opinión 👍",
+    "ratedDown": "Gracias, se lo diremos al personal 👎",
+    "profileBody": "Pide limpieza, ropa de cama, una reparación u objetos para la habitación.",
+    "open": "Abrir las solicitudes",
+    "status": {
+      "open": "Enviada",
+      "taken": "En curso",
+      "done": "Completada",
+      "cancelled": "Cancelada"
+    },
+    "errors": {
+      "request_open_limit": "Ya tienes 3 solicitudes abiertas: espera a que el personal las complete.",
+      "request_daily_limit": "Has alcanzado el límite de solicitudes de hoy. Para lo demás, pregunta en recepción.",
+      "invalid_category": "Esta categoría ya no está disponible.",
+      "request_closed": "Esta solicitud ya está cerrada.",
+      "too_long": "El texto es demasiado largo."
     }
   }
 }

@@ -7,6 +7,7 @@ import { FEATURE_KEYS, CONTENT_LOCALES, type FeatureKey, type HotelFeatures, typ
 
 const DB_KEY: Record<FeatureKey, string> = {
   social: 'social', publicChat: 'public_chat', challenges: 'challenges', coupons: 'coupons', bookings: 'bookings', reception: 'reception',
+  requests: 'requests',
 };
 /** Funzioni che dipendono dall'interruttore generale "social". */
 const UNDER_SOCIAL: FeatureKey[] = ['publicChat', 'challenges', 'coupons'];

@@ -18,7 +18,8 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const locale = await getLocale(staff.info.hotel.defaultLocale);
   const t = makeT(locale);
   const period: Period = PERIODS.includes(sp.period as Period) ? (sp.period as Period) : '7d';
-  const k = await staff.kpis(period);
+  const [k, rq] = await Promise.all([staff.kpis(period), staff.requestStats(period).catch(() => null)]);
+  const mins = (v: number | null) => (v === null ? t('common.notAvailable') : t('admin.requests.minutes', { n: v }));
   const na = t('common.notAvailable');
   const cap = k.i2.cap;
   const capPct = cap > 0 ? (k.i2.capUsed / cap) * 100 : 0;
@@ -113,6 +114,26 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           {def(6)}
         </section>
       </div>
+
+      {rq && (
+        <section className="card kpi" aria-labelledby="st-rq">
+          <h2 id="st-rq" className="h3">{t('admin.requests.statsTitle')}</h2>
+          <div className="num">{rq.total}</div>
+          <dl>
+            <dt>{t('admin.requests.statsDone')}</dt><dd>{rq.done}</dd>
+            <dt>{t('admin.requests.statsOpen')}</dt><dd>{rq.open}</dd>
+            <dt>{t('admin.requests.statsTake')}</dt><dd>{mins(rq.takeMinutes)}</dd>
+            <dt>{t('admin.requests.statsDoneTime')}</dt><dd>{mins(rq.doneMinutes)}</dd>
+            <dt>{t('admin.requests.statsRating')}</dt><dd>{rq.up + rq.down > 0 ? `${Math.round((rq.up / (rq.up + rq.down)) * 100)}% 👍 (${rq.up + rq.down})` : t('common.notAvailable')}</dd>
+          </dl>
+          {rq.byCategory.length > 0 && (
+            <div className="table-wrap"><table className="t">
+              <thead><tr><th>{t('admin.requests.category')}</th><th>{t('admin.requests.statsCount')}</th><th>{t('admin.requests.statsDoneTime')}</th></tr></thead>
+              <tbody>{rq.byCategory.map((c, i) => <tr key={i}><td>{c.name.it ?? Object.values(c.name)[0]}</td><td>{c.total}</td><td>{mins(c.doneMinutes)}</td></tr>)}</tbody>
+            </table></div>
+          )}
+        </section>
+      )}
 
       <p className="notice notice-warn">{t('admin.dashboard.euroNote')}</p>
       <details className="card card-muted">

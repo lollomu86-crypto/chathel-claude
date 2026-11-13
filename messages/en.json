@@ -294,7 +294,8 @@
     "roles": {
       "hotel_admin": "Manager",
       "reception": "Reception",
-      "bartender": "Bartender"
+      "bartender": "Bartender",
+      "team": "Department staff"
     },
     "hotel": "Hotel",
     "loginHeading": "Staff sign-in"
@@ -318,7 +319,8 @@
       "groupGuests": "Guests",
       "groupServices": "Services",
       "groupHotel": "Hotel",
-      "guests": "Guests"
+      "guests": "Guests",
+      "requests": "Requests"
     },
     "dashboard": {
       "title": "Statistics",
@@ -656,7 +658,9 @@
       "seeAll": "See all",
       "quick": "Quick actions",
       "sendNotice": "Send a notice",
-      "newEvent": "New event"
+      "newEvent": "New event",
+      "requests": "open requests",
+      "requestsOldest": "open, oldest waiting {n} min"
     },
     "guests": {
       "title": "Guests",
@@ -740,7 +744,81 @@
       "f_bonus": "Welcome bonus",
       "f_bonusHint": "The bonus for new guests. Those who already got it keep it.",
       "needsSocial": "Off because guest social is off.",
-      "offKeeps": "Turning a feature off deletes nothing: messages, bookings and coupons stay and are visible again when you turn it back on."
+      "offKeeps": "Turning a feature off deletes nothing: messages, bookings and coupons stay and are visible again when you turn it back on.",
+      "f_requests": "Requests to the staff",
+      "f_requestsHint": "Guests ask for cleaning, repairs and items; requests reach the right department."
+    },
+    "requests": {
+      "title": "Requests",
+      "intro": "Guest requests, most urgent and oldest first. Department staff see only theirs from the /team page.",
+      "offTitle": "Requests are off",
+      "department": "Department",
+      "allDepartments": "All departments",
+      "showClosed": "Also show closed ones (last 2 days)",
+      "openCount": "Open: {n}",
+      "emptyTitle": "No open requests",
+      "empty": "When a guest asks for something, it shows up here.",
+      "status": {
+        "open": "New",
+        "taken": "In progress",
+        "done": "Done",
+        "cancelled": "Cancelled"
+      },
+      "guestGone": "Guest has left",
+      "high": "Urgent",
+      "waiting": "Waiting {n} min (since {at})",
+      "sentAt": "Sent at {at}",
+      "takenBy": "taken by {name}",
+      "take": "Take it",
+      "done": "Done",
+      "makeNormal": "Remove urgent",
+      "makeHigh": "Mark urgent",
+      "move": "Move to department",
+      "minutes": "{n} min",
+      "statsTitle": "Guest requests",
+      "statsDone": "Completed",
+      "statsOpen": "Still open",
+      "statsTake": "Average time to take in hand",
+      "statsDoneTime": "Average time to resolve",
+      "statsRating": "Satisfied guests",
+      "category": "Category",
+      "statsCount": "Requests",
+      "settingsTitle": "Requests and department staff",
+      "settingsIntro": "The categories guests see and the accounts of department staff (housekeeping, maintenance…), who see only their department's requests on their phone.",
+      "categories": "Categories",
+      "off": "Off",
+      "turnOff": "Turn off",
+      "turnOn": "Turn on",
+      "newCategory": "New category",
+      "name_it": "Name (Italian)",
+      "name_en": "Name (English)",
+      "name_de": "Name (German)",
+      "name_ru": "Name (Russian)",
+      "team": "Department staff",
+      "teamIntro": "Each person signs in at chathel.com/team with their email and the password you see here only once.",
+      "teamEmpty": "No accounts yet.",
+      "teamOff": "Deactivate",
+      "teamOffConfirm": "{name} will no longer be able to sign in. Requests already handled stay.",
+      "teamOn": "Reactivate",
+      "teamAdd": "Add a person",
+      "teamName": "Name",
+      "teamEmail": "Sign-in email",
+      "teamCreate": "Create account",
+      "teamCreated": "Account created for {email}. Initial password:",
+      "teamPasswordOnce": "Copy it and give it to the person: it will not be shown again.",
+      "errors": {
+        "request_closed": "The request is already closed.",
+        "invalid_status": "Invalid status change.",
+        "invalid_category": "Invalid category: the Italian name is required (max 60 characters).",
+        "conflict": "This email is already registered.",
+        "invalid_input": "Invalid data: check name and email."
+      },
+      "departments": {
+        "housekeeping": "Housekeeping",
+        "maintenance": "Maintenance",
+        "roomservice": "Room service",
+        "reception": "Front desk"
+      }
     }
   },
   "privacy": {
@@ -761,7 +839,9 @@
     "pushTitle": "Phone notifications",
     "push": "If you turn them on in Profile, we store your device's technical address to send you notifications through your browser's service (Google, Apple or Mozilla). Notifications never contain your messages or nicknames. You can turn them off at any time; they are also deleted when you leave.",
     "hotelTitle": "What the hotel sees",
-    "hotel": "Hotel staff (management and front desk) see your name, language, the dates of your stay, when you last used the app, your bookings, the events you join and whether you have used the bonus. They do not see private chats, who you talk to or your Google data (email, photo)."
+    "hotel": "Hotel staff (management and front desk) see your name, language, the dates of your stay, when you last used the app, your bookings, the events you join and whether you have used the bonus. They do not see private chats, who you talk to or your Google data (email, photo).",
+    "requestsTitle": "Requests to the staff",
+    "requests": "If you make a request (cleaning, a fault, items for the room), the department staff see the category, the details you write, your first name and, if you give it, the place (for example the room). The place is optional, and when you leave the details and place are deleted; only anonymous data (category, times, rating) remain for the hotel's statistics."
   },
   "errors": {
     "invalid_input": "Invalid data.",
@@ -1078,5 +1158,50 @@
       "thread_not_open": "The conversation has not been accepted yet.",
       "recipient_unavailable": "This person is not available."
     }
+  },
+  "requests": {
+    "title": "Requests",
+    "short": "Requests",
+    "intro": "Need something? Towels, a fault, an extra pillow: write it here and it reaches the right department.",
+    "new": "New request",
+    "what": "What do you need?",
+    "where": "Where?",
+    "wherePlaceholder": "e.g. room 214, umbrella 12",
+    "whereHint": "Only the staff handling the request see it, and it is deleted when you leave.",
+    "note": "Details",
+    "notePlaceholder": "e.g. two large towels",
+    "noteHint": "For emergencies call 112 or the front desk.",
+    "send": "Send request",
+    "sent": "Request sent. We will let you know when the staff take it in hand.",
+    "mine": "Your requests",
+    "empty": "No requests yet.",
+    "cancel": "Cancel request",
+    "cancelConfirm": "Cancel this request?",
+    "sentAt": "Sent {when}",
+    "doneAt": "completed {when}",
+    "howWasIt": "How did it go?",
+    "rateUp": "All good",
+    "rateDown": "Not good",
+    "ratedUp": "Thanks for the feedback 👍",
+    "ratedDown": "Thanks, we will tell the staff 👎",
+    "profileBody": "Ask for cleaning, linen, a repair or items for the room.",
+    "open": "Open requests",
+    "status": {
+      "open": "Sent",
+      "taken": "In progress",
+      "done": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "errors": {
+      "request_open_limit": "You already have 3 open requests: wait for the staff to complete them.",
+      "request_daily_limit": "You have reached today's request limit. For anything else ask the front desk.",
+      "invalid_category": "This category is no longer available.",
+      "request_closed": "This request is already closed.",
+      "too_long": "The text is too long."
+    }
+  },
+  "team": {
+    "title": "Department requests",
+    "goBack": "Back to your page"
   }
 }

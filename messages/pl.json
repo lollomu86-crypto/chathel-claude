@@ -275,7 +275,9 @@
     "pushTitle": "Powiadomienia na telefonie",
     "push": "Jeśli włączysz je w Profilu, zapisujemy techniczny adres Twojego urządzenia, aby wysyłać Ci powiadomienia przez usługę Twojej przeglądarki (Google, Apple lub Mozilla). Powiadomienia nigdy nie zawierają Twoich wiadomości ani pseudonimów. Możesz je wyłączyć w każdej chwili; są też usuwane, gdy wyjeżdżasz.",
     "hotelTitle": "Co widzi hotel",
-    "hotel": "Personel hotelu (dyrekcja i recepcja) widzi Twoje imię, język, daty pobytu, kiedy ostatnio korzystałeś z aplikacji, Twoje rezerwacje, wydarzenia, w których bierzesz udział, oraz to, czy wykorzystałeś bonus. Nie widzi czatów prywatnych, tego, z kim rozmawiasz, ani Twoich danych Google (e-mail, zdjęcie)."
+    "hotel": "Personel hotelu (dyrekcja i recepcja) widzi Twoje imię, język, daty pobytu, kiedy ostatnio korzystałeś z aplikacji, Twoje rezerwacje, wydarzenia, w których bierzesz udział, oraz to, czy wykorzystałeś bonus. Nie widzi czatów prywatnych, tego, z kim rozmawiasz, ani Twoich danych Google (e-mail, zdjęcie).",
+    "requestsTitle": "Prośby do personelu",
+    "requests": "Gdy wysyłasz prośbę (sprzątanie, usterka, rzeczy do pokoju), personel działu widzi kategorię, wpisane szczegóły, Twoje imię oraz, jeśli je podasz, miejsce (np. pokój). Podanie miejsca jest dobrowolne; przy wyjeździe szczegóły i miejsce są usuwane, a do statystyk hotelu zostają tylko dane anonimowe (kategoria, czasy, ocena)."
   },
   "errors": {
     "invalid_input": "Nieprawidłowe dane.",
@@ -591,6 +593,47 @@
       "challenge_active_limit": "Masz już 3 otwarte wyzwania: poczekaj na odpowiedź lub anuluj jedno.",
       "thread_not_open": "Rozmowa nie została jeszcze przyjęta.",
       "recipient_unavailable": "Ta osoba jest niedostępna."
+    }
+  },
+  "requests": {
+    "title": "Prośby",
+    "short": "Prośby",
+    "intro": "Potrzebujesz czegoś? Ręczniki, usterka, dodatkowa poduszka: napisz tutaj, a prośba trafi do właściwego działu.",
+    "new": "Nowa prośba",
+    "what": "Czego potrzebujesz?",
+    "where": "Gdzie?",
+    "wherePlaceholder": "np. pokój 214, parasol 12",
+    "whereHint": "Widzi to tylko personel zajmujący się prośbą; zostaje usunięte przy wyjeździe.",
+    "note": "Szczegóły",
+    "notePlaceholder": "np. dwa duże ręczniki",
+    "noteHint": "W nagłym wypadku dzwoń pod 112 lub do recepcji.",
+    "send": "Wyślij prośbę",
+    "sent": "Prośba wysłana. Damy Ci znać, gdy personel się nią zajmie.",
+    "mine": "Twoje prośby",
+    "empty": "Na razie brak próśb.",
+    "cancel": "Anuluj prośbę",
+    "cancelConfirm": "Anulować tę prośbę?",
+    "sentAt": "Wysłano {when}",
+    "doneAt": "zrealizowano {when}",
+    "howWasIt": "Jak poszło?",
+    "rateUp": "Wszystko dobrze",
+    "rateDown": "Niezbyt dobrze",
+    "ratedUp": "Dziękujemy za opinię 👍",
+    "ratedDown": "Dziękujemy, przekażemy personelowi 👎",
+    "profileBody": "Poproś o sprzątanie, pościel, naprawę lub rzeczy do pokoju.",
+    "open": "Otwórz prośby",
+    "status": {
+      "open": "Wysłana",
+      "taken": "W realizacji",
+      "done": "Zrealizowana",
+      "cancelled": "Anulowana"
+    },
+    "errors": {
+      "request_open_limit": "Masz już 3 otwarte prośby: poczekaj, aż personel je zrealizuje.",
+      "request_daily_limit": "Osiągnięto dzisiejszy limit próśb. W innych sprawach zwróć się do recepcji.",
+      "invalid_category": "Ta kategoria nie jest już dostępna.",
+      "request_closed": "Ta prośba jest już zamknięta.",
+      "too_long": "Tekst jest za długi."
     }
   }
 }

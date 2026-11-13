@@ -23,7 +23,7 @@ export default async function Today() {
   const today = localDayKey(new Date(), tz);
   const tomorrow = addDaysKey(today, 1);
 
-  const [urgent, queue, reports, facilities, events, kpis, guests] = await Promise.all([
+  const [urgent, queue, reports, facilities, events, kpis, guests, requests] = await Promise.all([
     staff.urgentAlerts().catch(() => []),
     staff.handoffQueue(false).catch(() => []),
     staff.social().reports(false).catch(() => []),
@@ -31,6 +31,7 @@ export default async function Today() {
     staff.events().catch(() => []),
     admin ? staff.kpis('today').catch(() => null) : Promise.resolve(null),
     staff.guests().catch(() => []),
+    staff.requests(false).catch(() => []),
   ]);
   // chi ha prenotato ciascun orario (nome di battesimo e persone), dall'elenco ospiti
   const whoBySlot = new Map<string, string[]>();
@@ -38,6 +39,9 @@ export default async function Today() {
     whoBySlot.set(b.slotId, [...(whoBySlot.get(b.slotId) ?? []), b.party > 1 ? `${g.name} (${b.party})` : g.name]);
   }
   const pending = queue.filter((c) => c.status === 'handoff_pending').length;
+  // richieste degli ospiti aperte (0012) e da quanto aspetta la piu' vecchia
+  const openReq = requests.filter((r) => r.status === 'open' || r.status === 'taken');
+  const oldestMin = openReq.length ? Math.round((Date.now() - Math.min(...openReq.map((r) => new Date(r.createdAt).getTime()))) / 60_000) : 0;
   const bookings = facilities
     .flatMap((f) => f.slots.filter((s) => s.booked > 0 && localDayKey(new Date(s.startsAt), tz) === today).map((s) => ({ f, s })))
     .sort((a, b) => a.s.startsAt.localeCompare(b.s.startsAt));
@@ -71,6 +75,11 @@ export default async function Today() {
           <Icon name="chat" />
           <span className="num">{pending}</span>
           <span className="stat-label">{t('admin.today.toHandle')}</span>
+        </Link>
+        <Link href="/admin/requests" className={`card card-link today-tile${openReq.length > 0 ? ' today-tile-on' : ''}`}>
+          <Icon name="ticket" />
+          <span className="num">{openReq.length}</span>
+          <span className="stat-label">{openReq.length > 0 ? t('admin.today.requestsOldest', { n: oldestMin }) : t('admin.today.requests')}</span>
         </Link>
         <Link href="/admin/social" className={`card card-link today-tile${reports.length > 0 ? ' today-tile-on' : ''}`}>
           <Icon name="flag" />

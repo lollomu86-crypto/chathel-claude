@@ -10,11 +10,11 @@ import { useI18n } from './I18n';
 import { Icon } from './ui/Icon';
 
 interface Alert { conversationId: string; at: string; topic: string }
-interface Status { urgent: Alert[]; openReports: number; inbox: number; total: number }
-const Ctx = createContext<Status>({ urgent: [], openReports: 0, inbox: 0, total: 0 });
+interface Status { urgent: Alert[]; openReports: number; inbox: number; requests: number; total: number }
+const Ctx = createContext<Status>({ urgent: [], openReports: 0, inbox: 0, requests: 0, total: 0 });
 export const useStaffStatus = () => useContext(Ctx);
 
-export function StaffStatusProvider({ inbox, canModerate, children }: { inbox: number; canModerate: boolean; children: ReactNode }) {
+export function StaffStatusProvider({ inbox, requests = 0, canModerate, children }: { inbox: number; requests?: number; canModerate: boolean; children: ReactNode }) {
   const [urgent, setUrgent] = useState<Alert[]>([]);
   const [openReports, setOpenReports] = useState(0);
 
@@ -29,7 +29,7 @@ export function StaffStatusProvider({ inbox, canModerate, children }: { inbox: n
     return r.ok;
   }, 20_000, canModerate);
 
-  const value = useMemo<Status>(() => ({ urgent, openReports, inbox, total: urgent.length + openReports + inbox }), [urgent, openReports, inbox]);
+  const value = useMemo<Status>(() => ({ urgent, openReports, inbox, requests, total: urgent.length + openReports + inbox + requests }), [urgent, openReports, inbox, requests]);
 
   // il titolo della scheda porta il numero: si vede anche con il pannello in un'altra scheda del browser.
   // Una navigazione riscrive il titolo (metadata di pagina): un osservatore rimette il prefisso senza ricadere in cicli.

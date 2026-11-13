@@ -26,7 +26,7 @@ test('interruttori: chiave mancante = accesa, "social" spento spegne chat pubbli
   assert.equal(f.publicChat, true, 'la scelta salvata resta');
   const e = effectiveFeatures(f);
   assert.deepEqual([e.social, e.publicChat, e.challenges, e.coupons, e.bookings, e.reception], [false, false, false, false, false, true]);
-  assert.deepEqual(featuresToDb({ ...ALL_FEATURES_ON, publicChat: false }), { social: true, public_chat: false, challenges: true, coupons: true, bookings: true, reception: true });
+  assert.deepEqual(featuresToDb({ ...ALL_FEATURES_ON, publicChat: false }), { social: true, public_chat: false, challenges: true, coupons: true, bookings: true, reception: true, requests: true });
 });
 
 test('benvenuto: lingua dell\'ospite, poi quella dell\'hotel; il direttore lo salva, reception e bar no', async () => {
