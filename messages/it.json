@@ -294,7 +294,8 @@
     "roles": {
       "hotel_admin": "Direttore",
       "reception": "Reception",
-      "bartender": "Barista"
+      "bartender": "Barista",
+      "team": "Personale di reparto"
     },
     "hotel": "Hotel",
     "loginHeading": "Accesso staff"
@@ -318,7 +319,8 @@
       "groupGuests": "Ospiti",
       "groupServices": "Servizi",
       "groupHotel": "Hotel",
-      "guests": "Ospiti"
+      "guests": "Ospiti",
+      "requests": "Richieste"
     },
     "dashboard": {
       "title": "Statistiche",
@@ -656,7 +658,9 @@
       "seeAll": "Vedi tutto",
       "quick": "Azioni rapide",
       "sendNotice": "Manda un avviso",
-      "newEvent": "Nuovo evento"
+      "newEvent": "Nuovo evento",
+      "requests": "richieste aperte",
+      "requestsOldest": "aperte, la più vecchia da {n} min"
     },
     "guests": {
       "title": "Ospiti",
@@ -740,7 +744,81 @@
       "f_bonus": "Bonus di benvenuto",
       "f_bonusHint": "Il bonus ai nuovi ospiti. Chi l'ha già ricevuto lo conserva.",
       "needsSocial": "Spenta perché il social tra ospiti è spento.",
-      "offKeeps": "Spegnere una funzione non cancella nulla: messaggi, prenotazioni e coupon restano e tornano visibili quando la riaccendi."
+      "offKeeps": "Spegnere una funzione non cancella nulla: messaggi, prenotazioni e coupon restano e tornano visibili quando la riaccendi.",
+      "f_requests": "Richieste allo staff",
+      "f_requestsHint": "Gli ospiti chiedono pulizia, riparazioni e oggetti; le richieste arrivano al reparto giusto."
+    },
+    "requests": {
+      "title": "Richieste",
+      "intro": "Le richieste degli ospiti, dalla più urgente e più vecchia. Il personale di reparto vede solo le sue dalla pagina /team.",
+      "offTitle": "Richieste spente",
+      "department": "Reparto",
+      "allDepartments": "Tutti i reparti",
+      "showClosed": "Mostra anche le chiuse (ultimi 2 giorni)",
+      "openCount": "Aperte: {n}",
+      "emptyTitle": "Nessuna richiesta aperta",
+      "empty": "Quando un ospite chiede qualcosa, compare qui.",
+      "status": {
+        "open": "Nuova",
+        "taken": "Presa in carico",
+        "done": "Fatta",
+        "cancelled": "Annullata"
+      },
+      "guestGone": "Ospite partito",
+      "high": "Urgente",
+      "waiting": "In attesa da {n} min (alle {at})",
+      "sentAt": "Inviata alle {at}",
+      "takenBy": "presa da {name}",
+      "take": "Prendo in carico",
+      "done": "Fatto",
+      "makeNormal": "Togli urgente",
+      "makeHigh": "Segna urgente",
+      "move": "Sposta al reparto",
+      "minutes": "{n} min",
+      "statsTitle": "Richieste degli ospiti",
+      "statsDone": "Completate",
+      "statsOpen": "Ancora aperte",
+      "statsTake": "Tempo medio di presa in carico",
+      "statsDoneTime": "Tempo medio di risoluzione",
+      "statsRating": "Ospiti soddisfatti",
+      "category": "Categoria",
+      "statsCount": "Richieste",
+      "settingsTitle": "Richieste e personale di reparto",
+      "settingsIntro": "Le categorie che gli ospiti vedono e gli account del personale di reparto (pulizie, manutenzione…), che dal telefono vedono solo le richieste del loro reparto.",
+      "categories": "Categorie",
+      "off": "Spenta",
+      "turnOff": "Spegni",
+      "turnOn": "Accendi",
+      "newCategory": "Nuova categoria",
+      "name_it": "Nome (italiano)",
+      "name_en": "Nome (inglese)",
+      "name_de": "Nome (tedesco)",
+      "name_ru": "Nome (russo)",
+      "team": "Personale di reparto",
+      "teamIntro": "Ogni persona entra da chathel.com/team con la sua e-mail e la password che vedi qui una sola volta.",
+      "teamEmpty": "Nessun account ancora.",
+      "teamOff": "Disattiva",
+      "teamOffConfirm": "{name} non potrà più entrare. Le richieste già gestite restano.",
+      "teamOn": "Riattiva",
+      "teamAdd": "Aggiungi una persona",
+      "teamName": "Nome",
+      "teamEmail": "E-mail per entrare",
+      "teamCreate": "Crea l'account",
+      "teamCreated": "Account creato per {email}. Password iniziale:",
+      "teamPasswordOnce": "Copiala e consegnala alla persona: non verrà mostrata di nuovo.",
+      "errors": {
+        "request_closed": "La richiesta è già chiusa.",
+        "invalid_status": "Passaggio di stato non valido.",
+        "invalid_category": "Categoria non valida: serve il nome in italiano (max 60 caratteri).",
+        "conflict": "Questa e-mail è già registrata.",
+        "invalid_input": "Dati non validi: controlla nome ed e-mail."
+      },
+      "departments": {
+        "housekeeping": "Pulizie",
+        "maintenance": "Manutenzione",
+        "roomservice": "Servizio in camera",
+        "reception": "Reception"
+      }
     }
   },
   "privacy": {
@@ -761,7 +839,9 @@
     "pushTitle": "Notifiche sul telefono",
     "push": "Se le attivi dal Profilo, salviamo l'indirizzo tecnico del tuo dispositivo per inviarti le notifiche, passando dal servizio del tuo browser (Google, Apple o Mozilla). Le notifiche non contengono mai i tuoi messaggi né i nickname. Puoi disattivarle in ogni momento; vengono cancellate anche alla partenza.",
     "hotelTitle": "Cosa vede l'hotel",
-    "hotel": "Il personale dell'hotel (direzione e reception) vede il tuo nome, la lingua, le date del soggiorno, quando hai usato l'app l'ultima volta, le tue prenotazioni, gli eventi a cui partecipi e se hai usato il bonus. Non vede le chat private, con chi parli né i tuoi dati Google (e-mail, foto)."
+    "hotel": "Il personale dell'hotel (direzione e reception) vede il tuo nome, la lingua, le date del soggiorno, quando hai usato l'app l'ultima volta, le tue prenotazioni, gli eventi a cui partecipi e se hai usato il bonus. Non vede le chat private, con chi parli né i tuoi dati Google (e-mail, foto).",
+    "requestsTitle": "Richieste allo staff",
+    "requests": "Se fai una richiesta (pulizia, guasto, oggetti per la camera), lo staff del reparto vede la categoria, i dettagli che scrivi, il tuo nome di battesimo e, se lo indichi, il luogo (per esempio la camera). Il luogo è facoltativo e alla partenza dettagli e luogo si cancellano; restano solo dati anonimi (categoria, tempi, voto) per le statistiche dell'hotel."
   },
   "errors": {
     "invalid_input": "Dati non validi.",
@@ -1078,5 +1158,50 @@
       "thread_not_open": "La conversazione non è ancora stata accettata.",
       "recipient_unavailable": "Questa persona non è disponibile."
     }
+  },
+  "requests": {
+    "title": "Richieste",
+    "short": "Richieste",
+    "intro": "Ti serve qualcosa? Asciugamani, un guasto, un cuscino in più: scrivilo qui e arriva al reparto giusto.",
+    "new": "Nuova richiesta",
+    "what": "Di cosa hai bisogno?",
+    "where": "Dove?",
+    "wherePlaceholder": "es. camera 214, ombrellone 12",
+    "whereHint": "Lo vede solo lo staff che si occupa della richiesta e si cancella alla partenza.",
+    "note": "Dettagli",
+    "notePlaceholder": "es. due asciugamani grandi",
+    "noteHint": "Per emergenze chiama il 112 o la reception.",
+    "send": "Invia la richiesta",
+    "sent": "Richiesta inviata. Ti avvisiamo quando lo staff la prende in carico.",
+    "mine": "Le tue richieste",
+    "empty": "Nessuna richiesta per ora.",
+    "cancel": "Annulla la richiesta",
+    "cancelConfirm": "Annullare questa richiesta?",
+    "sentAt": "Inviata {when}",
+    "doneAt": "completata {when}",
+    "howWasIt": "Com'è andata?",
+    "rateUp": "Tutto bene",
+    "rateDown": "Non bene",
+    "ratedUp": "Grazie per il riscontro 👍",
+    "ratedDown": "Grazie, lo diremo allo staff 👎",
+    "profileBody": "Chiedi pulizia, biancheria, una riparazione o oggetti per la camera.",
+    "open": "Apri le richieste",
+    "status": {
+      "open": "Inviata",
+      "taken": "Presa in carico",
+      "done": "Completata",
+      "cancelled": "Annullata"
+    },
+    "errors": {
+      "request_open_limit": "Hai già 3 richieste aperte: aspetta che lo staff le completi.",
+      "request_daily_limit": "Hai raggiunto il limite di richieste di oggi. Per altro chiedi alla reception.",
+      "invalid_category": "Questa categoria non è più disponibile.",
+      "request_closed": "Questa richiesta è già chiusa.",
+      "too_long": "Il testo è troppo lungo."
+    }
+  },
+  "team": {
+    "title": "Richieste del reparto",
+    "goBack": "Torna alla tua pagina"
   }
 }

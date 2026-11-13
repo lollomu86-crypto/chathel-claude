@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { getLocale, getStaff, messagesFor } from '@/lib/server';
 import { makeT } from '@/lib/i18n';
 import { I18nProvider } from '@/components/I18n';
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function BarPage() {
   const staff = await getStaff();
+  if (staff?.info.role === 'team') redirect('/team');
   const locale = await getLocale(staff?.info.hotel.defaultLocale);
   const t = makeT(locale);
   return (

@@ -294,7 +294,8 @@
     "roles": {
       "hotel_admin": "Direktion",
       "reception": "Rezeption",
-      "bartender": "Barkeeper"
+      "bartender": "Barkeeper",
+      "team": "Abteilungspersonal"
     },
     "hotel": "Hotel",
     "loginHeading": "Personal-Login"
@@ -318,7 +319,8 @@
       "groupGuests": "Gäste",
       "groupServices": "Angebote",
       "groupHotel": "Hotel",
-      "guests": "Gäste"
+      "guests": "Gäste",
+      "requests": "Anfragen"
     },
     "dashboard": {
       "title": "Statistiken",
@@ -656,7 +658,9 @@
       "seeAll": "Alle anzeigen",
       "quick": "Schnellaktionen",
       "sendNotice": "Hinweis senden",
-      "newEvent": "Neues Event"
+      "newEvent": "Neues Event",
+      "requests": "offene Anfragen",
+      "requestsOldest": "offen, älteste seit {n} Min."
     },
     "guests": {
       "title": "Gäste",
@@ -740,7 +744,81 @@
       "f_bonus": "Willkommensbonus",
       "f_bonusHint": "Der Bonus für neue Gäste. Wer ihn schon erhalten hat, behält ihn.",
       "needsSocial": "Aus, weil Social unter Gästen aus ist.",
-      "offKeeps": "Das Ausschalten einer Funktion löscht nichts: Nachrichten, Buchungen und Gutscheine bleiben und sind wieder sichtbar, wenn du sie einschaltest."
+      "offKeeps": "Das Ausschalten einer Funktion löscht nichts: Nachrichten, Buchungen und Gutscheine bleiben und sind wieder sichtbar, wenn du sie einschaltest.",
+      "f_requests": "Anfragen an das Personal",
+      "f_requestsHint": "Gäste bitten um Reinigung, Reparaturen und Dinge; die Anfragen gehen an die richtige Abteilung."
+    },
+    "requests": {
+      "title": "Anfragen",
+      "intro": "Die Anfragen der Gäste, die dringendsten und ältesten zuerst. Das Abteilungspersonal sieht nur seine auf der Seite /team.",
+      "offTitle": "Anfragen ausgeschaltet",
+      "department": "Abteilung",
+      "allDepartments": "Alle Abteilungen",
+      "showClosed": "Auch abgeschlossene zeigen (letzte 2 Tage)",
+      "openCount": "Offen: {n}",
+      "emptyTitle": "Keine offenen Anfragen",
+      "empty": "Wenn ein Gast etwas braucht, erscheint es hier.",
+      "status": {
+        "open": "Neu",
+        "taken": "In Bearbeitung",
+        "done": "Erledigt",
+        "cancelled": "Storniert"
+      },
+      "guestGone": "Gast abgereist",
+      "high": "Dringend",
+      "waiting": "Wartet seit {n} Min. (seit {at})",
+      "sentAt": "Gesendet um {at}",
+      "takenBy": "übernommen von {name}",
+      "take": "Übernehmen",
+      "done": "Erledigt",
+      "makeNormal": "Nicht mehr dringend",
+      "makeHigh": "Als dringend markieren",
+      "move": "In Abteilung verschieben",
+      "minutes": "{n} Min.",
+      "statsTitle": "Anfragen der Gäste",
+      "statsDone": "Erledigt",
+      "statsOpen": "Noch offen",
+      "statsTake": "Durchschnittliche Zeit bis zur Übernahme",
+      "statsDoneTime": "Durchschnittliche Zeit bis zur Erledigung",
+      "statsRating": "Zufriedene Gäste",
+      "category": "Kategorie",
+      "statsCount": "Anfragen",
+      "settingsTitle": "Anfragen und Abteilungspersonal",
+      "settingsIntro": "Die Kategorien, die Gäste sehen, und die Konten des Abteilungspersonals (Housekeeping, Haustechnik…), das auf dem Handy nur die Anfragen seiner Abteilung sieht.",
+      "categories": "Kategorien",
+      "off": "Aus",
+      "turnOff": "Ausschalten",
+      "turnOn": "Einschalten",
+      "newCategory": "Neue Kategorie",
+      "name_it": "Name (Italienisch)",
+      "name_en": "Name (Englisch)",
+      "name_de": "Name (Deutsch)",
+      "name_ru": "Name (Russisch)",
+      "team": "Abteilungspersonal",
+      "teamIntro": "Jede Person meldet sich unter chathel.com/team mit ihrer E-Mail und dem Passwort an, das du hier nur einmal siehst.",
+      "teamEmpty": "Noch keine Konten.",
+      "teamOff": "Deaktivieren",
+      "teamOffConfirm": "{name} kann sich nicht mehr anmelden. Bereits bearbeitete Anfragen bleiben.",
+      "teamOn": "Reaktivieren",
+      "teamAdd": "Person hinzufügen",
+      "teamName": "Name",
+      "teamEmail": "E-Mail zum Anmelden",
+      "teamCreate": "Konto erstellen",
+      "teamCreated": "Konto für {email} erstellt. Startpasswort:",
+      "teamPasswordOnce": "Kopiere es und gib es der Person: es wird nicht noch einmal angezeigt.",
+      "errors": {
+        "request_closed": "Die Anfrage ist bereits abgeschlossen.",
+        "invalid_status": "Ungültiger Statuswechsel.",
+        "invalid_category": "Ungültige Kategorie: der italienische Name ist Pflicht (max. 60 Zeichen).",
+        "conflict": "Diese E-Mail ist bereits registriert.",
+        "invalid_input": "Ungültige Daten: Name und E-Mail prüfen."
+      },
+      "departments": {
+        "housekeeping": "Housekeeping",
+        "maintenance": "Haustechnik",
+        "roomservice": "Zimmerservice",
+        "reception": "Rezeption"
+      }
     }
   },
   "privacy": {
@@ -761,7 +839,9 @@
     "pushTitle": "Handy-Benachrichtigungen",
     "push": "Wenn du sie im Profil aktivierst, speichern wir die technische Adresse deines Geräts, um dir Benachrichtigungen über den Dienst deines Browsers (Google, Apple oder Mozilla) zu senden. Sie enthalten nie deine Nachrichten oder Nicknames. Du kannst sie jederzeit deaktivieren; bei der Abreise werden sie ebenfalls gelöscht.",
     "hotelTitle": "Was das Hotel sieht",
-    "hotel": "Das Hotelpersonal (Leitung und Rezeption) sieht deinen Namen, die Sprache, die Daten deines Aufenthalts, wann du die App zuletzt genutzt hast, deine Buchungen, die Events, an denen du teilnimmst, und ob du den Bonus genutzt hast. Es sieht keine privaten Chats, nicht mit wem du schreibst und keine Google-Daten (E-Mail, Foto)."
+    "hotel": "Das Hotelpersonal (Leitung und Rezeption) sieht deinen Namen, die Sprache, die Daten deines Aufenthalts, wann du die App zuletzt genutzt hast, deine Buchungen, die Events, an denen du teilnimmst, und ob du den Bonus genutzt hast. Es sieht keine privaten Chats, nicht mit wem du schreibst und keine Google-Daten (E-Mail, Foto).",
+    "requestsTitle": "Anfragen an das Personal",
+    "requests": "Wenn du eine Anfrage stellst (Reinigung, Defekt, Dinge für das Zimmer), sieht das Personal der Abteilung die Kategorie, die Details, die du schreibst, deinen Vornamen und, wenn du ihn angibst, den Ort (zum Beispiel das Zimmer). Der Ort ist freiwillig; bei der Abreise werden Details und Ort gelöscht, es bleiben nur anonyme Daten (Kategorie, Zeiten, Bewertung) für die Statistik des Hotels."
   },
   "errors": {
     "invalid_input": "Ungültige Daten.",
@@ -1078,5 +1158,50 @@
       "thread_not_open": "Das Gespräch wurde noch nicht angenommen.",
       "recipient_unavailable": "Diese Person ist nicht verfügbar."
     }
+  },
+  "requests": {
+    "title": "Anfragen",
+    "short": "Anfragen",
+    "intro": "Brauchst du etwas? Handtücher, ein Defekt, ein Extrakissen: schreib es hier und es geht an die richtige Abteilung.",
+    "new": "Neue Anfrage",
+    "what": "Was brauchst du?",
+    "where": "Wo?",
+    "wherePlaceholder": "z. B. Zimmer 214, Sonnenschirm 12",
+    "whereHint": "Nur das Personal, das die Anfrage bearbeitet, sieht es; es wird bei der Abreise gelöscht.",
+    "note": "Details",
+    "notePlaceholder": "z. B. zwei große Handtücher",
+    "noteHint": "Im Notfall die 112 oder die Rezeption anrufen.",
+    "send": "Anfrage senden",
+    "sent": "Anfrage gesendet. Wir sagen dir Bescheid, sobald sich das Personal darum kümmert.",
+    "mine": "Deine Anfragen",
+    "empty": "Noch keine Anfragen.",
+    "cancel": "Anfrage stornieren",
+    "cancelConfirm": "Diese Anfrage stornieren?",
+    "sentAt": "Gesendet {when}",
+    "doneAt": "erledigt {when}",
+    "howWasIt": "Wie war es?",
+    "rateUp": "Alles gut",
+    "rateDown": "Nicht gut",
+    "ratedUp": "Danke für die Rückmeldung 👍",
+    "ratedDown": "Danke, wir sagen es dem Personal 👎",
+    "profileBody": "Bitte um Reinigung, Wäsche, eine Reparatur oder Dinge für das Zimmer.",
+    "open": "Anfragen öffnen",
+    "status": {
+      "open": "Gesendet",
+      "taken": "In Bearbeitung",
+      "done": "Erledigt",
+      "cancelled": "Storniert"
+    },
+    "errors": {
+      "request_open_limit": "Du hast schon 3 offene Anfragen: warte, bis das Personal sie erledigt.",
+      "request_daily_limit": "Du hast das heutige Limit für Anfragen erreicht. Für alles andere frag an der Rezeption.",
+      "invalid_category": "Diese Kategorie ist nicht mehr verfügbar.",
+      "request_closed": "Diese Anfrage ist bereits abgeschlossen.",
+      "too_long": "Der Text ist zu lang."
+    }
+  },
+  "team": {
+    "title": "Anfragen der Abteilung",
+    "goBack": "Zurück zu deiner Seite"
   }
 }

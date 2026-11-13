@@ -11,7 +11,7 @@ const MAX_BYTES = 2 * 1024 * 1024;
 /** Lato lungo massimo dopo la riduzione nel browser. */
 const MAX_SIDE: Record<HotelMediaKind, number> = { logo: 800, cover: 1600 };
 const UNDER_SOCIAL: FeatureKey[] = ['publicChat', 'challenges', 'coupons'];
-const SWITCHES: FeatureKey[] = ['social', 'publicChat', 'challenges', 'coupons', 'bookings', 'reception'];
+const SWITCHES: FeatureKey[] = ['social', 'publicChat', 'challenges', 'coupons', 'bookings', 'reception', 'requests'];
 
 /** Riduce l'immagine (lato lungo al massimo 800/1600 px) e la ricodifica: niente dati EXIF (posizione) ne' file enormi. */
 async function shrink(file: File, kind: HotelMediaKind): Promise<Blob> {

@@ -4,6 +4,7 @@ import { makeT } from '@/lib/i18n';
 import { formatMoney } from '@/lib/format';
 import { AdminSettings } from '@/components/AdminSettings';
 import { AdminCustomization } from '@/components/AdminCustomization';
+import { AdminRequestSettings } from '@/components/AdminRequestSettings';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,10 +17,12 @@ export default async function SettingsAdmin() {
   const h = staff.info.hotel;
   const token = await staff.currentQrToken();
   const code = await staff.currentAccessCode();
+  const [reqCategories, team] = await Promise.all([staff.requestCategories().catch(() => []), staff.team().catch(() => [])]);
   return (
     <>
       <h1>{t('admin.settings.title')}</h1>
       <AdminCustomization logoUrl={h.logoUrl} coverUrl={h.coverUrl} welcome={h.welcome} features={h.features} bonusEnabled={h.bonusEnabled} />
+      <AdminRequestSettings categories={reqCategories} team={team} />
       <section className="card" aria-labelledby="bn">
         <h2 id="bn" className="h3">{t('admin.settings.bonusTitle')}</h2>
         <p className="muted">{t('admin.settings.bonusNote')}</p>

@@ -275,7 +275,9 @@
     "pushTitle": "Notifications sur le téléphone",
     "push": "Si vous les activez dans le Profil, nous enregistrons l'adresse technique de votre appareil pour vous envoyer des notifications via le service de votre navigateur (Google, Apple ou Mozilla). Les notifications ne contiennent jamais vos messages ni vos surnoms. Vous pouvez les désactiver à tout moment ; elles sont aussi supprimées à votre départ.",
     "hotelTitle": "Ce que voit l'hôtel",
-    "hotel": "Le personnel de l'hôtel (direction et réception) voit votre prénom, votre langue, les dates de votre séjour, votre dernière utilisation de l'application, vos réservations, les événements auxquels vous participez et si vous avez utilisé le bonus. Il ne voit pas les chats privés, les personnes avec qui vous discutez ni vos données Google (e-mail, photo)."
+    "hotel": "Le personnel de l'hôtel (direction et réception) voit votre prénom, votre langue, les dates de votre séjour, votre dernière utilisation de l'application, vos réservations, les événements auxquels vous participez et si vous avez utilisé le bonus. Il ne voit pas les chats privés, les personnes avec qui vous discutez ni vos données Google (e-mail, photo).",
+    "requestsTitle": "Demandes au personnel",
+    "requests": "Si vous faites une demande (ménage, panne, objets pour la chambre), le personnel du service voit la catégorie, les détails que vous écrivez, votre prénom et, si vous l'indiquez, le lieu (par exemple la chambre). Le lieu est facultatif ; à votre départ, les détails et le lieu sont supprimés et il ne reste que des données anonymes (catégorie, délais, note) pour les statistiques de l'hôtel."
   },
   "errors": {
     "invalid_input": "Données non valides.",
@@ -591,6 +593,47 @@
       "challenge_active_limit": "Vous avez déjà 3 défis ouverts : attendez une réponse ou annulez-en un.",
       "thread_not_open": "La conversation n'a pas encore été acceptée.",
       "recipient_unavailable": "Cette personne n'est pas disponible."
+    }
+  },
+  "requests": {
+    "title": "Demandes",
+    "short": "Demandes",
+    "intro": "Besoin de quelque chose ? Des serviettes, une panne, un oreiller en plus : écrivez-le ici et la demande arrive au bon service.",
+    "new": "Nouvelle demande",
+    "what": "De quoi avez-vous besoin ?",
+    "where": "Où ?",
+    "wherePlaceholder": "ex. chambre 214, parasol 12",
+    "whereHint": "Seul le personnel qui traite la demande le voit ; il est supprimé à votre départ.",
+    "note": "Détails",
+    "notePlaceholder": "ex. deux grandes serviettes",
+    "noteHint": "En cas d'urgence, appelez le 112 ou la réception.",
+    "send": "Envoyer la demande",
+    "sent": "Demande envoyée. Nous vous préviendrons quand le personnel la prendra en charge.",
+    "mine": "Vos demandes",
+    "empty": "Aucune demande pour le moment.",
+    "cancel": "Annuler la demande",
+    "cancelConfirm": "Annuler cette demande ?",
+    "sentAt": "Envoyée {when}",
+    "doneAt": "terminée {when}",
+    "howWasIt": "Tout s'est bien passé ?",
+    "rateUp": "Très bien",
+    "rateDown": "Pas bien",
+    "ratedUp": "Merci pour votre avis 👍",
+    "ratedDown": "Merci, nous le dirons au personnel 👎",
+    "profileBody": "Demandez le ménage, du linge, une réparation ou des objets pour la chambre.",
+    "open": "Ouvrir les demandes",
+    "status": {
+      "open": "Envoyée",
+      "taken": "Prise en charge",
+      "done": "Terminée",
+      "cancelled": "Annulée"
+    },
+    "errors": {
+      "request_open_limit": "Vous avez déjà 3 demandes en cours : attendez que le personnel les termine.",
+      "request_daily_limit": "Vous avez atteint la limite de demandes du jour. Pour le reste, adressez-vous à la réception.",
+      "invalid_category": "Cette catégorie n'est plus disponible.",
+      "request_closed": "Cette demande est déjà clôturée.",
+      "too_long": "Le texte est trop long."
     }
   }
 }

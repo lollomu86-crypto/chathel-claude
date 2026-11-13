@@ -275,7 +275,9 @@
     "pushTitle": "Notiser på telefonen",
     "push": "Om du slår på dem i Profilen sparar vi enhetens tekniska adress för att skicka notiser via din webbläsares tjänst (Google, Apple eller Mozilla). Notiserna innehåller aldrig dina meddelanden eller smeknamn. Du kan stänga av dem när som helst; de raderas också när du reser.",
     "hotelTitle": "Vad hotellet ser",
-    "hotel": "Hotellets personal (ledning och reception) ser ditt namn, ditt språk, datumen för din vistelse, när du senast använde appen, dina bokningar, evenemangen du deltar i och om du har använt bonusen. De ser inte privata chattar, vem du pratar med eller dina Google-uppgifter (e-post, foto)."
+    "hotel": "Hotellets personal (ledning och reception) ser ditt namn, ditt språk, datumen för din vistelse, när du senast använde appen, dina bokningar, evenemangen du deltar i och om du har använt bonusen. De ser inte privata chattar, vem du pratar med eller dina Google-uppgifter (e-post, foto).",
+    "requestsTitle": "Förfrågningar till personalen",
+    "requests": "Om du gör en förfrågan (städning, fel, saker till rummet) ser avdelningens personal kategorin, detaljerna du skriver, ditt förnamn och, om du anger den, platsen (till exempel rummet). Platsen är frivillig; när du reser raderas detaljer och plats och bara anonyma uppgifter (kategori, tider, betyg) finns kvar för hotellets statistik."
   },
   "errors": {
     "invalid_input": "Ogiltiga uppgifter.",
@@ -591,6 +593,47 @@
       "challenge_active_limit": "Du har redan 3 öppna utmaningar: vänta på svar eller annullera en.",
       "thread_not_open": "Konversationen har inte godkänts än.",
       "recipient_unavailable": "Den här personen är inte tillgänglig."
+    }
+  },
+  "requests": {
+    "title": "Förfrågningar",
+    "short": "Förfrågningar",
+    "intro": "Behöver du något? Handdukar, ett fel, en extra kudde: skriv det här så hamnar det hos rätt avdelning.",
+    "new": "Ny förfrågan",
+    "what": "Vad behöver du?",
+    "where": "Var?",
+    "wherePlaceholder": "t.ex. rum 214, parasoll 12",
+    "whereHint": "Bara personalen som hanterar förfrågan ser det, och det raderas när du reser.",
+    "note": "Detaljer",
+    "notePlaceholder": "t.ex. två stora handdukar",
+    "noteHint": "Vid nödsituation, ring 112 eller receptionen.",
+    "send": "Skicka förfrågan",
+    "sent": "Förfrågan skickad. Vi meddelar dig när personalen tar hand om den.",
+    "mine": "Dina förfrågningar",
+    "empty": "Inga förfrågningar än.",
+    "cancel": "Avbryt förfrågan",
+    "cancelConfirm": "Avbryta den här förfrågan?",
+    "sentAt": "Skickad {when}",
+    "doneAt": "klar {when}",
+    "howWasIt": "Hur gick det?",
+    "rateUp": "Allt bra",
+    "rateDown": "Inte bra",
+    "ratedUp": "Tack för din feedback 👍",
+    "ratedDown": "Tack, vi säger det till personalen 👎",
+    "profileBody": "Be om städning, sänglinne, en reparation eller saker till rummet.",
+    "open": "Öppna förfrågningar",
+    "status": {
+      "open": "Skickad",
+      "taken": "Pågår",
+      "done": "Klar",
+      "cancelled": "Avbruten"
+    },
+    "errors": {
+      "request_open_limit": "Du har redan 3 öppna förfrågningar: vänta tills personalen har gjort klart dem.",
+      "request_daily_limit": "Du har nått dagens gräns för förfrågningar. För annat, fråga i receptionen.",
+      "invalid_category": "Den här kategorin är inte längre tillgänglig.",
+      "request_closed": "Den här förfrågan är redan stängd.",
+      "too_long": "Texten är för lång."
     }
   }
 }

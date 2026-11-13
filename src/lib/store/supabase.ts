@@ -9,7 +9,7 @@
 // segnalazione "risposta AI sbagliata" (audit_log), contatori di frequenza condivisi. Non compare mai in codice client.
 // `createClient` e' iniettato (src/lib/store/index.ts lo importa dinamicamente): niente dipendenza statica da supabase-js.
 
-import { randomUUID } from 'node:crypto';
+import { randomInt, randomUUID } from 'node:crypto';
 import { ChError, fromPgError } from '../errors';
 import { kpisFromCounts } from '../kpi';
 import { pick } from '../i18n';
@@ -24,7 +24,11 @@ import { isLocale, type AdminEvent, type AdminFacility, type AdminNotification, 
   type GenerateSlotsInput, type GuestView, type HandoffConversation, type Kpis, type Locale, type NotificationView,
   type Period, type PublicHotel, type PublishNotificationInput, type RedeemResult, type SaveEventInput,
   type SaveKnowledgeInput, type StaffInfo, type StaffRole, type StartStayInput, type StartStayResult, type StartStayBonus,
-  type I18nText, type AdminGame, type GameView, type SaveGameInput, type StaffGuest, type HotelMediaKind, type SaveCustomizationInput } from '../types';
+  type I18nText, type AdminGame, type GameView, type SaveGameInput, type StaffGuest, type HotelMediaKind, type SaveCustomizationInput,
+  type CreateRequestInput, type CreateTeamMemberInput, type Department, type GuestRequestView, type RequestCategory, type RequestStats,
+  type SaveRequestCategoryInput, type StaffRequest, type TeamMember, type UpdateRequestInput } from '../types';
+import { cleanCategoryInput, cleanRequestInput, isDepartment, teamPassword } from '../rules/requests';
+import { periodStart } from '../kpi';
 import { cleanGameInput, GAME_LIMITS } from '../rules/games';
 import { cleanWelcome, effectiveFeatures, featuresFromDb, featuresToDb, MEDIA_EXT, type MediaType } from '../rules/features';
 import type { GuestApi, StaffApi, Store } from './types';
@@ -178,7 +182,7 @@ export class SupabaseStore implements Store {
 
   private async memberships(db: Db, uid: string): Promise<any[]> {
     const rows = ok(await db.from('hotel_staff')
-      .select('id, role, display_name, hotels(id, slug, name, timezone, default_locale, bonus_label, bonus_value_cents, bonus_season_cap, bonus_funding, season_year, bonus_enabled, logo_url, cover_url, welcome, features)')
+      .select('id, role, display_name, department, hotels(id, slug, name, timezone, default_locale, bonus_label, bonus_value_cents, bonus_season_cap, bonus_funding, season_year, bonus_enabled, logo_url, cover_url, welcome, features)')
       .eq('active', true).eq('user_id', uid).order('hotel_id')) as any[];
     return rows.filter((r) => r.hotels);
   }
@@ -204,7 +208,7 @@ export class SupabaseStore implements Store {
     const st = o?.hotelId ? rows.find((r) => r.hotels.id === o.hotelId) : rows[0];
     if (!st) return null;
     const h: any = st.hotels;
-    const info: StaffInfo = { role: st.role, displayName: st.display_name, hotel: { id: h.id, slug: h.slug, name: h.name, timezone: h.timezone,
+    const info: StaffInfo = { role: st.role, displayName: st.display_name, department: st.department ?? null, hotel: { id: h.id, slug: h.slug, name: h.name, timezone: h.timezone,
       defaultLocale: h.default_locale, bonusLabel: h.bonus_label, bonusValueCents: h.bonus_value_cents, bonusSeasonCap: h.bonus_season_cap,
       bonusFunding: h.bonus_funding, seasonYear: h.season_year, bonusEnabled: h.bonus_enabled !== false,
       logoUrl: h.logo_url ?? null, coverUrl: h.cover_url ?? null, welcome: h.welcome ?? {}, features: featuresFromDb(h.features) } };
@@ -362,6 +366,41 @@ class SbGuestApi implements GuestApi {
     const { error } = await this.db.rpc('end_my_stay');
     if (error) raise(error);
   }
+
+  // ---- richieste (0012): limiti e permessi nelle funzioni SQL request_*
+  async requestCategories(): Promise<RequestCategory[]> {
+    const rows = ok(await this.db.from('request_categories').select('id, name, department, active, sort_order').eq('active', true).order('sort_order')) as any[];
+    return rows.map(categoryFrom);
+  }
+  async myRequests(): Promise<GuestRequestView[]> {
+    const rows = ok(await this.db.from('guest_requests').select(REQ_COLS).eq('guest_id', this.g.id).order('created_at', { ascending: false }).limit(50)) as any[];
+    return rows.map(guestRequestFrom);
+  }
+  async createRequest(input: CreateRequestInput): Promise<GuestRequestView> {
+    const i = cleanRequestInput(input);
+    const { data: id, error } = await this.db.rpc('request_create', { p_category: i.categoryId, p_note: i.note, p_place: i.place });
+    if (error) raise(error);
+    const row = ok(await this.db.from('guest_requests').select(REQ_COLS).eq('id', id).maybeSingle()) as any;
+    if (!row) throw new ChError('CH003', 'not_found');
+    return guestRequestFrom(row);
+  }
+  async cancelRequest(id: string) {
+    const { error } = await this.db.rpc('request_cancel', { p_id: id });
+    if (error) raise(error);
+  }
+  async rateRequest(id: string, up: boolean) {
+    const { error } = await this.db.rpc('request_rate', { p_id: id, p_up: up });
+    if (error) raise(error);
+  }
+}
+
+const REQ_COLS = 'id, category_name, note, place, status, created_at, taken_at, done_at, rating';
+function categoryFrom(r: any): RequestCategory {
+  return { id: r.id, name: r.name ?? {}, department: r.department, active: !!r.active, sortOrder: r.sort_order ?? 0 };
+}
+function guestRequestFrom(r: any): GuestRequestView {
+  return { id: r.id, category: r.category_name ?? {}, note: r.note ?? null, place: r.place ?? null, status: r.status, createdAt: iso(r.created_at)!,
+    takenAt: iso(r.taken_at), doneAt: iso(r.done_at), rating: r.rating === 1 || r.rating === -1 ? r.rating : null };
 }
 
 // ==================================================================== staff
@@ -610,6 +649,71 @@ class SbStaffApi implements StaffApi {
     await this.setMedia(kind, null);
   }
   /** Salva il nuovo indirizzo e cancella il file precedente (solo se era nel nostro bucket e di questo hotel). */
+  // ---- richieste (0012)
+  async requests(includeClosed: boolean): Promise<StaffRequest[]> {
+    const { data, error } = await this.db.rpc('staff_requests', { p_hotel: this.hid, p_include_closed: includeClosed });
+    if (error) raise(error);
+    return ((data ?? []) as any[]).map((r) => ({ id: r.id, guestName: r.guest_name ?? null, category: r.category ?? {}, department: r.department,
+      note: r.note ?? null, place: r.place ?? null, status: r.status, priority: r.priority === 'high' ? 'high' : 'normal', createdAt: iso(r.created_at)!,
+      takenAt: iso(r.taken_at), doneAt: iso(r.done_at), takenBy: r.taken_by ?? null, rating: r.rating === 1 || r.rating === -1 ? r.rating : null }));
+  }
+  async updateRequest(i: UpdateRequestInput) {
+    const { error } = await this.db.rpc('request_update', { p_id: i.id, p_status: i.status ?? null, p_priority: i.priority ?? null, p_department: i.department ?? null });
+    if (error) raise(error);
+  }
+  async requestCategories(): Promise<RequestCategory[]> {
+    this.need(['hotel_admin', 'reception']);
+    const rows = ok(await this.db.from('request_categories').select('id, name, department, active, sort_order').eq('hotel_id', this.hid).order('sort_order')) as any[];
+    return rows.map(categoryFrom);
+  }
+  async saveRequestCategory(input: SaveRequestCategoryInput) {
+    this.need(['hotel_admin']);
+    const c = cleanCategoryInput(input);
+    if (input.id) {
+      touched(await this.db.from('request_categories').update(c).eq('id', input.id).eq('hotel_id', this.hid).select('id'));
+    } else {
+      const n = (ok(await this.db.from('request_categories').select('id').eq('hotel_id', this.hid)) as any[]).length;
+      ok(await this.db.from('request_categories').insert({ ...c, hotel_id: this.hid, sort_order: n + 1 }).select('id'));
+    }
+  }
+  async requestStats(period: Period): Promise<RequestStats> {
+    this.need(['hotel_admin', 'reception']);
+    const since = (periodStart(period, new Date(), this.tz) ?? new Date(0)).toISOString();
+    const { data, error } = await this.db.rpc('request_stats', { p_hotel: this.hid, p_since: since });
+    if (error) raise(error);
+    const d: any = data ?? {};
+    const num = (v: unknown) => (v === null || v === undefined ? null : Number(v));
+    return { total: Number(d.total ?? 0), done: Number(d.done ?? 0), open: Number(d.open ?? 0), takeMinutes: num(d.take_minutes), doneMinutes: num(d.done_minutes),
+      up: Number(d.up ?? 0), down: Number(d.down ?? 0),
+      byCategory: ((d.by_category ?? []) as any[]).map((x) => ({ name: x.name ?? {}, total: Number(x.total ?? 0), doneMinutes: num(x.done_minutes) })) };
+  }
+  // ---- personale di reparto: l'account (e-mail e password) lo crea solo il server con la chiave di servizio, dopo il controllo del ruolo
+  async team(): Promise<TeamMember[]> {
+    this.need(['hotel_admin']);
+    const rows = ok(await this.db.from('hotel_staff').select('id, display_name, department, active, role').eq('hotel_id', this.hid).eq('role', 'team').order('display_name')) as any[];
+    return rows.filter((r) => isDepartment(r.department)).map((r) => ({ id: r.id, name: r.display_name, department: r.department as Department, active: !!r.active }));
+  }
+  async createTeamMember(i: CreateTeamMemberInput) {
+    this.need(['hotel_admin']);
+    const email = i.email.trim().toLowerCase();
+    const name = i.name.trim();
+    if (name.length < 1 || name.length > 60 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !isDepartment(i.department)) throw new ChError('CH003', 'invalid_input');
+    const password = teamPassword((n) => randomInt(n));
+    const svc = this.store.serviceClient();
+    const made = await svc.auth.admin.createUser({ email, password, email_confirm: true });
+    if (made.error || !made.data?.user) throw new ChError('CH005', 'conflict'); // e-mail gia' registrata (o rifiutata)
+    const ins = await svc.from('hotel_staff').insert({ hotel_id: this.hid, user_id: made.data.user.id, role: 'team', display_name: name, department: i.department }).select('id');
+    if (ins.error) {
+      try { await svc.auth.admin.deleteUser(made.data.user.id); } catch { /* resta un utente senza ruolo: non entra da nessuna parte */ }
+      raise(ins.error);
+    }
+    return { password };
+  }
+  async setTeamMemberActive(id: string, active: boolean) {
+    this.need(['hotel_admin']);
+    touched(await this.db.from('hotel_staff').update({ active }).eq('id', id).eq('hotel_id', this.hid).eq('role', 'team').select('id'));
+  }
+
   private async setMedia(kind: HotelMediaKind, url: string | null) {
     const svc = this.store.serviceClient();
     const col = kind === 'logo' ? 'logo_url' : 'cover_url';

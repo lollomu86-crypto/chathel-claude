@@ -5,7 +5,7 @@
 // Regole: nessun testo di messaggi / nickname / token nei log; errori verso il client come codici
 // (reason) tradotti dalla UI; l'hotel e' sempre dedotto dalla sessione, mai dal client.
 
-import { defer, pushAnnouncement, pushReceptionReply, removeSubscription, saveSubscription, subscriptionPrefs } from '../push/notify';
+import { defer, pushAnnouncement, pushReceptionReply, pushRequestStatus, removeSubscription, saveSubscription, subscriptionPrefs } from '../push/notify';
 import { isPushEndpoint, vapidFromEnv } from '../push/webpush';
 import { z } from 'zod';
 import { aiMode, answerQuestion, safetyAnswer } from '../ai';
@@ -18,7 +18,9 @@ import { EMERGENCY_MAX_PER_MINUTE, GUEST_MESSAGES_PER_DAY, GUEST_MESSAGES_PER_MI
 import { logEvent } from '../log';
 import { hashKey, hit, ipKey, withLock } from '../ratelimit';
 import type { Store } from '../store/types';
-import { FEATURE_KEYS, LOCALES, isLocale, type FeatureKey, type Period, type SaveCustomizationInput } from '../types';
+import { DEPARTMENTS, FEATURE_KEYS, LOCALES, isLocale, type FeatureKey, type Period, type SaveCustomizationInput } from '../types';
+import { isEmergency } from '../ai/guardrails';
+import { REQUEST_LIMITS } from '../rules/requests';
 import { checkImage, requireFeature } from '../rules/features';
 import { preCheck } from '../ai/guardrails';
 import { makeT } from '../i18n';
@@ -205,6 +207,7 @@ export function featuresFor(action: string, raw: unknown): FeatureKey[] {
   const q = (raw ?? {}) as Record<string, unknown>;
   const publicScope = !q.threadId && !q.thread;
   if (action === 'book') return ['bookings'];
+  if (action === 'request-create') return ['requests'];
   if (action === 'games') return ['challenges'];
   if (!action.startsWith('social-')) return [];
   if (['social-feed', 'social-post', 'social-report'].includes(action)) return ['social', 'publicChat'];
@@ -260,6 +263,30 @@ export async function guestAction(ctx: Ctx, action: string, raw: unknown): Promi
         if (get) return fail(405, 'method_not_allowed');
         await g.endMyStay();
         return { ...ok(), guestCookie: null };
+      }
+      // ---- richieste (0012)
+      case 'requests':
+        return ok({ categories: await g.requestCategories(), requests: await g.myRequests() });
+      case 'request-create': {
+        if (get) return fail(405, 'method_not_allowed');
+        const b = z.object({ categoryId: idSchema, note: z.string().max(REQUEST_LIMITS.noteMax + 50).nullish(), place: z.string().max(REQUEST_LIMITS.placeMax + 20).nullish() }).parse(raw);
+        // un'emergenza scritta in una richiesta: messaggio fisso col 112 e avviso urgente alla reception, come nella chat della reception
+        if (b.note && isEmergency(b.note)) return emergencyFromRequest(ctx, g, b.note);
+        if (!(await hit(`req:${hashKey(ctx.guest ?? '')}`, 20, 10 * 60_000))) return fail(429, 'rate_limited');
+        const r = await g.createRequest({ categoryId: b.categoryId, note: b.note ?? null, place: b.place ?? null });
+        logEvent('request.create', { status: 'ok' });
+        return ok({ request: r });
+      }
+      case 'request-cancel': {
+        if (get) return fail(405, 'method_not_allowed');
+        await g.cancelRequest(z.object({ id: idSchema }).parse(raw).id);
+        return ok();
+      }
+      case 'request-rate': {
+        if (get) return fail(405, 'method_not_allowed');
+        const b = z.object({ id: idSchema, up: z.boolean() }).parse(raw);
+        await g.rateRequest(b.id, b.up);
+        return ok();
       }
       case 'push-config':
         return ok({ publicKey: pushDb(ctx) ? vapidFromEnv()?.publicKey ?? null : null });
@@ -534,6 +561,45 @@ export async function staffAction(ctx: Ctx, action: string, raw: unknown): Promi
         await s.removeMedia(z.object({ kind: z.enum(['logo', 'cover']) }).parse(raw).kind);
         return ok();
       }
+      // ---- richieste (0012): direttore e reception tutto, team solo il suo reparto
+      case 'requests':
+        return ok({ requests: await s.requests((raw as { closed?: string } | undefined)?.closed === '1') });
+      case 'request-update': {
+        if (!post) return fail(405, 'method_not_allowed');
+        const b = z.object({ id: idSchema, status: z.enum(['taken', 'done']).optional(), priority: z.enum(['normal', 'high']).optional(),
+          department: z.enum(DEPARTMENTS).optional() }).strict().parse(raw);
+        await s.updateRequest(b);
+        if (b.status) { const db = pushDb(ctx); if (db) { const hid = s.info.hotel.id, st = b.status; await defer(() => pushRequestStatus(db, hid, b.id, st)); } }
+        return ok();
+      }
+      case 'request-categories':
+        return ok({ categories: await s.requestCategories() });
+      case 'request-category-save': {
+        if (!post) return fail(405, 'method_not_allowed');
+        const n = z.string().max(80);
+        const b = z.object({ id: idSchema.optional(), name: z.object({ it: n, en: n, de: n, ru: n }).partial(), department: z.enum(DEPARTMENTS), active: z.boolean() }).strict().parse(raw);
+        await s.saveRequestCategory(b);
+        return ok();
+      }
+      case 'request-stats':
+        return ok({ stats: await s.requestStats(period.parse((raw as { period?: string } | undefined)?.period)) });
+      case 'team':
+        return ok({ team: await s.team() });
+      case 'team-create': {
+        if (!post) return fail(405, 'method_not_allowed');
+        if (!(await hit(`team:${hashKey(ctx.staff ?? '')}`, 10, 60 * 60_000))) return fail(429, 'rate_limited');
+        const b = z.object({ name: z.string().min(1).max(60), email: z.string().email().max(200), department: z.enum(DEPARTMENTS) }).strict().parse(raw);
+        const r = await s.createTeamMember(b);
+        logEvent('staff.team_create', { status: b.department });
+        // la password iniziale torna una sola volta, in questa risposta (mai nei log)
+        return ok({ password: r.password });
+      }
+      case 'team-active': {
+        if (!post) return fail(405, 'method_not_allowed');
+        const b = z.object({ id: idSchema, active: z.boolean() }).parse(raw);
+        await s.setTeamMemberActive(b.id, b.active);
+        return ok();
+      }
       default:
         return (await socialStaffAction(ctx, s, action, raw)) ?? fail(404, 'not_found');
     }
@@ -556,6 +622,21 @@ export async function staffMedia(ctx: Ctx, kindRaw: string | null, bytes: Uint8A
     logEvent('hotel.media', { status: kind });
     return ok({ url: r.url });
   });
+}
+
+/** Richiesta con parole d'emergenza: niente richiesta normale, messaggio col 112 e avviso urgente in reception (se la reception e' accesa). */
+async function emergencyFromRequest(ctx: Ctx, g: NonNullable<Awaited<ReturnType<Store['guest']>>>, text: string): Promise<Res> {
+  const view = await g.view();
+  const aiCtx = await g.aiContext();
+  const safe = safetyAnswer(text, view.locale, aiCtx)!;
+  if (!(await hit(`em:${hashKey(ctx.guest ?? '')}`, EMERGENCY_MAX_PER_MINUTE, 60_000))) return ok({ emergency: true, emergencyText: safe.text });
+  if (view.hotel.features.reception) {
+    const { conversationId } = await g.appendGuestMessage(text.slice(0, GUEST_MESSAGE_MAX_CHARS));
+    await g.appendAssistantMessage(conversationId, { text: safe.text, handoff: safe.handoff });
+    await raiseUrgent({ hotelSlug: view.hotel.slug, conversationId, topic: safe.handoff?.topic ?? 'emergenza', at: new Date().toISOString() });
+  }
+  logEvent('request.emergency', { status: 'emergency' });
+  return ok({ emergency: true, emergencyText: safe.text });
 }
 
 export async function health(): Promise<Res> {

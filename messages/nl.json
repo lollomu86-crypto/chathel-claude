@@ -275,7 +275,9 @@
     "pushTitle": "Meldingen op je telefoon",
     "push": "Als je ze in het Profiel inschakelt, bewaren we het technische adres van je apparaat om je meldingen te sturen via de dienst van je browser (Google, Apple of Mozilla). Meldingen bevatten nooit je berichten of bijnamen. Je kunt ze op elk moment uitschakelen; ze worden ook verwijderd als je vertrekt.",
     "hotelTitle": "Wat het hotel ziet",
-    "hotel": "Het hotelpersoneel (directie en receptie) ziet je naam, taal, de data van je verblijf, wanneer je de app voor het laatst hebt gebruikt, je reserveringen, de activiteiten waaraan je deelneemt en of je de bonus hebt gebruikt. Het ziet geen privéchats, niet met wie je praat en niet je Google-gegevens (e-mail, foto)."
+    "hotel": "Het hotelpersoneel (directie en receptie) ziet je naam, taal, de data van je verblijf, wanneer je de app voor het laatst hebt gebruikt, je reserveringen, de activiteiten waaraan je deelneemt en of je de bonus hebt gebruikt. Het ziet geen privéchats, niet met wie je praat en niet je Google-gegevens (e-mail, foto).",
+    "requestsTitle": "Verzoeken aan het personeel",
+    "requests": "Als je een verzoek doet (schoonmaak, storing, spullen voor de kamer), ziet het personeel van de afdeling de categorie, de details die je schrijft, je voornaam en, als je die opgeeft, de plaats (bijvoorbeeld de kamer). De plaats is optioneel; bij vertrek worden details en plaats verwijderd en blijven alleen anonieme gegevens (categorie, tijden, beoordeling) over voor de statistieken van het hotel."
   },
   "errors": {
     "invalid_input": "Ongeldige gegevens.",
@@ -591,6 +593,47 @@
       "challenge_active_limit": "Je hebt al 3 open uitdagingen: wacht op een antwoord of annuleer er een.",
       "thread_not_open": "Het gesprek is nog niet geaccepteerd.",
       "recipient_unavailable": "Deze persoon is niet beschikbaar."
+    }
+  },
+  "requests": {
+    "title": "Verzoeken",
+    "short": "Verzoeken",
+    "intro": "Iets nodig? Handdoeken, een storing, een extra kussen: schrijf het hier en het komt bij de juiste afdeling.",
+    "new": "Nieuw verzoek",
+    "what": "Wat heb je nodig?",
+    "where": "Waar?",
+    "wherePlaceholder": "bijv. kamer 214, parasol 12",
+    "whereHint": "Alleen het personeel dat het verzoek behandelt ziet het; het wordt bij vertrek verwijderd.",
+    "note": "Details",
+    "notePlaceholder": "bijv. twee grote handdoeken",
+    "noteHint": "Bel bij een noodgeval 112 of de receptie.",
+    "send": "Verzoek versturen",
+    "sent": "Verzoek verstuurd. We laten het weten zodra het personeel ermee aan de slag gaat.",
+    "mine": "Je verzoeken",
+    "empty": "Nog geen verzoeken.",
+    "cancel": "Verzoek annuleren",
+    "cancelConfirm": "Dit verzoek annuleren?",
+    "sentAt": "Verstuurd {when}",
+    "doneAt": "afgerond {when}",
+    "howWasIt": "Hoe ging het?",
+    "rateUp": "Prima",
+    "rateDown": "Niet goed",
+    "ratedUp": "Bedankt voor je reactie 👍",
+    "ratedDown": "Bedankt, we geven het door aan het personeel 👎",
+    "profileBody": "Vraag om schoonmaak, linnengoed, een reparatie of spullen voor de kamer.",
+    "open": "Verzoeken openen",
+    "status": {
+      "open": "Verstuurd",
+      "taken": "In behandeling",
+      "done": "Afgerond",
+      "cancelled": "Geannuleerd"
+    },
+    "errors": {
+      "request_open_limit": "Je hebt al 3 open verzoeken: wacht tot het personeel ze heeft afgerond.",
+      "request_daily_limit": "Je hebt het maximum aantal verzoeken voor vandaag bereikt. Voor andere zaken kun je bij de receptie terecht.",
+      "invalid_category": "Deze categorie is niet meer beschikbaar.",
+      "request_closed": "Dit verzoek is al afgesloten.",
+      "too_long": "De tekst is te lang."
     }
   }
 }

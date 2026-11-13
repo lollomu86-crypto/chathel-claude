@@ -6,7 +6,7 @@ import { useI18n } from './I18n';
 import { useStaffStatus } from './StaffStatus';
 import { Icon } from './ui/Icon';
 
-export interface NavItem { href: string; label: string; badge?: 'inbox' | 'social' }
+export interface NavItem { href: string; label: string; badge?: 'inbox' | 'social' | 'requests' }
 export interface NavGroup { label: string | null; items: NavItem[] }
 
 /**
@@ -19,7 +19,7 @@ export function AdminNav({ groups }: { groups: NavGroup[] }) {
   const st = useStaffStatus();
   const [open, setOpen] = useState(false);
   useEffect(() => { setOpen(false); }, [path]);
-  const count = (i: NavItem) => (i.badge === 'inbox' ? st.inbox + st.urgent.length : i.badge === 'social' ? st.openReports : 0);
+  const count = (i: NavItem) => (i.badge === 'inbox' ? st.inbox + st.urgent.length : i.badge === 'social' ? st.openReports : i.badge === 'requests' ? st.requests : 0);
   const all = groups.flatMap((g) => g.items);
   const current = all.find((i) => i.href === path) ?? all.find((i) => i.href !== '/admin' && path.startsWith(`${i.href}/`)) ?? all[0];
   const total = all.reduce((n, i) => n + count(i), 0);

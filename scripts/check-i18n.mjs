@@ -8,7 +8,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LANGS = ['it', 'en', 'de', 'ru', 'fr', 'es', 'nl', 'pl', 'sv', 'pt', 'cs', 'zh'];
 // lingue che traducono solo l'app ospite: admin/staff/bar ripiegano sull'inglese (src/lib/i18n)
 const GUEST_ONLY = new Set(['fr', 'es', 'nl', 'pl', 'sv', 'pt', 'cs', 'zh']);
-const STAFF = /^(admin|staff|bar)./;
+const STAFF = /^(admin|staff|bar|team)./;
 const flat = (o, p = '', out = new Set()) => {
   for (const [k, v] of Object.entries(o)) {
     const key = p ? `${p}.${k}` : k;

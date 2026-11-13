@@ -275,7 +275,9 @@
     "pushTitle": "Notificações no telemóvel",
     "push": "Se as ativar no Perfil, guardamos o endereço técnico do seu dispositivo para lhe enviar notificações através do serviço do seu navegador (Google, Apple ou Mozilla). As notificações nunca contêm as suas mensagens nem alcunhas. Pode desativá-las a qualquer momento; também são apagadas quando parte.",
     "hotelTitle": "O que o hotel vê",
-    "hotel": "O pessoal do hotel (direção e receção) vê o seu nome, o idioma, as datas da estadia, quando usou a app pela última vez, as suas reservas, os eventos em que participa e se utilizou o bónus. Não vê os chats privados, com quem fala nem os seus dados Google (e-mail, fotografia)."
+    "hotel": "O pessoal do hotel (direção e receção) vê o seu nome, o idioma, as datas da estadia, quando usou a app pela última vez, as suas reservas, os eventos em que participa e se utilizou o bónus. Não vê os chats privados, com quem fala nem os seus dados Google (e-mail, fotografia).",
+    "requestsTitle": "Pedidos ao pessoal",
+    "requests": "Se fizer um pedido (limpeza, avaria, objetos para o quarto), o pessoal do serviço vê a categoria, os detalhes que escrever, o seu nome próprio e, se o indicar, o local (por exemplo o quarto). O local é opcional; quando parte, os detalhes e o local são apagados e ficam apenas dados anónimos (categoria, tempos, avaliação) para as estatísticas do hotel."
   },
   "errors": {
     "invalid_input": "Dados inválidos.",
@@ -591,6 +593,47 @@
       "challenge_active_limit": "Já tem 3 desafios abertos: aguarde uma resposta ou anule um.",
       "thread_not_open": "A conversa ainda não foi aceite.",
       "recipient_unavailable": "Esta pessoa não está disponível."
+    }
+  },
+  "requests": {
+    "title": "Pedidos",
+    "short": "Pedidos",
+    "intro": "Precisa de alguma coisa? Toalhas, uma avaria, mais uma almofada: escreva aqui e o pedido chega ao serviço certo.",
+    "new": "Novo pedido",
+    "what": "De que precisa?",
+    "where": "Onde?",
+    "wherePlaceholder": "ex. quarto 214, guarda-sol 12",
+    "whereHint": "Só o pessoal que trata do pedido o vê, e é apagado quando parte.",
+    "note": "Detalhes",
+    "notePlaceholder": "ex. duas toalhas grandes",
+    "noteHint": "Em caso de emergência ligue para o 112 ou para a receção.",
+    "send": "Enviar o pedido",
+    "sent": "Pedido enviado. Avisamos quando o pessoal tratar dele.",
+    "mine": "Os seus pedidos",
+    "empty": "Ainda não há pedidos.",
+    "cancel": "Cancelar o pedido",
+    "cancelConfirm": "Cancelar este pedido?",
+    "sentAt": "Enviado {when}",
+    "doneAt": "concluído {when}",
+    "howWasIt": "Correu tudo bem?",
+    "rateUp": "Tudo bem",
+    "rateDown": "Não muito bem",
+    "ratedUp": "Obrigado pela opinião 👍",
+    "ratedDown": "Obrigado, vamos dizer ao pessoal 👎",
+    "profileBody": "Peça limpeza, roupa de cama, uma reparação ou objetos para o quarto.",
+    "open": "Abrir os pedidos",
+    "status": {
+      "open": "Enviado",
+      "taken": "Em curso",
+      "done": "Concluído",
+      "cancelled": "Cancelado"
+    },
+    "errors": {
+      "request_open_limit": "Já tem 3 pedidos abertos: aguarde que o pessoal os conclua.",
+      "request_daily_limit": "Atingiu o limite de pedidos de hoje. Para outros assuntos, dirija-se à receção.",
+      "invalid_category": "Esta categoria já não está disponível.",
+      "request_closed": "Este pedido já está encerrado.",
+      "too_long": "O texto é demasiado longo."
     }
   }
 }

@@ -87,6 +87,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ w
         <Link className="shortcut" href="/stay/events"><Icon name="calendar" />{t('nav.events')}</Link>
         {(f.bookings || f.challenges) && <Link className="shortcut" href="/stay/book"><Icon name="clock" />{t('nav.book')}</Link>}
         {f.reception && <Link className="shortcut" href="/stay/reception"><Icon name="chat" />{t('nav.reception')}</Link>}
+        {f.requests && <Link className="shortcut" href="/stay/requests"><Icon name="ticket" />{t('requests.short')}</Link>}
       </div>
 
       {notifs.length > 0 && (

@@ -193,3 +193,27 @@ test('ospite: la sessione si apre senza leggere colonne non concesse (0004) e l\
   await store.guest(sess('tok-g1'));
   assert.equal(db.calls.filter((c) => c.name === 'touch_guest').length, 1, 'entro 10 minuti nessuna nuova scrittura');
 });
+
+test('0012 richieste: funzioni SQL con il token dello staff; l\'account Team lo crea solo il service role', async () => {
+  const { db, store } = staffDb();
+  db.rpcs.staff_requests = (a, who) => (who.uid === 'u1' && a.p_hotel === 'h1'
+    ? { data: [{ id: 'r1', guest_name: 'Anna', category: { it: 'Pulizia' }, department: 'housekeeping', note: 'asciugamani', place: 'camera 2', status: 'open', priority: 'high', created_at: '2026-11-13T10:00:00Z', taken_at: null, done_at: null, taken_by: null, rating: null }] }
+    : { error: { code: 'CH004', message: 'forbidden' } });
+  db.rpcs.request_update = () => ({ data: null });
+  const api = (await store.staff(sess('tok-u1')))!; // hotel_admin su h1
+  const list = await api.requests(false);
+  assert.deepEqual([list[0].guestName, list[0].place, list[0].priority], ['Anna', 'camera 2', 'high']);
+  await api.updateRequest({ id: 'r1', status: 'taken' });
+  const call = db.calls.find((c) => c.name === 'request_update')!;
+  assert.equal(call.role, 'authenticated');
+  assert.deepEqual(call.args, { p_id: 'r1', p_status: 'taken', p_priority: null, p_department: null });
+
+  const { password } = await api.createTeamMember({ name: 'Gina', email: ' Gina@Hotel.test ', department: 'housekeeping' });
+  assert.equal(password.length, 14);
+  const row = db.table('hotel_staff').find((r) => r.display_name === 'Gina')!;
+  assert.deepEqual([row.hotel_id, row.role, row.department], ['h1', 'team', 'housekeeping']);
+  assert.equal(db.staffLogins.get('gina@hotel.test')?.password, password, 'utente creato con la chiave di servizio, e-mail normalizzata');
+  assert.equal(await code(api.createTeamMember({ name: 'Doppia', email: 'gina@hotel.test', department: 'maintenance' })), 'CH005:conflict');
+  const rec = (await store.staff(sess('tok-u1'), { hotelId: 'h2' }))!; // reception su h2
+  assert.equal(await code(rec.createTeamMember({ name: 'X', email: 'x@y.test', department: 'maintenance' })), 'CH004:forbidden');
+});

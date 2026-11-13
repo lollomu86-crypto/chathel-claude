@@ -53,6 +53,15 @@ import type {
   StartStayResult,
   HotelMediaKind,
   SaveCustomizationInput,
+  CreateRequestInput,
+  CreateTeamMemberInput,
+  GuestRequestView,
+  RequestCategory,
+  RequestStats,
+  SaveRequestCategoryInput,
+  StaffRequest,
+  TeamMember,
+  UpdateRequestInput,
 } from '../types';
 import type { MediaType } from '../rules/features';
 
@@ -127,6 +136,16 @@ export interface GuestApi {
   appendAssistantMessage(conversationId: string, a: AssistantAppend): Promise<void>;
   /** "Esci e cancella i miei dati" */
   endMyStay(): Promise<void>;
+  // ---- richieste (0012)
+  /** Categorie attive dell'hotel */
+  requestCategories(): Promise<RequestCategory[]>;
+  /** Le proprie richieste, piu' recenti prima */
+  myRequests(): Promise<GuestRequestView[]>;
+  createRequest(input: CreateRequestInput): Promise<GuestRequestView>;
+  /** Solo se ancora aperta */
+  cancelRequest(id: string): Promise<void>;
+  /** Una volta sola, solo se fatta */
+  rateRequest(id: string, up: boolean): Promise<void>;
 }
 
 export interface StaffApi {
@@ -177,6 +196,19 @@ export interface StaffApi {
   /** Logo o copertina gia' controllati (tipo reale e dimensione, rules/features.ts). Solo direttore. */
   uploadMedia(kind: HotelMediaKind, bytes: Uint8Array, type: MediaType): Promise<{ url: string }>;
   removeMedia(kind: HotelMediaKind): Promise<void>;
+  // ---- richieste (0012): direttore e reception tutto; team solo il proprio reparto e solo lo stato
+  requests(includeClosed: boolean): Promise<StaffRequest[]>;
+  updateRequest(input: UpdateRequestInput): Promise<void>;
+  /** Tutte le categorie, anche spente (direttore e reception) */
+  requestCategories(): Promise<RequestCategory[]>;
+  /** Solo direttore */
+  saveRequestCategory(input: SaveRequestCategoryInput): Promise<void>;
+  requestStats(period: Period): Promise<RequestStats>;
+  // ---- personale di reparto (solo direttore)
+  team(): Promise<TeamMember[]>;
+  /** Ritorna la password iniziale: si mostra una sola volta */
+  createTeamMember(input: CreateTeamMemberInput): Promise<{ password: string }>;
+  setTeamMemberActive(id: string, active: boolean): Promise<void>;
 }
 
 export interface Store {

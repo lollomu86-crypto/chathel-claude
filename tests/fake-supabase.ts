@@ -160,6 +160,21 @@ class FakeClient {
       this.db.tokens.set(l.access, l.uid);
       return { data: { session: { access_token: l.access, refresh_token: l.refresh }, user: { id: l.uid } }, error: null };
     },
+    /** GoTrue admin: solo con la chiave di servizio (come Supabase). E-mail gia' presente = errore. */
+    admin: {
+      createUser: async ({ email, password }: { email: string; password: string }) => {
+        if (this.who.role !== 'service_role') return { data: { user: null }, error: { message: 'not admin' } };
+        if (this.db.staffLogins.has(email)) return { data: { user: null }, error: { message: 'already registered' } };
+        const uid = `u-${this.db.staffLogins.size + 1}-${email}`;
+        this.db.staffLogins.set(email, { password, uid, access: `tok-${uid}`, refresh: `ref-${uid}` });
+        return { data: { user: { id: uid } }, error: null };
+      },
+      deleteUser: async (uid: string) => {
+        if (this.who.role !== 'service_role') return { data: null, error: { message: 'not admin' } };
+        for (const [e, l] of this.db.staffLogins) if (l.uid === uid) this.db.staffLogins.delete(e);
+        return { data: null, error: null };
+      },
+    },
   };
 }
 // alias leggibile per i test: .single() sul builder

@@ -24,9 +24,13 @@ import { DEFAULT_LOCALE, isLocale, type AdminEvent, type AdminFacility, type Adm
   type Period, type PublicHotel, type PublishNotificationInput, type RedeemResult, type SaveEventInput,
   type SaveKnowledgeInput, type StaffInfo, type StaffRole, type StartStayInput, type StartStayResult,
   type StartStayBonus, type AdminGame, type GameView, type SaveGameInput, type StaffGuest,
-  type FeatureKey, type HotelFeatures, type HotelMediaKind, type SaveCustomizationInput } from '../types';
+  type FeatureKey, type HotelFeatures, type HotelMediaKind, type SaveCustomizationInput,
+  type CreateRequestInput, type CreateTeamMemberInput, type Department, type GuestRequestView, type RequestCategory, type RequestPriority,
+  type RequestStats, type RequestStatus, type SaveRequestCategoryInput, type StaffRequest, type TeamMember, type UpdateRequestInput } from '../types';
 import type { GuestApi, StaffApi, Store } from './types';
-import { DEMO_EVENTS, DEMO_FACILITIES, DEMO_GAMES, DEMO_KB, DEMO_STAFF } from './demo-data';
+import { DEMO_EVENTS, DEMO_FACILITIES, DEMO_GAMES, DEMO_KB, DEMO_STAFF, type DemoStaffUser } from './demo-data';
+import { DEFAULT_CATEGORIES, REQUEST_LIMITS, cleanCategoryInput, cleanRequestInput, isDepartment, nextStatus, teamPassword } from '../rules/requests';
+import { periodStart } from '../kpi';
 
 const HOTEL_ID = 'hotel-demo';
 // costanti condivise: definite in ../limits (modulo neutro); riesportate qui per compatibilita'
@@ -118,6 +122,12 @@ export class DemoStore implements Store {
 
   id(prefix: string) { return `${prefix}${++this.seq}`; }
 
+  /** Account dello staff (copia modificabile: il direttore aggiunge il personale di reparto). */
+  staffUsers: DemoStaffUser[] = DEMO_STAFF.map((u) => ({ ...u }));
+  /** Richieste degli ospiti (0012) */
+  requestCategories: RequestCategory[] = DEFAULT_CATEGORIES.map((c, i) => ({ id: `rc${i + 1}`, name: { ...c.name }, department: c.department, active: true, sortOrder: i + 1 }));
+  requests: DemoRequest[] = [];
+
   /** Immagini caricate dal pannello (solo in memoria, come il resto della demo). */
   mediaFiles = new Map<string, { type: MediaType; bytes: Uint8Array }>();
   media(id: string) { return this.mediaFiles.get(id) ?? null; }
@@ -186,6 +196,12 @@ export class DemoStore implements Store {
     if (!g) return;
     const now = this.now();
     this.ledger.purgeGuest(guestId);
+    // richieste (come guests_requests_purge in 0012): via nota, luogo e ospite; le aperte si annullano; restano categoria, tempi, voto
+    for (const r of this.requests) {
+      if (r.guestId !== guestId) continue;
+      if (r.status === 'open' || r.status === 'taken') { r.status = 'cancelled'; r.cancelledAt = now; }
+      r.note = null; r.place = null; r.guestId = null;
+    }
     this.social.purgeProfile(guestId);
     this.book.purgeGuest(guestId, now);
     for (const a of this.attendance) {
@@ -300,7 +316,7 @@ export class DemoStore implements Store {
   }
 
   async staffLogin(email: string, password: string): Promise<{ session: string; role: StaffRole } | null> {
-    const u = DEMO_STAFF.find((x) => x.email === (email || '').trim().toLowerCase());
+    const u = this.staffUsers.find((x) => x.active && x.email === (email || '').trim().toLowerCase());
     // confronto sempre eseguito, anche se l'utente non esiste (tempo costante)
     const ok = sameHash(password || '', u?.password ?? randomUUID());
     if (!u || !ok) return null;
@@ -312,7 +328,7 @@ export class DemoStore implements Store {
   async staff(session: string | undefined, opts?: { hotelId?: string }): Promise<StaffApi | null> {
     this.tick();
     const uid = session ? this.staffSessions.get(session) : undefined;
-    const u = DEMO_STAFF.find((x) => x.id === uid);
+    const u = this.staffUsers.find((x) => x.id === uid && x.active);
     if (!u) return null;
     if (opts?.hotelId && opts.hotelId !== HOTEL_ID) return null; // la demo ha un solo hotel
     return new DemoStaffApi(this, u);
@@ -320,7 +336,7 @@ export class DemoStore implements Store {
 
   async staffHotels(session: string | undefined) {
     const uid = session ? this.staffSessions.get(session) : undefined;
-    const u = DEMO_STAFF.find((x) => x.id === uid);
+    const u = this.staffUsers.find((x) => x.id === uid && x.active);
     return u ? [{ id: HOTEL_ID, slug: this.hotel.slug, name: this.hotel.name, role: u.role }] : [];
   }
 }
@@ -466,6 +482,51 @@ class DemoGuestApi implements GuestApi {
     }
   }
   async endMyStay() { this.s.purge(this.gid, 'guest_request'); }
+
+  // ---- richieste (stesse regole di request_create / request_cancel / request_rate in 0012)
+  async requestCategories() {
+    return this.s.requestCategories.filter((c) => c.active).sort((a, b) => a.sortOrder - b.sortOrder).map((c) => ({ ...c }));
+  }
+  async myRequests(): Promise<GuestRequestView[]> {
+    return this.s.requests.filter((r) => r.guestId === this.gid).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()).map(guestView);
+  }
+  async createRequest(input: CreateRequestInput): Promise<GuestRequestView> {
+    this.s.requireFeature('requests');
+    const i = cleanRequestInput(input);
+    const c = this.s.requestCategories.find((x) => x.id === i.categoryId && x.active);
+    if (!c) throw new ChError('CH003', 'invalid_category');
+    const mine = this.s.requests.filter((r) => r.guestId === this.gid);
+    if (mine.filter((r) => r.status === 'open' || r.status === 'taken').length >= REQUEST_LIMITS.openMax) throw new ChError('CH007', 'request_open_limit');
+    const now = this.s.now();
+    const dayStart = zonedTime(localDayKey(now, this.h.timezone), '00:00', this.h.timezone);
+    if (mine.filter((r) => r.createdAt >= dayStart).length >= REQUEST_LIMITS.perDay) throw new ChError('CH007', 'request_daily_limit');
+    const r: DemoRequest = { id: randomUUID(), guestId: this.gid, categoryId: c.id, category: { ...c.name }, department: c.department, note: i.note, place: i.place,
+      status: 'open', priority: 'normal', createdAt: now, takenAt: null, doneAt: null, cancelledAt: null, takenBy: null, rating: null };
+    this.s.requests.push(r);
+    this.s.markAction(this.gid);
+    return guestView(r);
+  }
+  async cancelRequest(id: string) {
+    const r = this.s.requests.find((x) => x.id === id && x.guestId === this.gid && x.status === 'open');
+    if (!r) throw new ChError('CH003', 'request_closed');
+    r.status = 'cancelled'; r.cancelledAt = this.s.now();
+  }
+  async rateRequest(id: string, up: boolean) {
+    const r = this.s.requests.find((x) => x.id === id && x.guestId === this.gid && x.status === 'done' && x.rating === null);
+    if (!r) throw new ChError('CH003', 'request_closed');
+    r.rating = up ? 1 : -1;
+  }
+}
+
+interface DemoRequest {
+  id: string; guestId: string | null; categoryId: string | null; category: I18nText; department: Department; note: string | null; place: string | null;
+  status: RequestStatus; priority: RequestPriority; createdAt: Date; takenAt: Date | null; doneAt: Date | null; cancelledAt: Date | null;
+  takenBy: string | null; rating: 1 | -1 | null;
+}
+const isoOrNull = (d: Date | null) => (d ? d.toISOString() : null);
+function guestView(r: DemoRequest): GuestRequestView {
+  return { id: r.id, category: r.category, note: r.note, place: r.place, status: r.status, createdAt: r.createdAt.toISOString(),
+    takenAt: isoOrNull(r.takenAt), doneAt: isoOrNull(r.doneAt), rating: r.rating };
 }
 
 function demoAiContext(s: DemoStore): AiContext {
@@ -486,9 +547,9 @@ const BAR: StaffRole[] = ['hotel_admin', 'bartender'];
 
 class DemoStaffApi implements StaffApi {
   readonly info: StaffInfo;
-  constructor(private s: DemoStore, private u: (typeof DEMO_STAFF)[number]) {
+  constructor(private s: DemoStore, private u: DemoStaffUser) {
     const h = s.hotel;
-    this.info = { role: u.role, displayName: u.name, hotel: { id: h.id, slug: h.slug, name: h.name, timezone: h.timezone,
+    this.info = { role: u.role, displayName: u.name, department: u.department, hotel: { id: h.id, slug: h.slug, name: h.name, timezone: h.timezone,
       defaultLocale: h.defaultLocale, bonusLabel: h.bonusLabel, bonusValueCents: h.bonusValueCents, bonusSeasonCap: h.bonusCap,
       bonusFunding: h.bonusFunding, seasonYear: h.seasonYear, bonusEnabled: h.bonusEnabled,
       logoUrl: h.logoUrl, coverUrl: h.coverUrl, welcome: { ...h.welcome }, features: { ...h.features } } };
@@ -511,6 +572,97 @@ class DemoStaffApi implements StaffApi {
     return { url };
   }
   async removeMedia(kind: HotelMediaKind) { this.need(ADMIN); this.setMedia(kind, null); }
+  // ---- richieste (come request_update / staff_requests / request_stats in 0012)
+  private canSee(r: DemoRequest) {
+    if (FLOOR.includes(this.u.role)) return true;
+    return this.u.role === 'team' && !!this.u.department && r.department === this.u.department;
+  }
+  async requests(includeClosed: boolean): Promise<StaffRequest[]> {
+    if (!FLOOR.includes(this.u.role) && !(this.u.role === 'team' && this.u.department)) throw new ChError('CH004', 'forbidden');
+    const since = this.s.now().getTime() - 2 * 86_400_000;
+    return this.s.requests
+      .filter((r) => this.canSee(r) && (r.status === 'open' || r.status === 'taken' || (includeClosed && r.createdAt.getTime() > since)))
+      .sort((a, b) => Number(b.priority === 'high') - Number(a.priority === 'high') || a.createdAt.getTime() - b.createdAt.getTime())
+      .map((r) => ({ id: r.id, guestName: r.guestId ? this.s.guests.get(r.guestId)?.name ?? null : null, category: r.category, department: r.department,
+        note: r.note, place: r.place, status: r.status, priority: r.priority, createdAt: r.createdAt.toISOString(), takenAt: isoOrNull(r.takenAt),
+        doneAt: isoOrNull(r.doneAt), takenBy: r.takenBy ? this.s.staffUsers.find((x) => x.id === r.takenBy)?.name ?? null : null, rating: r.rating }));
+  }
+  async updateRequest(i: UpdateRequestInput) {
+    const r = this.s.requests.find((x) => x.id === i.id);
+    if (!r) throw new ChError('CH003', 'not_found');
+    if (!this.canSee(r)) throw new ChError('CH004', 'forbidden');
+    const full = FLOOR.includes(this.u.role);
+    if (!full && (i.priority !== undefined || i.department !== undefined)) throw new ChError('CH004', 'forbidden');
+    if (r.status === 'done' || r.status === 'cancelled') throw new ChError('CH003', 'request_closed');
+    const now = this.s.now();
+    if (i.status) {
+      r.status = nextStatus(r.status, i.status);
+      if (i.status === 'taken') { r.takenAt = now; r.takenBy = this.u.id; }
+      else { r.doneAt = now; r.takenAt ??= now; r.takenBy ??= this.u.id; }
+    }
+    if (i.priority !== undefined) r.priority = i.priority === 'high' ? 'high' : 'normal';
+    if (i.department !== undefined) {
+      if (!isDepartment(i.department)) throw new ChError('CH003', 'invalid_input');
+      r.department = i.department;
+    }
+  }
+  async requestCategories(): Promise<RequestCategory[]> {
+    this.need(FLOOR);
+    return [...this.s.requestCategories].sort((a, b) => a.sortOrder - b.sortOrder).map((c) => ({ ...c }));
+  }
+  async saveRequestCategory(input: SaveRequestCategoryInput) {
+    this.need(ADMIN);
+    const c = cleanCategoryInput(input);
+    if (input.id) {
+      const cur = this.s.requestCategories.find((x) => x.id === input.id);
+      if (!cur) throw new ChError('CH003', 'not_found');
+      Object.assign(cur, c);
+    } else {
+      this.s.requestCategories.push({ id: this.s.id('rc'), ...c, sortOrder: this.s.requestCategories.length + 1 });
+    }
+  }
+  async requestStats(period: Period): Promise<RequestStats> {
+    this.need(FLOOR);
+    const now = this.s.now();
+    const from = periodStart(period, now, this.s.hotel.timezone) ?? new Date(0);
+    const rs = this.s.requests.filter((r) => r.createdAt >= from);
+    const avg = (xs: number[]) => (xs.length ? Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10 : null);
+    const mins = (a: Date, b: Date) => (b.getTime() - a.getTime()) / 60_000;
+    const groups = new Map<string, DemoRequest[]>();
+    for (const r of rs) { const k = JSON.stringify(r.category); groups.set(k, [...(groups.get(k) ?? []), r]); }
+    return {
+      total: rs.length, done: rs.filter((r) => r.status === 'done').length, open: rs.filter((r) => r.status === 'open' || r.status === 'taken').length,
+      takeMinutes: avg(rs.filter((r) => r.takenAt).map((r) => mins(r.createdAt, r.takenAt!))),
+      doneMinutes: avg(rs.filter((r) => r.doneAt).map((r) => mins(r.createdAt, r.doneAt!))),
+      up: rs.filter((r) => r.rating === 1).length, down: rs.filter((r) => r.rating === -1).length,
+      byCategory: [...groups.values()].sort((a, b) => b.length - a.length)
+        .map((g) => ({ name: g[0].category, total: g.length, doneMinutes: avg(g.filter((r) => r.doneAt).map((r) => mins(r.createdAt, r.doneAt!))) })),
+    };
+  }
+  // ---- personale di reparto
+  async team(): Promise<TeamMember[]> {
+    this.need(ADMIN);
+    return this.s.staffUsers.filter((u) => u.role === 'team' && u.department)
+      .map((u) => ({ id: u.id, name: u.name, department: u.department as Department, active: u.active }));
+  }
+  async createTeamMember(i: CreateTeamMemberInput) {
+    this.need(ADMIN);
+    const email = i.email.trim().toLowerCase();
+    const name = i.name.trim();
+    if (name.length < 1 || name.length > 60 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !isDepartment(i.department)) throw new ChError('CH003', 'invalid_input');
+    if (this.s.staffUsers.some((u) => u.email === email)) throw new ChError('CH005', 'conflict');
+    const password = teamPassword((n) => randomInt(n));
+    this.s.staffUsers.push({ id: this.s.id('staff-team-'), email, password, role: 'team', name, department: i.department, active: true });
+    return { password };
+  }
+  async setTeamMemberActive(id: string, active: boolean) {
+    this.need(ADMIN);
+    const u = this.s.staffUsers.find((x) => x.id === id && x.role === 'team');
+    if (!u) throw new ChError('CH003', 'not_found');
+    u.active = active;
+    if (!active) for (const [tok, uid] of this.s.staffSessions) if (uid === id) this.s.staffSessions.delete(tok);
+  }
+
   private setMedia(kind: HotelMediaKind, url: string | null) {
     const h = this.s.hotel;
     const prev = kind === 'logo' ? h.logoUrl : h.coverUrl;
