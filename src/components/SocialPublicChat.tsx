@@ -147,7 +147,7 @@ export function SocialPublicChat({ hotelName, settings, timezone, onChanged }: {
         )}
         <label htmlFor="pub" className="sr-only">{t('social.chat.placeholder')}</label>
         <textarea id="pub" className="composer-text" rows={1} maxLength={max} placeholder={t('social.chat.placeholder')} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} autoComplete="off" disabled={!canWrite} />
-        <button type="submit" className="btn btn-primary" disabled={busy || !text.trim() || !canWrite} aria-busy={busy}>{t('common.send')}</button>
+        <button type="submit" className="send-btn" disabled={busy || !text.trim() || !canWrite} aria-busy={busy} aria-label={t('common.send')} title={t('common.send')}><Icon name="send" /></button>
       </form>
       <p className="muted small">{t('social.chat.charsLeft', { n: max - [...text].length })}</p>
       <ReportDialog open={reporting !== null} onClose={() => setReporting(null)} onSend={report} />

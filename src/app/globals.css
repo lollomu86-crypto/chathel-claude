@@ -1017,3 +1017,75 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 /* pulsante ufficiale di Google (disegnato da Google): centrato, a tutta larghezza fino a 400 px */
 .gis-wrap { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-2); min-height: 44px; }
 .gis-btn { display: flex; justify-content: center; width: 100%; min-height: 44px; color-scheme: light; }
+
+/* =====================================================================
+   Chat dell'ospite (reception, chat comune, privati) nello stile delle app di messaggi piu' usate:
+   bolle morbide con la coda, ora piccola dentro la bolla, giorni in una pillola, barra di scrittura a pillola
+   con il pulsante di invio tondo, risposte rapide che scorrono, elenco conversazioni a righe come WhatsApp.
+   Solo per l'app ospite (main.guest). NESSUN colore nuovo.
+   ===================================================================== */
+/* testata della conversazione */
+.chat-head { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
+.chat-head-text { min-width: 0; flex: 1; }
+.guest .chat-head h1 { margin: 0; font-size: var(--fs-xl); line-height: 1.2; }
+.chat-status { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-avatar { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 48px; height: 48px; border-radius: 50%; background: var(--primary); color: var(--on-primary); }
+.chat-avatar svg { width: 24px; height: 24px; }
+.chat-avatar-staff { background: var(--primary-soft); color: var(--on-primary-soft); }
+.guest .thread-head { gap: var(--space-2); margin-top: var(--space-1); }
+.guest .thread-head h1 { font-size: var(--fs-xl); }
+.guest .avatar { border-radius: 50%; }
+.guest .thread-head .avatar { width: 40px; height: 40px; font-size: var(--fs-md); }
+
+/* bolle */
+.guest .chat { gap: 2px; padding-bottom: var(--space-2); }
+.guest .chat > * + :not(.msg-cont):not(.bubble-cont) { margin-top: var(--space-3); }
+.guest .bubble { --tail: 6px; max-width: 82%; padding: 8px 12px 6px; border-radius: 20px; font-size: var(--fs-md); line-height: 1.38; overflow-wrap: anywhere; column-gap: var(--space-2); }
+.guest .bubble .time { font-size: 0.6875rem; line-height: 1.8; margin-top: 2px; }
+.guest .bubble .who { font-size: var(--fs-xs); margin-bottom: 1px; }
+.guest .bubble-me { border-bottom-right-radius: var(--tail); }
+.guest .bubble-me.bubble-cont { border-top-right-radius: var(--tail); }
+.guest .bubble-other { border-color: transparent; box-shadow: var(--shadow-card); border-bottom-left-radius: var(--tail); }
+.guest .msg-cont .bubble-other { border-top-left-radius: var(--tail); }
+.guest .bubble-ai { background: var(--surface); box-shadow: var(--shadow-card), inset 3px 0 0 var(--link); }
+.guest .msg { gap: 6px; }
+.guest .msg .avatar { width: 28px; height: 28px; font-size: var(--fs-xs); align-self: flex-end; }
+.guest .msg-gap { width: 28px; }
+.guest .msg-other { align-items: flex-end; }
+
+/* giorno: pillola al centro, come WhatsApp */
+.guest .date-sep { margin-block: var(--space-3) var(--space-1); padding: 4px 12px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-muted); }
+
+/* entrata delle bolle nuove */
+@keyframes bubble-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+.guest .chat > .bubble, .guest .chat > .msg { animation: bubble-in 180ms ease-out both; }
+
+/* risposte rapide: una riga che scorre */
+.quick-replies { display: flex; gap: var(--space-2); margin: 0 calc(-1 * var(--space-4)); padding: 2px var(--space-4); overflow-x: auto; scrollbar-width: none; }
+.quick-replies::-webkit-scrollbar { display: none; }
+.quick-replies .chip { flex: none; min-height: 40px; border-radius: var(--radius-pill); border-width: var(--bw); white-space: nowrap; }
+.chip-strong { border-color: var(--primary); color: var(--link); font-weight: var(--fw-semibold); }
+.chip-strong svg { width: 16px; height: 16px; }
+
+/* barra di scrittura: campo a pillola che cresce con il testo, invio tondo */
+.guest .composer { gap: var(--space-2); align-items: flex-end; padding: var(--space-2) 0; }
+.guest .composer-text { min-height: 44px; max-height: 8rem; padding: 10px 16px; border-radius: 22px; border: var(--bw) solid var(--border); background: var(--surface); line-height: 1.4; field-sizing: content; }
+.guest .composer-text:focus { border-color: var(--primary); }
+.send-btn { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--primary); color: var(--on-primary); cursor: pointer; transition: transform 120ms ease-out, background var(--ease); }
+.send-btn svg { width: 20px; height: 20px; margin-left: -2px; }
+.send-btn:hover { background: var(--primary-hover); }
+.send-btn:active { transform: scale(0.92); }
+.send-btn:disabled { background: var(--surface-2); color: var(--text-muted); cursor: default; }
+.send-btn[aria-busy="true"] svg { opacity: 0.5; }
+
+/* elenco conversazioni a righe: avatar tondo, nome, anteprima, ora; senza riquadri */
+.guest .card.thread { background: transparent; border: 0; border-radius: 0; box-shadow: none; border-bottom: var(--bw) solid var(--border); }
+.guest .thread-main { padding: var(--space-3) 0; gap: var(--space-3); }
+.guest .thread .avatar { width: 52px; height: 52px; }
+.guest .thread .btn-group { padding: 0 0 var(--space-3) calc(52px + var(--space-3)); }
+.guest .thread-main:active { opacity: 0.7; }
+
+@media (prefers-reduced-motion: reduce) {
+  .guest .chat > .bubble, .guest .chat > .msg { animation: none; }
+  .send-btn { transition: none; }
+}

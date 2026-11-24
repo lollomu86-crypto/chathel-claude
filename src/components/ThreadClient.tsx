@@ -158,6 +158,7 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
     <>
       <div className="row row-nowrap thread-head">
         <Link className="icon-btn icon-btn-plain" href="/stay/social?tab=private" aria-label={t('social.thread.back')}><Icon name="back" /></Link>
+        <span className="avatar" aria-hidden="true">{[...name][0] ?? '?'}</span>
         <h1 className="grow truncate">{t('social.thread.title', { name })}</h1>
         <ActionMenu label={t('social.chat.moreAbout', { name })} items={[{ key: 'block', label: t('social.thread.block'), icon: 'ban', danger: true, onSelect: () => void block() }]} />
       </div>
@@ -221,7 +222,7 @@ export function ThreadClient({ initial, timezone, couponsLeft }: { initial: Thre
         <form className="composer" onSubmit={(e) => { e.preventDefault(); void send(); }}>
           <label htmlFor="pm" className="sr-only">{t('social.thread.placeholder')}</label>
           <textarea id="pm" className="composer-text" rows={1} maxLength={280} placeholder={t('social.thread.placeholder')} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} autoComplete="off" />
-          <button type="submit" className="btn btn-primary" disabled={busy || !text.trim()} aria-busy={busy}>{t('common.send')}</button>
+          <button type="submit" className="send-btn" disabled={busy || !text.trim()} aria-busy={busy} aria-label={t('common.send')} title={t('common.send')}><Icon name="send" /></button>
         </form>
       )}
       <ReportDialog open={reporting !== null} onClose={() => setReporting(null)} onSend={report} defaultReason="harassment" />
