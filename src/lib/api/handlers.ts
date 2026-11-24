@@ -83,7 +83,9 @@ export async function identityAction(ctx: Ctx, action: string, raw: unknown): Pr
     const post = ctx.method === 'POST';
     switch (action) {
       case 'options':
-        return ok({ mode: p.mode, demo: p.listDemo?.() ?? [] });
+        // googleClientId: identificativo PUBBLICO del client OAuth (non e' un segreto). Se c'e', il browser usa il pulsante
+        // ufficiale di Google sul nostro dominio invece del redirect via supabase.co (vedi auth/google-client.ts).
+        return ok({ mode: p.mode, demo: p.listDemo?.() ?? [], googleClientId: p.mode === 'supabase' ? (readEnv('GOOGLE_CLIENT_ID') ?? null) : null });
       case 'me': {
         const v = await p.verify(ctx.identityCookie);
         // si restituisce SOLO il nome di battesimo: mai il subject, mai e-mail o foto

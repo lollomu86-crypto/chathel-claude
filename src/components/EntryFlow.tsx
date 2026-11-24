@@ -1,8 +1,11 @@
 'use client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { finishGoogleLogin, signInWithGoogle, type BrowserAuthClient } from '@/lib/auth/google-client';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  finishGoogleLogin, finishIdTokenLogin, loadGoogleIdentity, makeNonce, sha256Hex, signInWithGoogle,
+  type BrowserAuthClient, type IdTokenAuthClient,
+} from '@/lib/auth/google-client';
 import { call, setLangCookie } from './client-api';
 import { ConsentFields, NO_CONSENTS, type SocialConsents } from './ConsentFields';
 import { useErrorText, useI18n } from './I18n';
@@ -11,7 +14,7 @@ import { Icon } from './ui/Icon';
 const pad = (n: number) => String(n).padStart(2, '0');
 const dayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
-interface IdentityOptions { mode: 'demo' | 'supabase'; demo: { id: string; label: string }[] }
+interface IdentityOptions { mode: 'demo' | 'supabase'; demo: { id: string; label: string }[]; googleClientId: string | null }
 interface Me { givenName: string; provider: string }
 
 /**
@@ -50,7 +53,7 @@ export function EntryFlow({ slug, token, hotelName }: { slug: string; token: str
     (async () => {
       const [o, m] = await Promise.all([call('/api/identity/options'), call('/api/identity/me')]);
       if (!alive) return;
-      const opt = o.ok ? ({ mode: o.mode, demo: (o.demo as IdentityOptions['demo']) ?? [] } as IdentityOptions) : null;
+      const opt = o.ok ? ({ mode: o.mode, demo: (o.demo as IdentityOptions['demo']) ?? [], googleClientId: (o.googleClientId as string | null) ?? null } as IdentityOptions) : null;
       setOptions(opt);
       let identity = m.ok ? (m.identity as Me) : null;
       const back = typeof window !== 'undefined' && (/access_token=|[?&]code=/.test(window.location.hash + window.location.search));
@@ -95,6 +98,20 @@ export function EntryFlow({ slug, token, hotelName }: { slug: string; token: str
     const r = await signInWithGoogle(client, redirectTo);
     if (r.error) { setBusy(false); setError(t('onboarding.googleFailed')); }
   };
+
+  // pulsante ufficiale di Google: la finestra di Google mostra il nostro dominio (non supabase.co)
+  const onGoogleCredential = useCallback(async (credential: string, nonce: string) => {
+    setBusy(true); setError(null);
+    const client = (await browserClient(false)) as IdTokenAuthClient | null;
+    if (!client) { setBusy(false); setError(t('onboarding.googleUnavailable')); return; }
+    const r = await finishIdTokenLogin(client, credential, nonce, call);
+    if (r.ok) {
+      const m = await call('/api/identity/me');
+      if (m.ok) { setMe(m.identity as Me); setBusy(false); return; }
+    }
+    setBusy(false); setError(t('onboarding.googleFailed'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const switchAccount = async () => {
     await call('/api/identity/logout', {});
@@ -150,9 +167,18 @@ export function EntryFlow({ slug, token, hotelName }: { slug: string; token: str
         <section className="card stack" aria-labelledby="idh">
           <h2 id="idh" className="t-sub">{t('onboarding.identityTitle')}</h2>
           <p>{t('onboarding.identityBody')}</p>
-          <button type="button" className="btn btn-primary btn-lg btn-block" onClick={google} disabled={busy} aria-expanded={options?.mode === 'demo' ? pickDemo : undefined}>
-            <Icon name="google" />{t('onboarding.google')}
-          </button>
+          {options?.mode === 'supabase' && options.googleClientId ? (
+            <GoogleButton clientId={options.googleClientId} locale={locale} busy={busy} onCredential={onGoogleCredential}
+              fallback={(
+                <button type="button" className="btn btn-primary btn-lg btn-block" onClick={google} disabled={busy}>
+                  <Icon name="google" />{t('onboarding.google')}
+                </button>
+              )} />
+          ) : (
+            <button type="button" className="btn btn-primary btn-lg btn-block" onClick={google} disabled={busy} aria-expanded={options?.mode === 'demo' ? pickDemo : undefined}>
+              <Icon name="google" />{t('onboarding.google')}
+            </button>
+          )}
           {options?.mode === 'demo' && (
             <p className="notice notice-warn"><Icon name="info" />{t('onboarding.demoIdentity')}</p>
           )}
@@ -208,6 +234,51 @@ export function EntryFlow({ slug, token, hotelName }: { slug: string; token: str
           </button>
         </form>
       )}
+    </div>
+  );
+}
+
+/**
+ * Pulsante ufficiale "Continua con Google" (Google Identity Services), disegnato da Google nella nostra pagina.
+ * Se lo script di Google non si carica (rete, blocco dei contenuti, browser interni a Instagram/Facebook...) mostra
+ * il pulsante di prima (redirect via Supabase), cosi' l'accesso funziona comunque.
+ */
+function GoogleButton({ clientId, locale, busy, onCredential, fallback }: {
+  clientId: string; locale: string; busy: boolean; onCredential: (credential: string, nonce: string) => void; fallback: React.ReactNode;
+}) {
+  const box = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<'loading' | 'ready' | 'failed'>('loading');
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const gis = await loadGoogleIdentity();
+      if (!alive) return;
+      if (!gis || !box.current || !globalThis.crypto?.subtle) { setState('failed'); return; }
+      try {
+        const nonce = makeNonce();
+        gis.initialize({
+          client_id: clientId,
+          nonce: await sha256Hex(nonce),
+          ux_mode: 'popup',
+          itp_support: true,
+          use_fedcm_for_button: true,
+          callback: (r) => { if (r.credential) onCredential(r.credential, nonce); },
+        });
+        if (!alive || !box.current) return;
+        const width = Math.max(220, Math.min(400, Math.round(box.current.clientWidth)));
+        gis.renderButton(box.current, { type: 'standard', theme: 'outline', size: 'large', shape: 'pill', text: 'continue_with', logo_alignment: 'center', width, locale });
+        setState('ready');
+      } catch {
+        if (alive) setState('failed');
+      }
+    })();
+    return () => { alive = false; };
+  }, [clientId, locale, onCredential]);
+  if (state === 'failed') return <>{fallback}</>;
+  return (
+    <div className="gis-wrap" aria-busy={state === 'loading' || busy}>
+      <div ref={box} className="gis-btn" style={busy ? { pointerEvents: 'none', opacity: 0.6 } : undefined} />
+      {state === 'loading' && <span className="skeleton sk-56" />}
     </div>
   );
 }

@@ -73,3 +73,75 @@ export function clearLocalAuthStorage(): void {
     }
   }
 }
+
+// ----------------------------------------------------------------------------- pulsante ufficiale di Google (GIS)
+// Con il redirect OAuth (signInWithOAuth) Google mostra "continua su <progetto>.supabase.co", perche' il ritorno passa da
+// Supabase. Con Google Identity Services il pulsante e la scelta dell'account stanno sul NOSTRO dominio: Google mostra
+// "continua su chathel.it". Il token di Google (ID token) passa poi a Supabase con signInWithIdToken, che crea la stessa
+// sessione di prima: il resto del flusso (server, cookie HttpOnly) non cambia.
+// Richiede: GOOGLE_CLIENT_ID sul server (lo stesso client "ChatHel Web" gia' configurato in Supabase) e l'indirizzo del
+// sito tra le "Origini JavaScript autorizzate" del client in Google Cloud. Senza, si usa il redirect di prima.
+
+export interface IdTokenAuthClient extends BrowserAuthClient {
+  auth: BrowserAuthClient['auth'] & {
+    signInWithIdToken(args: { provider: 'google'; token: string; nonce?: string }): Promise<{ error: { message: string } | null }>;
+  };
+}
+
+/** Le parti di `google.accounts.id` che usiamo. */
+export interface GoogleIdApi {
+  initialize(cfg: {
+    client_id: string;
+    callback: (r: { credential?: string }) => void;
+    nonce?: string;
+    ux_mode?: 'popup' | 'redirect';
+    itp_support?: boolean;
+    use_fedcm_for_button?: boolean;
+    cancel_on_tap_outside?: boolean;
+  }): void;
+  renderButton(el: HTMLElement, opts: Record<string, string | number>): void;
+}
+
+const GIS_SRC = 'https://accounts.google.com/gsi/client';
+let gisPromise: Promise<GoogleIdApi | null> | null = null;
+
+/** Carica una sola volta lo script di Google; null se non si carica (rete, blocco dei contenuti, browser interni alle app). */
+export function loadGoogleIdentity(timeoutMs = 8000): Promise<GoogleIdApi | null> {
+  type W = { google?: { accounts?: { id?: GoogleIdApi } } };
+  const w = globalThis as unknown as W;
+  if (w.google?.accounts?.id) return Promise.resolve(w.google.accounts.id);
+  if (typeof document === 'undefined') return Promise.resolve(null);
+  gisPromise ??= new Promise<GoogleIdApi | null>((resolve) => {
+    const s = document.createElement('script');
+    s.src = GIS_SRC;
+    s.async = true;
+    const timer = setTimeout(() => resolve(null), timeoutMs);
+    s.onload = () => { clearTimeout(timer); resolve(w.google?.accounts?.id ?? null); };
+    s.onerror = () => { clearTimeout(timer); gisPromise = null; resolve(null); };
+    document.head.appendChild(s);
+  });
+  return gisPromise;
+}
+
+/** Nonce casuale: a Google va il suo SHA-256 (esadecimale), a Supabase quello in chiaro (come da documentazione Supabase). */
+export function makeNonce(bytes = 32): string {
+  const a = new Uint8Array(bytes);
+  globalThis.crypto.getRandomValues(a);
+  return Array.from(a, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+export async function sha256Hex(s: string): Promise<string> {
+  const d = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(d), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Dal token di Google alla sessione Supabase, poi al server come nel flusso con redirect. */
+export async function finishIdTokenLogin(
+  client: IdTokenAuthClient,
+  credential: string,
+  nonce: string,
+  post: (url: string, body: unknown) => Promise<{ ok: boolean; error?: string }>,
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await client.auth.signInWithIdToken({ provider: 'google', token: credential, nonce });
+  if (error) { clearLocalAuthStorage(); return { ok: false, error: 'id_token_rejected' }; }
+  return finishGoogleLogin(client, post);
+}
