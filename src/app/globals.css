@@ -914,7 +914,7 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 .sec-head .link-tap { font-weight: var(--fw-semibold); color: var(--link); text-decoration: none; white-space: nowrap; }
 
 /* Evento in evidenza: foto grande, testo sopra la foto */
-.feature-card { position: relative; display: block; overflow: hidden; border-radius: var(--radius-card); aspect-ratio: 16 / 11; color: var(--on-header); text-decoration: none; background: var(--primary-soft); }
+.feature-card { position: relative; display: block; overflow: hidden; border-radius: var(--radius-card); aspect-ratio: 16 / 10; color: var(--on-header); text-decoration: none; background: var(--primary-soft); }
 .feature-media, .feature-media img, .feature-media .media-empty { position: absolute; inset: 0; width: 100%; height: 100%; }
 .feature-media img { object-fit: cover; transition: transform 600ms ease-out; }
 .feature-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(11, 20, 38, 0.75)); pointer-events: none; }
@@ -935,7 +935,7 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 .rail { list-style: none; display: flex; gap: var(--space-3); margin: 0 calc(-1 * var(--space-4)); padding: var(--space-1) var(--space-4) var(--space-2);
   overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--space-4); scrollbar-width: none; overscroll-behavior-x: contain; }
 .rail::-webkit-scrollbar { display: none; }
-.rail > li { flex: 0 0 min(60%, 220px); scroll-snap-align: start; display: flex; animation: rise 500ms ease-out both; animation-delay: calc(150ms + var(--i, 0) * 70ms); }
+.rail > li { flex: 0 0 calc((100% - var(--rail-n, 2) * var(--space-3)) / var(--rail-n, 2) - var(--rail-peek, 28px)); scroll-snap-align: start; display: flex; animation: rise 500ms ease-out both; animation-delay: calc(150ms + var(--i, 0) * 70ms); }
 .photo-card { display: flex; flex-direction: column; gap: var(--space-2); width: 100%; color: var(--text); text-decoration: none; }
 .photo-card-media { position: relative; display: block; aspect-ratio: 1 / 1; overflow: hidden; border-radius: var(--radius-lg); background: var(--primary-soft); }
 .photo-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 600ms ease-out; }
@@ -1007,3 +1007,10 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 .guest .slot { border-width: var(--bw); }
 .guest .slot:not([aria-pressed="true"]):not([disabled]):not(.slot-low) { border-color: var(--border); }
 .guest .stepper button { border-radius: 50%; }
+/* File di card: si vedono intere (2 sul telefono, 3 da 600 px) e un pezzo della successiva, cosi' si capisce che si scorre.
+   Sul telefono la fila arriva al bordo dello schermo; su schermi larghi resta nella colonna e sfuma a destra. */
+@media (min-width: 600px) {
+  .rail { --rail-n: 3; --rail-peek: 22px; margin: 0; padding-inline: 0; scroll-padding-inline: 0;
+    -webkit-mask-image: linear-gradient(90deg, black calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, black calc(100% - 40px), transparent); }
+  .feature-card { aspect-ratio: 2 / 1; }
+}
