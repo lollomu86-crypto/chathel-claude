@@ -132,7 +132,11 @@
     "socialRequests": "待处理的聊天请求：{n}",
     "socialNew": "其他住客发来的新消息",
     "socialOpen": "打开住客",
-    "hotelWelcome": "来自 {hotel} 的消息"
+    "hotelWelcome": "来自 {hotel} 的消息",
+    "stayUntil": "您的入住 · 至 {date}",
+    "seeAll": "查看全部",
+    "bookTitle": "可预订",
+    "nextSlot": "{when} 起有空位"
   },
   "bonus": {
     "title": "您的福利",

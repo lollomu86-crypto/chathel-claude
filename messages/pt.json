@@ -132,7 +132,11 @@
     "socialRequests": "Pedidos de conversa pendentes: {n}",
     "socialNew": "Novas mensagens de outros hóspedes",
     "socialOpen": "Abrir Hóspedes",
-    "hotelWelcome": "Uma mensagem do {hotel}"
+    "hotelWelcome": "Uma mensagem do {hotel}",
+    "stayUntil": "A sua estadia · até {date}",
+    "seeAll": "Ver tudo",
+    "bookTitle": "Para reservar",
+    "nextSlot": "Livre a partir de {when}"
   },
   "bonus": {
     "title": "O seu bónus",

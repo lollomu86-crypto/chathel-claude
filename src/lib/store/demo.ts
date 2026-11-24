@@ -67,9 +67,9 @@ interface Hotel {
 }
 interface G { id: string; name: string; locale: Locale; isAdult: boolean; createdAt: Date; expiresAt: Date; stayId: string; startBonus: StartStayBonus; identityKey: string; lastSeenAt?: Date | null }
 interface Stay { id: string; guestId: string | null; startedAt: Date; expiresAt: Date; status: 'active' | 'ended'; firstActionAt: Date | null }
-interface Ev { id: string; title: I18nText; description: I18nText | null; location: string | null; startsAt: Date; endsAt: Date | null; capacity: number | null; published: boolean }
+interface Ev { id: string; title: I18nText; description: I18nText | null; location: string | null; startsAt: Date; endsAt: Date | null; capacity: number | null; published: boolean; imageUrl?: string | null }
 interface Att { eventId: string; guestId: string | null; status: 'going' | 'attended' | 'cancelled'; createdAt: Date }
-interface Fac { id: string; kind: AdminFacility['kind']; name: I18nText; description: I18nText | null; defaultCapacity: number; active: boolean }
+interface Fac { id: string; kind: AdminFacility['kind']; name: I18nText; description: I18nText | null; defaultCapacity: number; active: boolean; imageUrl?: string | null }
 interface Conv { id: string; guestId: string | null; status: ConversationStatus; locale: Locale; startedAt: Date; lastMessageAt: Date; closedAt: Date | null;
   aiAnswerCount: number; handoffAt: Date | null; reason: HandoffReason | null; topic: string | null; assignedTo: string | null; priority: HandoffPriority }
 interface Msg { id: string; convId: string; role: ChatMessage['role']; content: string; createdAt: Date; wrong: boolean }
@@ -148,14 +148,14 @@ export class DemoStore implements Store {
       let startsAt = zonedTime(addDaysKey(today, e.day), e.time, tz);
       if (e.day === 0 && startsAt.getTime() < now.getTime() + 3_600_000) startsAt = zonedTime(addDaysKey(today, 1), e.time, tz);
       this.events.push({ id: this.id('ev'), title: e.title, description: e.description, location: e.location, startsAt,
-        endsAt: new Date(startsAt.getTime() + e.durationMin * 60_000), capacity: e.capacity, published: e.published });
+        endsAt: new Date(startsAt.getTime() + e.durationMin * 60_000), capacity: e.capacity, published: e.published, imageUrl: e.imageUrl ?? null });
     }
     // un evento passato (non deve comparire agli ospiti)
     const past = zonedTime(addDaysKey(today, -1), '21:00', tz);
     this.events.push({ id: this.id('ev'), title: { it: 'Serata di ieri', en: 'Last night', de: 'Gestern Abend' }, description: null, location: 'Bar Terrazza',
       startsAt: past, endsAt: new Date(past.getTime() + 2 * 3_600_000), capacity: null, published: true });
     for (const f of DEMO_FACILITIES) {
-      const fac: Fac = { id: this.id('fac'), kind: f.kind, name: f.name, description: f.description, defaultCapacity: f.capacity, active: true };
+      const fac: Fac = { id: this.id('fac'), kind: f.kind, name: f.name, description: f.description, defaultCapacity: f.capacity, active: true, imageUrl: f.imageUrl ?? null };
       this.facilities.push(fac);
       this.makeSlots(fac, today, addDaysKey(today, 7), f.start, f.end, f.minutes, f.capacity);
     }
@@ -377,7 +377,7 @@ class DemoGuestApi implements GuestApi {
       .map((e) => {
         const act = this.s.attendance.filter((a) => a.eventId === e.id && (a.status === 'going' || a.status === 'attended'));
         return { id: e.id, title: e.title, description: e.description, location: e.location, startsAt: e.startsAt.toISOString(),
-          endsAt: e.endsAt?.toISOString() ?? null, capacity: e.capacity,
+          endsAt: e.endsAt?.toISOString() ?? null, capacity: e.capacity, imageUrl: e.imageUrl ?? null,
           // solo il NUMERO (mai chi). Con Supabase reale e' null: vedi NOTE-SVILUPPO.
           goingCount: act.length, going: act.some((a) => a.guestId === this.gid) };
       });
@@ -401,7 +401,7 @@ class DemoGuestApi implements GuestApi {
   async facilities(): Promise<FacilityView[]> {
     const now = this.s.now();
     return this.s.facilities.filter((f) => f.active).map((f) => ({
-      id: f.id, kind: f.kind, name: f.name, description: f.description,
+      id: f.id, kind: f.kind, name: f.name, description: f.description, imageUrl: f.imageUrl ?? null,
       slots: [...this.s.book.slots.values()]
         .filter((x) => x.facilityId === f.id && x.status === 'open' && x.startsAt > now)
         .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())

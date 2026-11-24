@@ -132,7 +132,11 @@
     "socialRequests": "Oczekujące prośby o czat: {n}",
     "socialNew": "Nowe wiadomości od innych gości",
     "socialOpen": "Otwórz Gości",
-    "hotelWelcome": "Wiadomość od {hotel}"
+    "hotelWelcome": "Wiadomość od {hotel}",
+    "stayUntil": "Twój pobyt · do {date}",
+    "seeAll": "Zobacz wszystkie",
+    "bookTitle": "Do rezerwacji",
+    "nextSlot": "Wolne od {when}"
   },
   "bonus": {
     "title": "Twój bonus",
