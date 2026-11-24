@@ -81,8 +81,14 @@ export function ChatClient({ initial, hotelName, aiMode, timezone }: { initial: 
   const tm = (iso: string) => formatTime(iso, locale, timezone);
   return (
     <>
-      <h1>{t('reception.title')}</h1>
-      <p className="muted small">{t('reception.assistantOf', { hotel: hotelName })}</p>
+      {/* testata della conversazione: avatar, nome, chi risponde (come le app di messaggi) */}
+      <header className="chat-head">
+        <span className={`chat-avatar${human ? ' chat-avatar-staff' : ''}`} aria-hidden="true"><Icon name={human ? 'user' : 'chat'} /></span>
+        <div className="chat-head-text">
+          <h1>{t('reception.title')}</h1>
+          <p className="chat-status">{human ? t('reception.badgeStaff') : t('reception.assistantOf', { hotel: hotelName })}</p>
+        </div>
+      </header>
       {aiMode === 'keyword' && <p className="notice notice-warn"><Icon name="info" />{t('reception.demoMode')}</p>}
       {emergency && (
         <div className="notice notice-err emergency" role="alert">
@@ -113,19 +119,20 @@ export function ChatClient({ initial, hotelName, aiMode, timezone }: { initial: 
       </div>
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">{announce}</div>
 
-      {chat.messages.length === 0 && pending.length === 0 && (
-        <div className="chips">
-          {quick.map((q) => <button key={q} type="button" className="chip" onClick={() => send(q)}>{q}</button>)}
-        </div>
-      )}
       {error && <p className="error-text" role="alert"><Icon name="alert" />{error}</p>}
-      {!human && (
-        <button type="button" className="btn btn-secondary btn-small" disabled={busy} onClick={() => send(t('reception.operatorRequestText'))}>{t('reception.talkToOperator')}</button>
+      {/* risposte rapide in una riga che scorre, sopra la barra di scrittura */}
+      {(!human || (chat.messages.length === 0 && pending.length === 0)) && (
+        <div className="quick-replies" role="group" aria-label={t('reception.title')}>
+          {!human && (
+            <button type="button" className="chip chip-strong" disabled={busy} onClick={() => send(t('reception.operatorRequestText'))}><Icon name="user" />{t('reception.talkToOperator')}</button>
+          )}
+          {chat.messages.length === 0 && pending.length === 0 && quick.map((q) => <button key={q} type="button" className="chip" disabled={busy} onClick={() => send(q)}>{q}</button>)}
+        </div>
       )}
       <form className="composer" onSubmit={(e) => { e.preventDefault(); void send(text); }}>
         <label htmlFor="msg" className="sr-only">{t('reception.placeholder')}</label>
         <textarea id="msg" className="composer-text" rows={1} maxLength={1000} placeholder={t('reception.placeholder')} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} autoComplete="off" />
-        <button type="submit" className="btn btn-primary" disabled={busy || !text.trim()} aria-busy={busy}>{t('reception.send')}</button>
+        <button type="submit" className="send-btn" disabled={busy || !text.trim()} aria-busy={busy} aria-label={t('reception.send')} title={t('reception.send')}><Icon name="send" /></button>
       </form>
     </>
   );
