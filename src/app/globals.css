@@ -866,3 +866,144 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
 .lang-menu > button[aria-checked="true"] { background: var(--primary-soft); color: var(--on-primary-soft); font-weight: var(--fw-bold); }
 .lang-menu-wide { left: 0; right: 0; min-width: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px; }
 
+
+/* =====================================================================
+   Home come le app piu' usate (viaggi, banca, social): testata piatta, titolo grande, azioni rapide in cerchio,
+   bonus come tessera del portafoglio, foto grandi con il testo sotto e niente cornici. Piccole animazioni.
+   NESSUN colore nuovo: solo token; il velo sulle foto e' una trasparenza del colore del testo (--text del tema chiaro).
+   ===================================================================== */
+/* testata dell'app ospite piatta: l'onda resta solo sulla pagina d'ingresso */
+.app-head { margin-bottom: 0; }
+.app-head::after { display: none; }
+
+.home-greet { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-2); }
+.home-greet h1, .photo-hero h1 { margin: 0; font-family: var(--font-display); font-weight: var(--fw-display); letter-spacing: var(--ls-display);
+  font-size: clamp(1.75rem, 7.5vw, 2.125rem); line-height: 1.12; overflow-wrap: anywhere; hyphens: auto; }
+.home-sub { margin: 0; color: var(--text-muted); font-size: var(--fs-sm); }
+.home-welcome { margin: 0; color: var(--text-muted); line-height: 1.5; }
+.home-welcome strong { display: block; color: var(--text); font-weight: var(--fw-semibold); margin-bottom: 2px; }
+
+/* Copertina dell'hotel con il saluto sopra */
+.photo-hero { position: relative; overflow: hidden; border-radius: var(--radius-card); aspect-ratio: 4 / 3; max-height: 320px; width: 100%; background: var(--primary-soft); }
+.photo-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; animation: kenburns 1.8s ease-out both; }
+.photo-hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(11, 20, 38, 0.7)); }
+.photo-hero-text { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-5); }
+.photo-hero-text h1, .photo-hero-text .home-sub { color: var(--on-header); }
+
+/* Azioni rapide: cerchi con etichetta, tutti in una riga */
+.quick { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--space-2); margin-top: var(--space-1); }
+.quick-btn { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); min-width: 0; padding: var(--space-1) 0; color: var(--text); text-decoration: none; }
+.quick-ico { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--primary-soft); color: var(--on-primary-soft); transition: transform 160ms ease-out; }
+.quick-ico svg { width: 26px; height: 26px; }
+.quick-label { max-width: 100%; font-size: var(--fs-xs); font-weight: var(--fw-semibold); text-align: center; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.quick-btn:active .quick-ico { transform: scale(0.92); }
+
+/* Bonus come tessera del portafoglio */
+.pass { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); border-radius: var(--radius-card);
+  background: var(--primary-soft); color: var(--text); text-decoration: none; border: var(--bw) solid var(--ticket-line); }
+.pass-ico { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; border-radius: 50%; background: var(--cta); color: var(--on-cta); }
+.pass-ico svg { width: 22px; height: 22px; }
+.pass-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.pass-text small { color: var(--text-muted); font-size: var(--fs-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pass-text strong { font-family: var(--font-display); font-weight: var(--fw-bold); line-height: 1.25; }
+.pass-cta { flex: none; padding: 10px 14px; border-radius: var(--radius-pill); background: var(--cta); color: var(--on-cta); font-weight: var(--fw-bold); font-size: var(--fs-sm); white-space: nowrap; }
+
+/* Titoli di sezione con "Vedi tutti" a destra */
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+.sec-title { margin: 0; font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-xl); line-height: 1.2; }
+.sec-head .link-tap { font-weight: var(--fw-semibold); color: var(--link); text-decoration: none; white-space: nowrap; }
+
+/* Evento in evidenza: foto grande, testo sopra la foto */
+.feature-card { position: relative; display: block; overflow: hidden; border-radius: var(--radius-card); aspect-ratio: 16 / 11; color: var(--on-header); text-decoration: none; background: var(--primary-soft); }
+.feature-media, .feature-media img, .feature-media .media-empty { position: absolute; inset: 0; width: 100%; height: 100%; }
+.feature-media img { object-fit: cover; transition: transform 600ms ease-out; }
+.feature-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 45%, rgba(11, 20, 38, 0.75)); pointer-events: none; }
+.feature-text { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; display: flex; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-5) var(--space-5); }
+.feature-text strong { font-family: var(--font-display); font-weight: var(--fw-display); letter-spacing: var(--ls-display); font-size: var(--fs-xl); line-height: 1.15; }
+.feature-text span { font-size: var(--fs-sm); opacity: 0.92; }
+
+/* Data sopra le foto */
+.date-pill { position: absolute; top: var(--space-3); left: var(--space-3); z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 50px; padding: 6px 8px; border-radius: 12px; background: var(--surface); color: var(--text); box-shadow: var(--shadow-float);
+  font-family: var(--font-display); font-weight: var(--fw-display); line-height: 1; }
+.date-pill small { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cta-text, var(--text-muted)); }
+.date-pill strong { font-size: var(--fs-xl); }
+.date-pill-sm { top: var(--space-2); left: var(--space-2); min-width: 42px; padding: 4px 6px; }
+.date-pill-sm strong { font-size: var(--fs-lg); }
+
+/* Fila che scorre di lato: foto arrotondata e testo sotto, senza cornice */
+.rail { list-style: none; display: flex; gap: var(--space-3); margin: 0 calc(-1 * var(--space-4)); padding: var(--space-1) var(--space-4) var(--space-2);
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--space-4); scrollbar-width: none; overscroll-behavior-x: contain; }
+.rail::-webkit-scrollbar { display: none; }
+.rail > li { flex: 0 0 min(60%, 220px); scroll-snap-align: start; display: flex; animation: rise 500ms ease-out both; animation-delay: calc(150ms + var(--i, 0) * 70ms); }
+.photo-card { display: flex; flex-direction: column; gap: var(--space-2); width: 100%; color: var(--text); text-decoration: none; }
+.photo-card-media { position: relative; display: block; aspect-ratio: 1 / 1; overflow: hidden; border-radius: var(--radius-lg); background: var(--primary-soft); }
+.photo-card-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 600ms ease-out; }
+.media-empty { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: var(--primary-soft); color: var(--on-primary-soft); }
+.media-empty svg { width: 36px; height: 36px; opacity: 0.8; }
+.photo-card-body { display: flex; flex-direction: column; gap: 2px; padding: 0 2px; }
+.photo-card-body strong { font-weight: var(--fw-semibold); line-height: 1.3; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.photo-card-body .event-meta { margin: 0; }
+
+/* Tocco: la card si abbassa appena; al passaggio del mouse la foto si avvicina */
+.feature-card, .photo-card, .pass { transition: transform 160ms ease-out; }
+.feature-card:active, .photo-card:active, .pass:active { transform: scale(0.97); }
+@media (hover: hover) { .feature-card:hover img, .photo-card:hover img { transform: scale(1.05); } }
+
+/* Entrata: le sezioni salgono una dopo l'altra */
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes kenburns { from { transform: scale(1.08); } to { transform: scale(1); } }
+.rise { animation: rise 480ms ease-out both; }
+.shell > .rise:nth-child(2) { animation-delay: 50ms; }
+.shell > .rise:nth-child(3) { animation-delay: 100ms; }
+.shell > .rise:nth-child(4) { animation-delay: 150ms; }
+.shell > .rise:nth-child(5) { animation-delay: 200ms; }
+.shell > .rise:nth-child(n+6) { animation-delay: 250ms; }
+@media (prefers-reduced-motion: reduce) {
+  .rise, .rail > li, .photo-hero-img { animation: none; }
+  .feature-card, .photo-card, .pass, .quick-ico, .feature-media img, .photo-card-media img { transition: none; }
+  .feature-card:hover img, .photo-card:hover img, .feature-card:active, .photo-card:active, .pass:active, .quick-btn:active .quick-ico { transform: none; }
+}
+
+/* =====================================================================
+   Schermate dell'ospite (main.guest) con lo stile della Home: titolo grande, titoli di sezione forti, pulsanti a capsula,
+   selettori in stile iOS (pillola bianca su fondo grigio), foto con la data sopra, entrata morbida.
+   Vale SOLO per l'app ospite: pannello, Bar e pagine d'accesso restano com'erano. NESSUN colore nuovo.
+   ===================================================================== */
+.guest > h1:first-child, .guest > header:first-child h1 { margin-top: var(--space-2); font-size: clamp(1.75rem, 7.5vw, 2.125rem); line-height: 1.12; overflow-wrap: anywhere; hyphens: auto; }
+.guest > h2.t-sub, .guest > section:not(.card) > h2.t-sub, .guest > section:not(.card) > .row > h2.t-sub { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-xl); line-height: 1.2; letter-spacing: 0; }
+
+/* pulsanti e scelte a capsula */
+.guest .btn { border-radius: var(--radius-pill); }
+.guest .day { border-radius: var(--radius-pill); border-width: var(--bw); }
+.guest .slot { border-radius: 14px; }
+
+/* selettore a segmenti: pillola chiara su fondo grigio, come iOS */
+.guest .seg { background: var(--surface-2); border-color: transparent; border-radius: var(--radius-pill); padding: 4px; }
+.guest .seg > button, .guest .seg > a { border-radius: var(--radius-pill); }
+.guest .seg > [aria-selected="true"], .guest .seg > [aria-pressed="true"], .guest .seg > [aria-current="page"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow-float); }
+.guest .seg > [aria-selected="true"]:hover, .guest .seg > [aria-pressed="true"]:hover, .guest .seg > [aria-current="page"]:hover { background: var(--surface); }
+
+/* card: angoli piu' morbidi, niente ombra pesante; le foto riempiono la parte alta con la data sopra */
+.guest .card { border-radius: var(--radius-card); }
+.guest .card.has-photo > .card-photo-box { position: relative; margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) 0; }
+.guest .card-photo-box > .card-photo { width: 100%; max-width: none; margin: 0; aspect-ratio: 16 / 10; }
+.guest .card.has-photo > .card-photo { aspect-ratio: 16 / 10; }
+.guest .card.event h2.t-sub, .guest .card.event h3.t-sub { font-family: var(--font-display); font-weight: var(--fw-bold); font-size: var(--fs-lg); line-height: 1.25; }
+.guest .card.has-photo { transition: transform 160ms ease-out; }
+@media (hover: hover) { .guest .card.has-photo .card-photo { transition: transform 600ms ease-out; } .guest .card.has-photo:hover .card-photo { transform: scale(1.03); } }
+
+/* stati vuoti piu' leggeri: niente cornice, icona in un cerchio tenue */
+.guest .card.empty { background: transparent; border: 0; box-shadow: none; }
+.guest .empty > svg { box-sizing: content-box; width: 28px; height: 28px; padding: 16px; border-radius: 50%; background: var(--primary-soft); color: var(--on-primary-soft); }
+
+/* entrata morbida delle schermate (solo opacita': non sposta barre fisse e campi di scrittura) */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.guest > :not(.rise) { animation: fade-in 320ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .guest > :not(.rise) { animation: none; } .guest .card.has-photo .card-photo { transition: none; } }
+.guest .card > h2, .guest .card > .row > h2, .guest .card > header h2 { font-size: var(--fs-lg); }
+.guest .days { scrollbar-width: none; }
+.guest .days::-webkit-scrollbar { display: none; }
+.guest .slot { border-width: var(--bw); }
+.guest .slot:not([aria-pressed="true"]):not([disabled]):not(.slot-low) { border-color: var(--border); }
+.guest .stepper button { border-radius: 50%; }

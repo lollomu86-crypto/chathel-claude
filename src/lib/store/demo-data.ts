@@ -38,6 +38,8 @@ export interface DemoFacilitySeed {
   start: string;
   end: string;
   minutes: number;
+  /** immagine d'esempio (come nel seed SQL di Hotel Prova) */
+  imageUrl?: string;
 }
 export const DEMO_FACILITIES: DemoFacilitySeed[] = [
   {
@@ -48,6 +50,7 @@ export const DEMO_FACILITIES: DemoFacilitySeed[] = [
     start: '10:00',
     end: '19:00',
     minutes: 60,
+    imageUrl: '/demo/spa-percorso.svg',
   },
   {
     kind: 'pool',
@@ -57,6 +60,7 @@ export const DEMO_FACILITIES: DemoFacilitySeed[] = [
     start: '09:00',
     end: '19:00',
     minutes: 120,
+    imageUrl: '/demo/piscina-lettini.svg',
   },
 ];
 
@@ -80,6 +84,7 @@ export interface DemoEventSeed {
   durationMin: number;
   capacity: number | null;
   published: boolean;
+  imageUrl?: string;
 }
 export const DEMO_EVENTS: DemoEventSeed[] = [
   {
@@ -91,6 +96,7 @@ export const DEMO_EVENTS: DemoEventSeed[] = [
     durationMin: 120,
     capacity: null,
     published: true,
+    imageUrl: '/demo/musica-piazzetta.svg',
   },
   {
     title: { it: 'Animazione per bambini', en: 'Kids entertainment', de: 'Kinderanimation' },
@@ -101,6 +107,7 @@ export const DEMO_EVENTS: DemoEventSeed[] = [
     durationMin: 90,
     capacity: null,
     published: true,
+    imageUrl: '/demo/caccia-al-tesoro.svg',
   },
   {
     title: { it: 'Yoga all\'alba', en: 'Sunrise yoga', de: 'Yoga bei Sonnenaufgang' },
@@ -111,6 +118,7 @@ export const DEMO_EVENTS: DemoEventSeed[] = [
     durationMin: 60,
     capacity: 3,
     published: true,
+    imageUrl: '/demo/yoga-alba.svg',
   },
   {
     title: { it: 'Cena di gala (bozza)', en: 'Gala dinner (draft)', de: 'Galadinner (Entwurf)' },
@@ -121,5 +129,6 @@ export const DEMO_EVENTS: DemoEventSeed[] = [
     durationMin: 150,
     capacity: null,
     published: false,
+    imageUrl: '/demo/cena-sarda.svg',
   },
 ];

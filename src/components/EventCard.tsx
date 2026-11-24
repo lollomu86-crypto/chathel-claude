@@ -39,9 +39,15 @@ export function EventCard(p: EventCardProps) {
   };
   return (
     <article className={`card event stack-sm${safeImage(p.imageUrl) ? ' has-photo' : ''}`} aria-labelledby={`ev-${p.id}`}>
-      {safeImage(p.imageUrl) && <img className="card-photo" src={safeImage(p.imageUrl)!} alt="" width={800} height={450} loading="lazy" decoding="async" />}
+      {/* con la foto la data sta sulla foto (come nella Home); senza foto resta il riquadro accanto al titolo */}
+      {safeImage(p.imageUrl) && (
+        <div className="card-photo-box">
+          <img className="card-photo" src={safeImage(p.imageUrl)!} alt="" width={800} height={450} loading="lazy" decoding="async" />
+          <span className="date-pill" aria-hidden="true"><small>{p.chip.weekday}</small><strong>{p.chip.day}</strong></span>
+        </div>
+      )}
       <div className="row row-nowrap">
-        <span className="date-chip" aria-hidden="true"><small>{p.chip.weekday}</small><strong>{p.chip.day}</strong></span>
+        {!safeImage(p.imageUrl) && <span className="date-chip" aria-hidden="true"><small>{p.chip.weekday}</small><strong>{p.chip.day}</strong></span>}
         <div className="grow">
           <h2 id={`ev-${p.id}`} className="t-sub">{p.title}</h2>
           <div className="event-meta">{p.when}{p.location ? ` · ${p.location}` : ''}</div>

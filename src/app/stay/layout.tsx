@@ -35,7 +35,7 @@ export default async function StayLayout({ children }: { children: React.ReactNo
               </div>
             </div>
           </header>
-          <main id="main" className="shell">{children}</main>
+          <main id="main" className="shell guest">{children}</main>
           <TabBar />
         </SocialBadgeProvider>
       </FeaturesProvider>

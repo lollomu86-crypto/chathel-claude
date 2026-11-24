@@ -132,7 +132,11 @@
     "socialRequests": "Richieste di chat da gestire: {n}",
     "socialNew": "Ci sono nuovi messaggi dagli altri ospiti",
     "socialOpen": "Apri Ospiti",
-    "hotelWelcome": "Un messaggio da {hotel}"
+    "hotelWelcome": "Un messaggio da {hotel}",
+    "stayUntil": "Il tuo soggiorno · fino al {date}",
+    "seeAll": "Vedi tutti",
+    "bookTitle": "Da prenotare",
+    "nextSlot": "Libero da {when}"
   },
   "bonus": {
     "title": "Il tuo bonus",

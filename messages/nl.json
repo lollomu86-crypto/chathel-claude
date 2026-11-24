@@ -132,7 +132,11 @@
     "socialRequests": "Chatverzoeken in afwachting: {n}",
     "socialNew": "Nieuwe berichten van andere gasten",
     "socialOpen": "Gasten openen",
-    "hotelWelcome": "Een bericht van {hotel}"
+    "hotelWelcome": "Een bericht van {hotel}",
+    "stayUntil": "Je verblijf · tot {date}",
+    "seeAll": "Alles bekijken",
+    "bookTitle": "Te reserveren",
+    "nextSlot": "Vrij vanaf {when}"
   },
   "bonus": {
     "title": "Je bonus",

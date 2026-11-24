@@ -132,7 +132,11 @@
     "socialRequests": "Čekající žádosti o chat: {n}",
     "socialNew": "Nové zprávy od ostatních hostů",
     "socialOpen": "Otevřít Hosté",
-    "hotelWelcome": "Zpráva od {hotel}"
+    "hotelWelcome": "Zpráva od {hotel}",
+    "stayUntil": "Váš pobyt · do {date}",
+    "seeAll": "Zobrazit vše",
+    "bookTitle": "K rezervaci",
+    "nextSlot": "Volno od {when}"
   },
   "bonus": {
     "title": "Váš bonus",

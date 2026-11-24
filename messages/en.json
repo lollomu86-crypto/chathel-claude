@@ -132,7 +132,11 @@
     "socialRequests": "Chat requests waiting: {n}",
     "socialNew": "New messages from other guests",
     "socialOpen": "Open Guests",
-    "hotelWelcome": "A message from {hotel}"
+    "hotelWelcome": "A message from {hotel}",
+    "stayUntil": "Your stay · until {date}",
+    "seeAll": "See all",
+    "bookTitle": "Book now",
+    "nextSlot": "Free from {when}"
   },
   "bonus": {
     "title": "Your bonus",

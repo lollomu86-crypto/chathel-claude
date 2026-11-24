@@ -132,7 +132,11 @@
     "socialRequests": "Väntande chattförfrågningar: {n}",
     "socialNew": "Nya meddelanden från andra gäster",
     "socialOpen": "Öppna Gäster",
-    "hotelWelcome": "Ett meddelande från {hotel}"
+    "hotelWelcome": "Ett meddelande från {hotel}",
+    "stayUntil": "Din vistelse · till {date}",
+    "seeAll": "Visa alla",
+    "bookTitle": "Att boka",
+    "nextSlot": "Ledigt från {when}"
   },
   "bonus": {
     "title": "Din bonus",

@@ -132,7 +132,11 @@
     "socialRequests": "Запросов на чат к обработке: {n}",
     "socialNew": "Новые сообщения от других гостей",
     "socialOpen": "Открыть «Гости»",
-    "hotelWelcome": "Сообщение от {hotel}"
+    "hotelWelcome": "Сообщение от {hotel}",
+    "stayUntil": "Ваше пребывание · до {date}",
+    "seeAll": "Все",
+    "bookTitle": "Можно забронировать",
+    "nextSlot": "Свободно с {when}"
   },
   "bonus": {
     "title": "Ваш бонус",
