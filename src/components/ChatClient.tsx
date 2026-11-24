@@ -89,7 +89,6 @@ export function ChatClient({ initial, hotelName, aiMode, timezone }: { initial: 
           <p className="chat-status">{human ? t('reception.badgeStaff') : t('reception.assistantOf', { hotel: hotelName })}</p>
         </div>
       </header>
-      {aiMode === 'keyword' && <p className="notice notice-warn"><Icon name="info" />{t('reception.demoMode')}</p>}
       {emergency && (
         <div className="notice notice-err emergency" role="alert">
           <Icon name="phone" />
