@@ -192,6 +192,7 @@ test('identita\': endpoint options / demo-login / me / logout; nessun dato oltre
   const { store } = makeStore();
   let r = await identityAction(ctxOf(store, { method: 'GET' }), 'options', {});
   assert.equal(r.body?.mode, 'demo');
+  assert.equal(r.body?.googleClientId, null, 'in demo niente pulsante di Google');
   assert.deepEqual((r.body?.demo as { label: string }[]).map((x) => x.label), DEMO_IDENTITIES.map((d) => `${d.givenName} (demo)`));
   r = await identityAction(ctxOf(store), 'demo-login', { id: 'giulia' });
   assert.equal(r.status, 200); assert.equal(r.identityCookie, 'demo:giulia');

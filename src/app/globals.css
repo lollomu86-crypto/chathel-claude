@@ -1014,3 +1014,6 @@ progress.bar-meter::-moz-progress-bar { background: var(--primary); }
     -webkit-mask-image: linear-gradient(90deg, black calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, black calc(100% - 40px), transparent); }
   .feature-card { aspect-ratio: 2 / 1; }
 }
+/* pulsante ufficiale di Google (disegnato da Google): centrato, a tutta larghezza fino a 400 px */
+.gis-wrap { display: flex; flex-direction: column; align-items: stretch; gap: var(--space-2); min-height: 44px; }
+.gis-btn { display: flex; justify-content: center; width: 100%; min-height: 44px; color-scheme: light; }
